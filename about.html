@@ -135,42 +135,70 @@
         }
 
         /* ==================================================
-        == 🚀 НОВІ СТИЛІ АНІМАЦІЙ 🚀 ==
+        == 🚀 НОВІ СТИЛІ АНІМАЦІЙ (GSAP) 🚀 ==
         ==================================================
         */
         
-        /* Проста поява (для заголовків) */
-        .fade-in {
-            opacity: 0;
-            transition: opacity 0.8s ease-out;
-            transition-delay: 200ms;
-        }
-
-        /* Поява + зсув вгору (для карток та елементів) */
-        .fade-in-up {
+        /* Початковий стан для елементів, що "випливають" */
+        .gsap-fade-in-up {
             opacity: 0;
             transform: translateY(30px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
         }
 
-        /* Стан "видимості", який додає JavaScript */
-        .is-visible {
-            opacity: 1;
-            transform: translateY(0);
+        /* Початковий стан для елементів, що "проявляються" */
+        .gsap-fade-in {
+            opacity: 0;
         }
 
-        /* Затримки для "преміального" ефекту сходів (stagger) */
-        .stagger-1 { transition-delay: 100ms; }
-        .stagger-2 { transition-delay: 200ms; }
-        .stagger-3 { transition-delay: 300ms; }
-        .stagger-4 { transition-delay: 400ms; }
-        .stagger-5 { transition-delay: 500ms; }
-        .stagger-6 { transition-delay: 600ms; }
-        
+        /* Початковий стан для SVG-ліній (ефект "малювання") */
+        .gsap-svg-draw {
+            /* Починаємо з невидимої лінії */
+            stroke-dasharray: 1000; /* Довжина лінії (велике число) */
+            stroke-dashoffset: 1000; /* Початок "малювання" */
+        }
+
+        /* Початковий стан для SVG-крапки */
+        .gsap-svg-dot {
+            opacity: 0;
+        }
+
+        /* Початковий стан для стовпців діаграми */
+        .gsap-bar {
+            height: 0;
+            opacity: 0;
+        }
+
         /* ==================================================
-        == Кінець СТИЛІВ АНІМАЦІЙ ==
+        == 🚀 НОВІ СТИЛІ ІНТЕРАКТИВНИХ ДІАГРАМ 🚀 ==
         ==================================================
         */
+        
+        /* Базовий контейнер для візуалізацій */
+        .process-viz {
+            height: 60px; /* Фіксована висота */
+            width: 100%;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        /* 3. Анімація Дашборду (CSS) */
+        .viz-dashboard {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 8px;
+            height: 100%;
+            width: 100px;
+        }
+        .dashboard-bar {
+            width: 15px;
+            background-color: #2563eb; /* accent-blue */
+            opacity: 0.5; /* Буде 0 через .gsap-bar */
+            height: 0; /* Початкова висота */
+        }
+
     </style>
 
     <!-- 
@@ -260,17 +288,17 @@
             <div class="container mx-auto px-6">
                 <!-- Hero Text -->
                 <div class="max-w-3xl mx-auto text-center"> 
-                    <!-- АНІМАЦІЯ: Додано .fade-in-up -->
-                    <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight fade-in-up">
+                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
+                    <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight gsap-fade-in-up">
                         Stop Wasting Ad Spend.
                         <span class="block accent-blue">Start Generating Revenue.</span>
                     </h1>
-                    <!-- АНІМАЦІЯ: Додано .fade-in-up .stagger-1 -->
-                    <p class="mt-6 text-lg text-gray-600 max-w-xl mx-auto fade-in-up stagger-1">
+                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
+                    <p class="mt-6 text-lg text-gray-600 max-w-xl mx-auto gsap-fade-in-up">
                         I'm Oleksandr, a PPC & YouTube Ads specialist. In PPC marketing since 2016, I build data-driven marketing engines that deliver measurable results, generating over $1M+ in client revenue and achieving 400,000+ conversions.
                     </p>
-                    <!-- АНІМАЦІЯ: Додано .fade-in-up .stagger-2 -->
-                    <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4 fade-in-up stagger-2">
+                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
+                    <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4 gsap-fade-in-up">
                         <a href="https://t.me/YTube_PPC" target="_blank" rel="noopener noreferrer" class="cta-button">
                             Contact me on Telegram
                         </a>
@@ -286,44 +314,45 @@
         <section id="results" class="py-20 bg-white"> 
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
-                    <!-- АНІМАЦІЯ: Додано .fade-in -->
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 fade-in">Proven by Numbers</h2>
-                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto fade-in">My work isn't just theory. It's about delivering tangible business outcomes.</p>
+                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in -->
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 gsap-fade-in">Proven by Numbers</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto gsap-fade-in">My work isn't just theory. It's about delivering tangible business outcomes.</p>
                 </div>
                 <!-- Stats Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- АНІМАЦІЯ: Додано .fade-in-up та .stagger-X -->
-                    <div class="stat-card p-6 text-center fade-in-up stagger-1">
+                <!-- АНІМАЦІЯ: Додано .gsap-stagger-grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 gsap-stagger-grid">
+                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
+                    <div class="stat-card p-6 text-center gsap-fade-in-up">
                         <div class="text-4xl md:text-5xl font-extrabold accent-blue">$1M+</div>
                         <p class="mt-2 text-lg font-semibold text-gray-900">In Client Revenue</p>
                         <p class="text-gray-500 text-sm">Generated from ad spend.</p>
                     </div>
                     <!-- Stat Card -->
-                    <div class="stat-card p-6 text-center fade-in-up stagger-2">
+                    <div class="stat-card p-6 text-center gsap-fade-in-up">
                         <div class="text-4xl md:text-5xl font-extrabold accent-blue">400,000+</div>
                         <p class="mt-2 text-lg font-semibold text-gray-900">Conversions Achieved</p>
                         <p class="text-gray-500 text-sm">Optimized for quality and cost.</p>
                     </div>
                     <!-- Stat Card -->
-                    <div class="stat-card p-6 text-center fade-in-up stagger-3">
+                    <div class="stat-card p-6 text-center gsap-fade-in-up">
                         <div class="text-4xl md:text-5xl font-extrabold accent-blue">30+</div>
                         <p class="mt-2 text-lg font-semibold text-gray-900">Projects Worked On</p>
                         <p class="text-gray-500 text-sm">Across diverse industries.</p>
                     </div>
                      <!-- Stat Card -->
-                    <div class="stat-card p-6 text-center fade-in-up stagger-4">
+                    <div class="stat-card p-6 text-center gsap-fade-in-up">
                         <div class="text-4xl md:text-5xl font-extrabold accent-blue">Since 2016</div>
                         <p class="mt-2 text-lg font-semibold text-gray-900">In PPC Marketing</p>
                         <p class="text-gray-500 text-sm">Proven track record.</p>
                     </div>
                      <!-- Stat Card -->
-                    <div class="stat-card p-6 text-center fade-in-up stagger-5">
+                    <div class="stat-card p-6 text-center gsap-fade-in-up">
                         <div class="text-4xl md:text-5xl font-extrabold accent-blue">660K+</div>
                         <p class="mt-2 text-lg font-semibold text-gray-900">YouTube Subscribers</p>
                         <p class="text-gray-500 text-sm">Acquired for client channels.</p>
                     </div>
                      <!-- Stat Card -->
-                    <div class="stat-card p-6 text-center fade-in-up stagger-6">
+                    <div class="stat-card p-6 text-center gsap-fade-in-up">
                         <div class="text-4xl md:text-5xl font-extrabold accent-blue">3.9M</div>
                         <p class="mt-2 text-lg font-semibold text-gray-900">Organic Views</p>
                         <p class="text-gray-500 text-sm">On a single video.</p>
@@ -336,14 +365,15 @@
         <section id="services" class="py-20 bg-indigo-50">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
-                    <!-- АНІМАЦІЯ: Додано .fade-in -->
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 fade-in">How I Can Help You</h2>
-                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto fade-in">Full-funnel strategies to scale your business. No prices, just solutions.</p>
+                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in -->
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 gsap-fade-in">How I Can Help You</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto gsap-fade-in">Full-funnel strategies to scale your business. No prices, just solutions.</p>
                 </div>
                 <!-- Services Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <!-- АНІМАЦІЯ: Додано .fade-in-up та .stagger-X -->
-                    <div class="service-card fade-in-up stagger-1">
+                <!-- АНІМАЦІЯ: Додано .gsap-stagger-grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 gsap-stagger-grid">
+                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
+                    <div class="service-card gsap-fade-in-up">
                         <h3 class="text-2xl font-bold text-gray-900 mb-4">Google Ads (PPC) Mastery</h3>
                         <p class="text-gray-700 mb-6">
                             Driving targeted traffic and high-intent conversions. Specializing in complex PMax & Search campaigns.
@@ -357,7 +387,7 @@
                     </div>
 
                     <!-- Service Card 2: YouTube -->
-                    <div class="service-card fade-in-up stagger-2">
+                    <div class="service-card gsap-fade-in-up">
                         <h3 class="text-2xl font-bold text-gray-900 mb-4">YouTube Marketing & Growth</h3>
                         <p class="text-gray-700 mb-6">
                             From 0 to 660k+ subscribers. I build channels that create fans and drive sales.
@@ -371,7 +401,7 @@
                     </div>
 
                     <!-- Service Card 3: Audits -->
-                    <div class="service-card fade-in-up stagger-3">
+                    <div class="service-card gsap-fade-in-up">
                         <h3 class="text-2xl font-bold text-gray-900 mb-4">Strategic Audits & Consulting</h3>
                         <p class="text-gray-700 mb-6">
                             I'll find the leaks in your funnel and the opportunities for growth. Get a clear, actionable plan.
@@ -391,15 +421,16 @@
         <section id="toolkit" class="py-20 bg-white"> 
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
-                    <!-- АНІМАЦІЯ: Додано .fade-in -->
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 fade-in">Toolkit for Success</h2>
-                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto fade-in">The core competencies I leverage to achieve marketing excellence.</p>
+                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in -->
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 gsap-fade-in">Toolkit for Success</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto gsap-fade-in">The core competencies I leverage to achieve marketing excellence.</p>
                 </div>
                 <!-- Toolkit Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- АНІМАЦІЯ: Додано .gsap-stagger-grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 gsap-stagger-grid">
                     
-                    <!-- АНІМАЦІЯ: Додано .fade-in-up та .stagger-X -->
-                    <div class="toolkit-card text-left p-6 fade-in-up stagger-1"> 
+                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
+                    <div class="toolkit-card text-left p-6 gsap-fade-in-up"> 
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
                             <circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle>
                         </svg>
@@ -408,7 +439,7 @@
                     </div>
 
                     <!-- Toolkit Card 2: Google Ads -->
-                    <div class="toolkit-card text-left p-6 fade-in-up stagger-2">
+                    <div class="toolkit-card text-left p-6 gsap-fade-in-up">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
                             <path d="M2 3h20"></path><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"></path><path d="m7 21 5-5 5 5"></path>
                         </svg>
@@ -417,7 +448,7 @@
                     </div>
 
                     <!-- Toolkit Card 3: Data & Analytics -->
-                    <div class="toolkit-card text-left p-6 fade-in-up stagger-3">
+                    <div class="toolkit-card text-left p-6 gsap-fade-in-up">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
                             <path d="M3 3v18h18"></path><path d="M7 12v4"></path><path d="M12 8v8"></path><path d="M17 4v12"></path>
                         </svg>
@@ -426,7 +457,7 @@
                     </div>
 
                     <!-- Toolkit Card 4: YouTube Marketing -->
-                    <div class="toolkit-card text-left p-6 fade-in-up stagger-4">
+                    <div class="toolkit-card text-left p-6 gsap-fade-in-up">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
                             <path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z"></path><path d="m6.2 5.3 3.1 3.9"></path><path d="m12.4 3.6 3.1 4"></path><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path>
                         </svg>
@@ -435,7 +466,7 @@
                     </div>
 
                     <!-- Toolkit Card 5: Automation -->
-                    <div class="toolkit-card text-left p-6 fade-in-up stagger-5">
+                    <div class="toolkit-card text-left p-6 gsap-fade-in-up">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
                             <path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path>
                         </svg>
@@ -444,7 +475,7 @@
                     </div>
 
                     <!-- Toolkit Card 6: Content Creation -->
-                    <div class="toolkit-card text-left p-6 fade-in-up stagger-6">
+                    <div class="toolkit-card text-left p-6 gsap-fade-in-up">
                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
                             <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle>
                         </svg>
@@ -455,19 +486,33 @@
             </div>
         </section>
 
-        <!-- 5. "Your Path to Results" Block (NEW) -->
+        <!-- 5. "Your Path to Results" Block (ОНОВЛЕНО) -->
         <section id="process" class="py-20 bg-indigo-50">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
-                    <!-- АНІМАЦІЯ: Додано .fade-in -->
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 fade-in">Your Path to Results</h2>
-                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto fade-in">My work is a transparent process, not a "black box".</p>
+                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in -->
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 gsap-fade-in">Your Path to Results</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto gsap-fade-in">My work is a transparent process, not a "black box".</p>
                 </div>
                 <!-- Process Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <!-- АНІМАЦІЯ: Додано .fade-in-up та .stagger-X -->
-                    <div class="process-card p-6 fade-in-up stagger-1">
-                        <span class="text-5xl font-extrabold accent-blue mb-4 block">01</span>
+                <!-- АНІМАЦІЯ: Додано .gsap-stagger-grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 gsap-stagger-grid">
+                    
+                    <!-- Step 1 Card (ОНОВЛЕНО) -->
+                    <div class="process-card p-6 gsap-fade-in-up">
+                        <!-- НОВА Візуалізація: Воронка -->
+                        <div class="process-viz">
+                            <svg class="viz-funnel" width="80" height="60" viewBox="0 0 80 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- АНІМАЦІЯ: Додано .gsap-svg-draw -->
+                                <path class="gsap-svg-draw" d="M2 2L30 2" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+                                <path class="gsap-svg-draw" d="M50 2L78 2" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+                                <path class="gsap-svg-draw" d="M30 2L40 28L50 2" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+                                <path class="gsap-svg-draw" d="M28 58L52 58" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+                                <path class="gsap-svg-draw" d="M40 28L28 58" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+                                <path class="gsap-svg-draw" d="M40 28L52 58" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <span class="text-5xl font-extrabold accent-blue mb-2 block">01</span>
                         <h3 class="text-2xl font-bold text-gray-900 mb-4">Discovery & Strategy</h3>
                         <p class="text-gray-700 mb-6">
                             We start with a deep dive into your business, goals, and existing assets. I'll conduct an audit and present a clear strategy.
@@ -478,9 +523,19 @@
                             <li>Full Funnel Audit</li>
                         </ul>
                     </div>
-                    <!-- Step 2 Card -->
-                    <div class="process-card p-6 fade-in-up stagger-2">
-                        <span class="text-5xl font-extrabold accent-blue mb-4 block">02</span>
+
+                    <!-- Step 2 Card (ОНОВЛЕНО) -->
+                    <div class="process-card p-6 gsap-fade-in-up">
+                        <!-- НОВА Візуалізація: Графік -->
+                        <div class="process-viz">
+                            <svg class="viz-graph" width="100" height="60" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- АНІМАЦІЯ: Додано .gsap-svg-draw -->
+                                <path class="gsap-svg-draw" d="M2 58C14.1667 53.8333 34.6 34.6 42 30C49.4 25.4 58.6667 43.1667 70 30C81.3333 16.8333 90.1667 8.33333 98 2" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+                                <!-- АНІМАЦІЯ: Додано .gsap-svg-dot -->
+                                <circle class="gsap-svg-dot" cx="98" cy="2" r="2" fill="#2563eb" stroke="#fff" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <span class="text-5xl font-extrabold accent-blue mb-2 block">02</span>
                         <h3 class="text-2xl font-bold text-gray-900 mb-4">Campaign Launch & Optimization</h3>
                         <p class="text-gray-700 mb-6">
                             I build and launch your campaigns based on the strategy, focusing on meticulous setup, A/B testing, and daily performance optimization.
@@ -491,9 +546,20 @@
                             <li>Budget & Bid Management</li>
                         </ul>
                     </div>
-                    <!-- Step 3 Card -->
-                    <div class="process-card p-6 fade-in-up stagger-3">
-                        <span class="text-5xl font-extrabold accent-blue mb-4 block">03</span>
+
+                    <!-- Step 3 Card (ОНОВЛЕНО) -->
+                    <div class="process-card p-6 gsap-fade-in-up">
+                        <!-- НОВА Візуалізація: Дашборд -->
+                        <div class="process-viz">
+                            <div class="viz-dashboard">
+                                <!-- АНІМАЦІЯ: Додано .gsap-bar та data-height -->
+                                <div class="dashboard-bar gsap-bar" data-height="30%"></div>
+                                <div class="dashboard-bar gsap-bar" data-height="50%"></div>
+                                <div class="dashboard-bar gsap-bar" data-height="75%"></div>
+                                <div class="dashboard-bar gsap-bar" data-height="40%"></div>
+                            </div>
+                        </div>
+                        <span class="text-5xl font-extrabold accent-blue mb-2 block">03</span>
                         <h3 class="text-2xl font-bold text-gray-900 mb-4">Reporting & Scaling</h3>
                         <p class="text-gray-700 mb-6">
                             You get clear, actionable reports—not just data dumps. We analyze results together and make strategic decisions to scale.
@@ -513,13 +579,13 @@
             <div class="container mx-auto px-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-12 items-center">
                     <!-- Image -->
-                    <!-- АНІМАЦІЯ: Додано .fade-in-up -->
-                    <div class="md:col-span-1 flex justify-center fade-in-up">
+                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
+                    <div class="md:col-span-1 flex justify-center gsap-fade-in-up">
                         <img src="https://i.ibb.co/L6V7RzN/photo-2024-05-23-14-16-11.jpg" alt="Oleksandr Serniak" class="w-64 h-64 object-cover rounded-full shadow-lg border-4 border-white" loading="lazy">
                     </div>
                     <!-- Text -->
-                    <!-- АНІМАЦІЯ: Додано .fade-in-up .stagger-1 -->
-                    <div class="md:col-span-2 text-center md:text-left fade-in-up stagger-1">
+                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
+                    <div class="md:col-span-2 text-center md:text-left gsap-fade-in-up">
                         <h2 class="text-3xl md:text-4xl font-bold text-gray-900">About Me</h2>
                         <p class="mt-4 text-lg text-gray-700">
                             I'm a practitioner, not just a theorist. In PPC marketing since 2016, my focus has always been on one thing: results. I've managed budgets up to $60,000/month, generated over $1M in revenue for clients, and built YouTube channels to 660,000+ subscribers.
@@ -536,21 +602,21 @@
         <section id="contact" class="py-24 bg-indigo-50"> 
             <div class="container mx-auto px-6 text-center">
                  <div class="max-w-2xl mx-auto">
-                    <!-- АНІМАЦІЯ: Додано .fade-in -->
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 fade-in">Ready to Build Your Profit Engine?</h2>
-                     <p class="mt-4 text-lg text-gray-600 fade-in">
+                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in -->
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 gsap-fade-in">Ready to Build Your Profit Engine?</h2>
+                     <p class="mt-4 text-lg text-gray-600 gsap-fade-in">
                          Stop guessing. Let's build a predictable system for acquiring customers.
                      </p>
-                     <p class="mt-6 text-lg text-gray-700 fade-in">
+                     <p class="mt-6 text-lg text-gray-700 gsap-fade-in">
                          Contact me on Telegram for a <span class="font-bold">free 30-minute strategy consultation</span>. We'll diagnose your biggest challenge and outline a clear path to growth. No obligation, just pure value.
                      </p>
-                     <!-- АНІМАЦІЯ: Додано .fade-in-up (для кнопки) -->
-                     <div class="mt-10 fade-in-up">
+                     <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up (для кнопки) -->
+                     <div class="mt-10 gsap-fade-in-up">
                         <a href="https://t.me/YTube_PPC" target="_blank" rel="noopener noreferrer" class="cta-button text-lg">
                             Contact Me on Telegram
                         </a>
                      </div>
-                     <p class="mt-4 text-sm text-gray-500 fade-in">Or find me on Telegram: @YTube_PPC</p>
+                     <p class="mt-4 text-sm text-gray-500 gsap-fade-in">Or find me on Telegram: @YTube_PPC</p>
                  </div>
             </div>
         </section>
@@ -569,9 +635,11 @@
         </div>
     </footer>
 
+    <!-- 🚀 НОВІ СКРИПТИ: GSAP + SCROLLTRIGGER 🚀 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    
     <script>
-        // 🚀 НОВИЙ АНІМАЦІЙНИЙ СКРИПТ 🚀
-        // Ми чекаємо, поки весь HTML завантажиться
         document.addEventListener('DOMContentLoaded', () => {
 
             // --- Mobile Menu Toggle (Існуючий код) ---
@@ -612,45 +680,113 @@
                 });
             });
 
-            // --- НОВИЙ КОД: Анімації ---
+            // --- 🚀 НОВИЙ КОД: GSAP Анімації 🚀 ---
             
-            // 1. Анімація першого екрану (Hero) при завантаженні
-            // Ми просто додаємо клас .is-visible до елементів з затримкою
-            const heroElements = document.querySelectorAll('#hero .fade-in-up');
-            heroElements.forEach((el, index) => {
-                setTimeout(() => {
-                    el.classList.add('is-visible');
-                }, index * 150); // Затримка 0ms, 150ms, 300ms
+            // 1. Реєструємо плагін ScrollTrigger
+            gsap.registerPlugin(ScrollTrigger);
+
+            // 2. Анімація першого екрану (Hero) при завантаженні
+            // Елементи з'являються "сходами" (stagger)
+            gsap.to("#hero .gsap-fade-in-up", {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                stagger: 0.2, // Затримка 0.2с між H1, P, та кнопками
+                ease: "power3.out",
+                delay: 0.2 // Легка затримка перед початком
             });
 
-            // 2. Анімація решти секцій при скролі
-            // Налаштування "спостерігача"
-            const observerOptions = {
-                root: null, // Спостерігати відносно в'юпорту
-                rootMargin: '0px',
-                threshold: 0.1 // Запускати, коли 10% елементу видно
-            };
-
-            // Функція, яка виконується, коли елемент з'являється
-            const observerCallback = (entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('is-visible');
-                        observer.unobserve(entry.target); // Припинити спостереження
+            // 3. Загальна анімація для заголовків секцій (проста поява)
+            gsap.utils.toArray(".gsap-fade-in").forEach(el => {
+                gsap.to(el, {
+                    opacity: 1,
+                    duration: 1.2,
+                    ease: "power1.inOut",
+                    scrollTrigger: {
+                        trigger: el,
+                        start: "top 85%", // Почати, коли 85% екрану пройдено
+                        toggleActions: "play none none none" // Запустити 1 раз
                     }
                 });
-            };
-
-            // Створення "спостерігача"
-            const scrollObserver = new IntersectionObserver(observerCallback, observerOptions);
-
-            // Вибір УСІХ елементів, які треба анімувати, ОКРІМ першого екрану
-            const elementsToAnimateOnScroll = document.querySelectorAll('section:not(#hero) .fade-in-up, section:not(#hero) .fade-in');
-            
-            // Запуск спостереження для кожного елементу
-            elementsToAnimateOnScroll.forEach(el => {
-                scrollObserver.observe(el);
             });
+
+            // 4. Загальна анімація для "сіток" (картки статистики, послуг, інструментів)
+            gsap.utils.toArray(".gsap-stagger-grid").forEach(grid => {
+                gsap.to(grid.querySelectorAll(".gsap-fade-in-up"), {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.7,
+                    stagger: 0.15, // Плавні "сходи" для карток
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: grid,
+                        start: "top 80%",
+                        toggleActions: "play none none none"
+                    }
+                });
+            });
+
+            // 5. Спеціальна анімація для секції "About Me"
+            // Ми хочемо, щоб фото і текст з'явились разом, але з легкою затримкою
+            const aboutTimeline = gsap.timeline({
+                scrollTrigger: {
+                    trigger: "#about",
+                    start: "top 70%",
+                    toggleActions: "play none none none"
+                }
+            });
+            aboutTimeline
+                .to("#about .gsap-fade-in-up", {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.8,
+                    stagger: 0.3, // Спочатку фото, потім текст
+                    ease: "power3.out"
+                });
+
+
+            // 6. Спеціальна анімація для візуалізацій в "Process"
+            const processTimeline = gsap.timeline({
+                scrollTrigger: {
+                    trigger: "#process",
+                    start: "top 70%", // Почати, коли секція з'явиться
+                    toggleActions: "play none none none"
+                }
+            });
+
+            // Ми додаємо всі анімації візуалізацій в одну "часову шкалу",
+            // щоб вони запускались послідовно та красиво
+            processTimeline
+                // Анімуємо "малювання" воронки
+                .to(".viz-funnel .gsap-svg-draw", {
+                    strokeDashoffset: 0,
+                    duration: 1,
+                    stagger: 0.1, // Кожна лінія малюється по черзі
+                    ease: "power1.inOut"
+                }, "start") // "start" - це мітка, всі анімації з цією міткою почнуться одночасно
+
+                // Анімуємо "малювання" графіку (трохи пізніше)
+                .to(".viz-graph .gsap-svg-draw", {
+                    strokeDashoffset: 0,
+                    duration: 1.2,
+                    ease: "power1.inOut"
+                }, "start+=0.3") // Почати через 0.3с після мітки "start"
+
+                // Анімуємо появу крапки в кінці графіку
+                .to(".viz-graph .gsap-svg-dot", {
+                    opacity: 1,
+                    duration: 0.3
+                }, "start+=1.3") // Почати, коли графік майже домалювався
+
+                // Анімуємо "зростання" стовпців дашборду
+                .to(".viz-dashboard .gsap-bar", {
+                    height: (i, target) => target.dataset.height, // Беремо висоту з data-height="X%"
+                    opacity: 0.7,
+                    duration: 0.8,
+                    stagger: 0.15, // Кожен стовпець по черзі
+                    ease: "back.out(1.7)" // "Пружинистий" ефект
+                }, "start+=0.5");
+
         });
     </script>
 
