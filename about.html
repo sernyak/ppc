@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="scroll-smooth"> <!-- Повернуто 'en', оскільки відгуки англійською -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,22 +10,23 @@
       == SEO-ОПТИМІЗАЦІЯ (Частина 1) ==
       ==================================================
     -->
-
+    
     <!-- Meta Description: Опис для Google (150-160 символів) -->
     <meta name="description" content="Stop wasting ad spend. I'm Oleksandr Serniak, a PPC & YouTube Ads expert since 2016. I build data-driven marketing engines that generate $1M+ in client revenue.">
-
+    
     <!-- Canonical URL: Вказує Google "майстер-версію" вашого сайту, щоб уникнути дублів -->
-    <!-- ‼️ ВАЖЛИВО: Замініть YOUR-DOMAIN.com на ваш справжній домен -->
-    <link rel="canonical" href="https://www.YOUR-DOMAIN.com/" />
+    <!-- ‼️ ВАЖЛИВО: Замініть example.com на ваш справжній домен -->
+    <link rel="canonical" href="https://www.example.com/" />
 
     <!-- Open Graph (OG) Tags: Для прев'ю в Facebook, LinkedIn, Telegram -->
     <meta property="og:title" content="Oleksandr Serniak - PPC & YouTube Ads Expert" />
     <meta property="og:description" content="Stop wasting ad spend. I'm Oleksandr Serniak, a PPC & YouTube Ads expert since 2016. I build data-driven marketing engines that generate $1M+ in client revenue." />
     <meta property="og:type" content="website" />
-    <!-- ‼️ ВАЖЛИВО: Замініть YOUR-DOMAIN.com на ваш справжній домен -->
-    <meta property="og:url" content="https://www.YOUR-DOMAIN.com/" />
+    <!-- ‼️ ВАЖЛИВО: Замініть example.com на ваш справжній домен -->
+    <meta property="og:url" content="https://www.example.com/" />
     <!-- Це фото буде на прев'ю посилання -->
     <meta property="og:image" content="https://i.ibb.co/L6V7RzN/photo-2024-05-23-14-16-11.jpg" />
+    <meta property="og:locale" content="en_US" /> <!-- Змінено локаль -->
 
     <!-- Twitter Card Tags: Для прев'ю в Twitter -->
     <meta name="twitter:card" content="summary_large_image">
@@ -42,23 +43,23 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+        
     <!-- 
       РЕКОМЕНДАЦІЯ РОЗРОБНИКА (Performance):
       Для "бойового" сайту (production) цей CSS файл потрібно скомпілювати 
-      з опцією 'purge', щоб видалити всі невикористані стилі. 
+      з опцією 'purge', щоб видалити всі невикористані стилі.
     -->
-
+    
     <!-- 
       РЕКОМЕНДАЦІЯ РОЗРОБНИКА (Аналітика):
       Додайте сюди ваш код Google Analytics (GA4) або Google Tag Manager (GTM).
     -->
-    
+        
     <style>
         /* Системний шрифт в стилі Apple */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 
-                         Helvetica, Arial, sans-serif, "Apple Color Emoji", 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                         Helvetica, Arial, sans-serif, "Apple Color Emoji",
                          "Segoe UI Emoji", "Segoe UI Symbol";
             background-color: #f8fafc; /* Базовий фон сторінки (світло-сірий) */
             color: #111827;
@@ -75,8 +76,9 @@
         .bg-accent-blue-hover:hover {
             background-color: #1d4ed8;
         }
+        
         /* Уніфіковано картки */
-        .stat-card, .service-card, .process-card, .toolkit-card {
+        .stat-card, .service-card, .process-card, .testimonial-card, .case-study-card {
             background-color: #ffffff; /* Усі картки мають білий фон */
             border: 1px solid #e5e7eb;
             border-radius: 12px;
@@ -84,18 +86,33 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
             padding: 24px;
         }
-        .stat-card:hover, .service-card:hover, .process-card:hover, .toolkit-card:hover {
+
+        .stat-card:hover, .service-card:hover, .process-card:hover, .testimonial-card:hover, .case-study-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
-        .service-card, .process-card {
+
+        .service-card, .process-card, .testimonial-card, .case-study-card {
             display: flex;
             flex-direction: column;
             height: 100%; /* Для однакової висоти карток у grid */
         }
-        .service-card:hover, .process-card:hover, .toolkit-card:hover {
+        
+        .service-card:hover, .process-card:hover, .testimonial-card:hover, .case-study-card:hover {
              border-color: #2563eb; /* Акцент при наведенні */
         }
+
+        /* ⭐️ НОВИЙ СТИЛЬ: для цитат у відгуках */
+        .testimonial-quote {
+            font-size: 1.125rem; /* 18px */
+            font-weight: 500;
+            line-height: 1.6;
+            color: #374151; /* gray-700 */
+            padding-left: 28px;
+            position: relative;
+            border-left: 4px solid #dbeafe; /* blue-100 */
+        }
+
         .cta-button {
             display: inline-block;
             background-color: #2563eb;
@@ -125,6 +142,7 @@
             background-color: #f9fafb;
             transform: translateY(-2px);
         }
+
         /* Mobile Menu Styles */
         #mobile-menu {
             transform: translateX(-100%);
@@ -133,46 +151,49 @@
         #mobile-menu.open {
             transform: translateX(0);
         }
+        
+        /* ⭐️ НОВИЙ СТИЛЬ: Sticky Telegram Button ⭐️ */
+        .sticky-telegram-cta {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background-color: #2563eb; /* accent-blue */
+            color: #ffffff;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+        .sticky-telegram-cta:hover {
+            background-color: #1d4ed8; /* hover color */
+            transform: scale(1.1);
+        }
 
         /* ==================================================
-        == 🚀 НОВІ СТИЛІ АНІМАЦІЙ (GSAP) 🚀 ==
+        == 🚀 СТИЛІ АНІМАЦІЙ (GSAP) 🚀 ==
         ==================================================
         */
-        
+                
         /* Початковий стан для елементів, що "випливають" */
         .gsap-fade-in-up {
             opacity: 0;
             transform: translateY(30px);
         }
-
         /* Початковий стан для елементів, що "проявляються" */
         .gsap-fade-in {
             opacity: 0;
         }
 
-        /* Початковий стан для SVG-ліній (ефект "малювання") */
-        .gsap-svg-draw {
-            /* Починаємо з невидимої лінії */
-            stroke-dasharray: 1000; /* Довжина лінії (велике число) */
-            stroke-dashoffset: 1000; /* Початок "малювання" */
-        }
-
-        /* Початковий стан для SVG-крапки */
-        .gsap-svg-dot {
-            opacity: 0;
-        }
-
-        /* Початковий стан для стовпців діаграми */
-        .gsap-bar {
-            height: 0;
-            opacity: 0;
-        }
-
         /* ==================================================
-        == 🚀 НОВІ СТИЛІ ІНТЕРАКТИВНИХ ДІАГРАМ 🚀 ==
+        == 🚀 СТИЛІ ІНТЕРАКТИВНИХ ДІАГРАМ 🚀 ==
         ==================================================
         */
-        
+                
         /* Базовий контейнер для візуалізацій */
         .process-viz {
             height: 60px; /* Фіксована висота */
@@ -182,7 +203,7 @@
             align-items: flex-end;
             justify-content: center;
         }
-
+        
         /* 3. Анімація Дашборду (CSS) */
         .viz-dashboard {
             display: flex;
@@ -192,13 +213,13 @@
             height: 100%;
             width: 100px;
         }
+        
         .dashboard-bar {
             width: 15px;
             background-color: #2563eb; /* accent-blue */
-            opacity: 0.5; /* Буде 0 через .gsap-bar */
-            height: 0; /* Початкова висота */
+            opacity: 0.5; 
+            /* Висота і прозорість тепер контролюються GSAP */
         }
-
     </style>
 
     <!-- 
@@ -206,30 +227,31 @@
       == SEO-ОПТИМІЗАЦІЯ (Частина 2) ==
       ==================================================
     -->
+    
     <!-- Structured Data (JSON-LD) - Пояснює Google, ХТО ви -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Person",
       "name": "Oleksandr Serniak",
-      // "‼️ ВАЖЛИВО: Замініть YOUR-DOMAIN.com на ваш справжній домен
-      "url": "https://www.YOUR-DOMAIN.com/",
+      // "‼️ ВАЖЛИВО: Замініть example.com на ваш справжній домен
+      "url": "https://www.example.com/",
       "image": "https://i.ibb.co/L6V7RzN/photo-2024-05-23-14-16-11.jpg",
       "sameAs": [
         "https://www.linkedin.com/in/serniak",
         "https://t.me/YTube_PPC"
       ],
       "jobTitle": "PPC & YouTube Ads Specialist",
-      "description": "PPC specialist since 2016, generating over $1M+ in client revenue and achieving 400,000+ conversions. Specializes in Google Ads, PMax, and YouTube channel growth.",
+      "description": "PPC specialist since 2016, generating over $1M+ in client revenue and new 400,000+ conversions. Specializes in Google Ads, PMax, and YouTube channel growth.",
       "knowsAbout": ["PPC", "Google Ads", "YouTube Ads", "Marketing Strategy", "Data Analytics", "Looker Studio"]
     }
     </script>
+    
     <!-- 
       ==================================================
       == Кінець SEO-ОПТИМІЗАЦІЇ (Частина 2) ==
       ==================================================
     -->
-
 </head>
 <body class="antialiased">
 
@@ -240,8 +262,12 @@
                 Oleksandr Serniak
             </a>
             <nav class="hidden md:flex space-x-6">
-                <a href="#results" class="text-gray-600 hover:text-gray-900 transition">Results</a>
+                <!-- ⭐️ ПОРЯДОК ЗМІНЕНО -->
                 <a href="#services" class="text-gray-600 hover:text-gray-900 transition">Services</a>
+                <a href="#results" class="text-gray-600 hover:text-gray-900 transition">Results</a>
+                <!-- ⭐️ -->
+                <a href="#testimonials" class="text-gray-600 hover:text-gray-900 transition">Reviews</a>
+                <a href="#case-studies" class="text-gray-600 hover:text-gray-900 transition">Cases</a>
                 <a href="#process" class="text-gray-600 hover:text-gray-900 transition">Process</a>
                 <a href="#about" class="text-gray-600 hover:text-gray-900 transition">About</a>
                 <a href="#contact" class="text-gray-600 hover:text-gray-900 transition">Contact</a>
@@ -252,9 +278,7 @@
             <!-- Mobile Menu Button -->
             <div class="md:hidden">
                 <button id="menu-toggle" class="text-gray-900 focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
-                    </svg>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
                 </button>
             </div>
         </div>
@@ -265,17 +289,20 @@
         <div class="flex justify-between items-center mb-8">
             <span class="text-xl font-bold tracking-tight text-gray-900">Navigation</span>
             <button id="menu-close" class="text-gray-900 focus:outline-none">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
         <nav class="flex flex-col space-y-6">
-            <a href="#results" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">Results</a>
+            <!-- ⭐️ ПОРЯДОК ЗМІНЕНО -->
             <a href="#services" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">Services</a>
+            <a href="#results" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">Results</a>
+            <!-- ⭐️ -->
+            <a href="#testimonials" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">Reviews</a>
+            <a href="#case-studies" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">Cases</a>
             <a href="#process" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">Process</a>
             <a href="#about" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">About</a>
             <a href="#contact" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">Contact</a>
+            
             <a href="https://t.me/YTube_PPC" target="_blank" rel="noopener noreferrer" class="cta-button mt-4 text-center">
                 Contact me on Telegram
             </a>
@@ -283,12 +310,13 @@
     </div>
 
     <main>
+
         <!-- 1. Hero Section -->
         <section id="hero" class="hero-gradient pt-32 pb-20 md:pt-40 md:pb-28">
             <div class="container mx-auto px-6">
                 <!-- Hero Text -->
-                <div class="max-w-3xl mx-auto text-center"> 
-                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
+                <div class="max-w-3xl mx-auto text-center">
+                     <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
                     <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight gsap-fade-in-up">
                         Stop Wasting Ad Spend.
                         <span class="block accent-blue">Start Generating Revenue.</span>
@@ -310,68 +338,24 @@
             </div>
         </section>
 
-        <!-- 2. "Results" Block -->
-        <section id="results" class="py-20 bg-white"> 
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in -->
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 gsap-fade-in">Proven by Numbers</h2>
-                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto gsap-fade-in">My work isn't just theory. It's about delivering tangible business outcomes.</p>
-                </div>
-                <!-- Stats Grid -->
-                <!-- АНІМАЦІЯ: Додано .gsap-stagger-grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 gsap-stagger-grid">
-                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
-                    <div class="stat-card p-6 text-center gsap-fade-in-up">
-                        <div class="text-4xl md:text-5xl font-extrabold accent-blue">$1M+</div>
-                        <p class="mt-2 text-lg font-semibold text-gray-900">In Client Revenue</p>
-                        <p class="text-gray-500 text-sm">Generated from ad spend.</p>
-                    </div>
-                    <!-- Stat Card -->
-                    <div class="stat-card p-6 text-center gsap-fade-in-up">
-                        <div class="text-4xl md:text-5xl font-extrabold accent-blue">400,000+</div>
-                        <p class="mt-2 text-lg font-semibold text-gray-900">Conversions Achieved</p>
-                        <p class="text-gray-500 text-sm">Optimized for quality and cost.</p>
-                    </div>
-                    <!-- Stat Card -->
-                    <div class="stat-card p-6 text-center gsap-fade-in-up">
-                        <div class="text-4xl md:text-5xl font-extrabold accent-blue">30+</div>
-                        <p class="mt-2 text-lg font-semibold text-gray-900">Projects Worked On</p>
-                        <p class="text-gray-500 text-sm">Across diverse industries.</p>
-                    </div>
-                     <!-- Stat Card -->
-                    <div class="stat-card p-6 text-center gsap-fade-in-up">
-                        <div class="text-4xl md:text-5xl font-extrabold accent-blue">Since 2016</div>
-                        <p class="mt-2 text-lg font-semibold text-gray-900">In PPC Marketing</p>
-                        <p class="text-gray-500 text-sm">Proven track record.</p>
-                    </div>
-                     <!-- Stat Card -->
-                    <div class="stat-card p-6 text-center gsap-fade-in-up">
-                        <div class="text-4xl md:text-5xl font-extrabold accent-blue">660K+</div>
-                        <p class="mt-2 text-lg font-semibold text-gray-900">YouTube Subscribers</p>
-                        <p class="text-gray-500 text-sm">Acquired for client channels.</p>
-                    </div>
-                     <!-- Stat Card -->
-                    <div class="stat-card p-6 text-center gsap-fade-in-up">
-                        <div class="text-4xl md:text-5xl font-extrabold accent-blue">3.9M</div>
-                        <p class="mt-2 text-lg font-semibold text-gray-900">Organic Views</p>
-                        <p class="text-gray-500 text-sm">On a single video.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 3. "How I Can Help You" Block -->
-        <section id="services" class="py-20 bg-indigo-50">
+        <!-- 
+          ==================================================
+          == ⭐️ БЛОК 2: "How I Can Help You" (ПОСЛУГИ) ⭐️ ==
+          == (Поміняно місцями з "Results")
+          ==================================================
+        -->
+        <section id="services" class="py-20 bg-white"> <!-- ⭐️ Змінено фон для чергування -->
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
                     <!-- АНІМАЦІЯ: Додано .gsap-fade-in -->
                     <h2 class="text-3xl md:text-4xl font-bold text-gray-900 gsap-fade-in">How I Can Help You</h2>
                     <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto gsap-fade-in">Full-funnel strategies to scale your business. No prices, just solutions.</p>
                 </div>
+                
                 <!-- Services Grid -->
                 <!-- АНІМАЦІЯ: Додано .gsap-stagger-grid -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 gsap-stagger-grid">
+                    
                     <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
                     <div class="service-card gsap-fade-in-up">
                         <h3 class="text-2xl font-bold text-gray-900 mb-4">Google Ads (PPC) Mastery</h3>
@@ -385,7 +369,7 @@
                             <li>Budget Management ($60k+/mo)</li>
                         </ul>
                     </div>
-
+                    
                     <!-- Service Card 2: YouTube -->
                     <div class="service-card gsap-fade-in-up">
                         <h3 class="text-2xl font-bold text-gray-900 mb-4">YouTube Marketing & Growth</h3>
@@ -399,7 +383,7 @@
                             <li>(3.9M+ views on one video)</li>
                         </ul>
                     </div>
-
+                    
                     <!-- Service Card 3: Audits -->
                     <div class="service-card gsap-fade-in-up">
                         <h3 class="text-2xl font-bold text-gray-900 mb-4">Strategic Audits & Consulting</h3>
@@ -417,89 +401,211 @@
             </div>
         </section>
 
-        <!-- 4. "Toolkit" Block -->
-        <section id="toolkit" class="py-20 bg-white"> 
-            <div class="container mx-auto px-6">
+        <!-- 
+          ==================================================
+          == ⭐️ БЛОК 3: "Proven by Numbers" (ПОВЕРНЕНО 6) ⭐️ ==
+          ==================================================
+        -->
+        <section id="results" class="py-20 bg-indigo-50"> <!-- ⭐️ Змінено фон для чергування -->
+             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
                     <!-- АНІМАЦІЯ: Додано .gsap-fade-in -->
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 gsap-fade-in">Toolkit for Success</h2>
-                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto gsap-fade-in">The core competencies I leverage to achieve marketing excellence.</p>
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 gsap-fade-in">Proven by Numbers</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto gsap-fade-in">My work isn't just theory. It's about delivering tangible business outcomes.</p>
                 </div>
-                <!-- Toolkit Grid -->
-                <!-- АНІМАЦІЯ: Додано .gsap-stagger-grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 gsap-stagger-grid">
+                
+                <!-- Stats Grid -->
+                <!-- ⭐️ ПОВЕРНЕНО: 6 блоків з lg:grid-cols-3 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 gsap-stagger-grid">
                     
                     <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
-                    <div class="toolkit-card text-left p-6 gsap-fade-in-up"> 
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
-                            <circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle>
-                        </svg>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Marketing Strategy</h3>
-                        <p class="text-gray-600">Developing comprehensive strategies from market research to campaign execution.</p>
+                    <div class="stat-card p-6 text-center gsap-fade-in-up">
+                        <div class="text-4xl md:text-5xl font-extrabold accent-blue">$1M+</div>
+                        <p class="mt-2 text-lg font-semibold text-gray-900">In Client Revenue</p>
+                        <p class="text-gray-500 text-sm">Generated from ad spend.</p>
                     </div>
-
-                    <!-- Toolkit Card 2: Google Ads -->
-                    <div class="toolkit-card text-left p-6 gsap-fade-in-up">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
-                            <path d="M2 3h20"></path><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"></path><path d="m7 21 5-5 5 5"></path>
-                        </svg>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Google Ads</h3>
-                        <p class="text-gray-600">Expert in Search, Display, Video, and PMax campaigns with a focus on A/B testing.</p>
+                    
+                    <!-- Stat Card -->
+                    <div class="stat-card p-6 text-center gsap-fade-in-up">
+                        <div class="text-4xl md:text-5xl font-extrabold accent-blue">400,000+</div>
+                        <p class="mt-2 text-lg font-semibold text-gray-900">Conversions Achieved</p>
+                        <p class="text-gray-500 text-sm">Optimized for quality and cost.</p>
                     </div>
-
-                    <!-- Toolkit Card 3: Data & Analytics -->
-                    <div class="toolkit-card text-left p-6 gsap-fade-in-up">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
-                            <path d="M3 3v18h18"></path><path d="M7 12v4"></path><path d="M12 8v8"></path><path d="M17 4v12"></path>
-                        </svg>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Data & Analytics</h3>
-                        <p class="text-gray-600">Utilizing Google Analytics, Looker Studio, and custom dashboards to derive insights.</p>
+                    
+                    <!-- Stat Card -->
+                    <div class="stat-card p-6 text-center gsap-fade-in-up">
+                        <div class="text-4xl md:text-5xl font-extrabold accent-blue">30+</div>
+                        <p class="mt-2 text-lg font-semibold text-gray-900">Projects Worked On</p>
+                        <p class="text-gray-500 text-sm">Across diverse industries.</p>
                     </div>
-
-                    <!-- Toolkit Card 4: YouTube Marketing -->
-                    <div class="toolkit-card text-left p-6 gsap-fade-in-up">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
-                            <path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z"></path><path d="m6.2 5.3 3.1 3.9"></path><path d="m12.4 3.6 3.1 4"></path><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path>
-                        </svg>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">YouTube Marketing</h3>
-                        <p class="text-gray-600">Full-funnel YouTube strategy, from channel development to video promotion.</p>
+                     
+                     <!-- Stat Card -->
+                    <div class="stat-card p-6 text-center gsap-fade-in-up">
+                        <div class="text-4xl md:text-5xl font-extrabold accent-blue">Since 2016</div>
+                        <p class="mt-2 text-lg font-semibold text-gray-900">In PPC Marketing</p>
+                        <p class="text-gray-500 text-sm">Proven track record.</p>
                     </div>
-
-                    <!-- Toolkit Card 5: Automation -->
-                    <div class="toolkit-card text-left p-6 gsap-fade-in-up">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
-                            <path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path>
-                        </svg>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Automation</h3>
-                        <p class="text-gray-600">Automating reporting (Looker, HTML) and campaign management using tools like Google Sheets.</p>
+                     
+                     <!-- Stat Card -->
+                    <div class="stat-card p-6 text-center gsap-fade-in-up">
+                        <div class="text-4xl md:text-5xl font-extrabold accent-blue">660K+</div>
+                        <p class="mt-2 text-lg font-semibold text-gray-900">YouTube Subscribers</p>
+                        <p class="text-gray-500 text-sm">Acquired for client channels.</p>
                     </div>
-
-                    <!-- Toolkit Card 6: Content Creation -->
-                    <div class="toolkit-card text-left p-6 gsap-fade-in-up">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
-                            <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle>
-                        </svg>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Content Creation</h3>
-                        <p class="text-gray-600">Hands-on experience in professional video shooting and photography.</p>
+                     
+                     <!-- Stat Card -->
+                    <div class="stat-card p-6 text-center gsap-fade-in-up">
+                        <div class="text-4xl md:text-5xl font-extrabold accent-blue">3.9M</div>
+                        <p class="mt-2 text-lg font-semibold text-gray-900">Organic Views</p>
+                        <p class="text-gray-500 text-sm">On a single video.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 5. "Your Path to Results" Block (ОНОВЛЕНО) -->
-        <section id="process" class="py-20 bg-indigo-50">
+        <!-- 
+          ==================================================
+          == ⭐️ БЛОК 4: "Testimonials" (АНОНІМІЗОВАНО) ⭐️ ==
+          ==================================================
+        -->
+        <section id="testimonials" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in -->
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 gsap-fade-in">What My Clients Say</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto gsap-fade-in">Numbers are important. But real trust comes from real people.</p>
+                </div>
+
+                <!-- Testimonials Grid -->
+                <!-- АНІМАЦІЯ: Додано .gsap-stagger-grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 gsap-stagger-grid">
+                    
+                    <!-- Відгук 1 (Artem B.) -->
+                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
+                    <div class="testimonial-card gsap-fade-in-up">
+                        <p class="testimonial-quote mb-6">
+                            "Thanks to his professionalism, he was able to scale Google Ads budgets from scratch... to the level of Meta, while maintaining profitability. This confirmed the importance of the channel as an effective and profitable tool in the overall marketing strategy."
+                        </p>
+                        <div class="flex items-center mt-auto pt-4 border-t border-gray-100">
+                            <!-- ‼️ ВАЖЛИВО: Замініть це фото -->
+                            <img src="https://placehold.co/50x50/E0E7FF/4338CA?text=AB" alt="Artem B." class="w-12 h-12 rounded-full object-cover mr-4">
+                            <div>
+                                <p class="font-bold text-gray-900">Artem B.</p>
+                                <p class="text-sm text-gray-500">Head of Performance, EdTech</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Відгук 2 (Tati S.) -->
+                    <div class="testimonial-card gsap-fade-in-up">
+                        <p class="testimonial-quote mb-6">
+                            "Oleksandr is a senior PPC specialist understanding how to build and optimize the funnel. He develops comprehensive strategies... With a focus on analytics and performance metrics, Oleksandr pro-actively adjusts campaigns to deliver the results with the best economy."
+                        </p>
+                        <div class="flex items-center mt-auto pt-4 border-t border-gray-100">
+                            <!-- ‼️ ВАЖЛИВО: Замініть це фото -->
+                            <img src="https://placehold.co/50x50/FEF3C7/D97706?text=TS" alt="Tati S." class="w-12 h-12 rounded-full object-cover mr-4">
+                            <div>
+                                <p class="font-bold text-gray-900">Tati S.</p>
+                                <p class="text-sm text-gray-500">Senior Marketing Director, SaaS</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Відгук 3 (Roman S.) -->
+                    <div class="testimonial-card gsap-fade-in-up">
+                        <p class="testimonial-quote mb-6">
+                            "Oleksandr is a strong specialist in Google Ads and YouTube marketing... He set up and optimized ad campaigns with large budgets, developed lead generation strategies, created briefs for video creatives, and implemented A/B testing to increase effectiveness."
+                        </p>
+                        <div class="flex items-center mt-auto pt-4 border-t border-gray-100">
+                            <!-- ‼️ ВАЖЛИВО: Замініть це фото -->
+                            <img src="https://placehold.co/50x50/D1FAE5/047857?text=RS" alt="Roman S." class="w-12 h-12 rounded-full object-cover mr-4">
+                            <div>
+                                <p class="font-bold text-gray-900">Roman S.</p>
+                                <p class="text-sm text-gray-500">Chief Marketing Officer, B2B</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 
+          ==================================================
+          == ⭐️ БЛОК 5: "Mini Case Studies" (АНОНІМІЗОВАНО) ⭐️ ==
+          ==================================================
+        -->
+        <section id="case-studies" class="py-20 bg-indigo-50">
+             <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in -->
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 gsap-fade-in">Real Results in Action</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto gsap-fade-in">This is how I turn strategy into revenue.</p>
+                </div>
+                
+                <!-- Case Studies Grid -->
+                <!-- АНІМАЦІЯ: Додано .gsap-stagger-grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 gsap-stagger-grid">
+                                        
+                    <!-- Кейс 1: EdTech (з відгуку Artem B.) -->
+                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
+                    <div class="case-study-card text-left p-6 gsap-fade-in-up">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 accent-blue mb-4">
+                            <path d="M2 3h20"></path><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"></path><path d="m7 21 5-5 5 5"></path>
+                        </svg>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Case: EdTech Google Ads Scaling</h3>
+                        <p class="text-gray-600 mb-4">
+                            <span class="font-semibold text-gray-700">Client:</span> English EdTech Startup
+                        </p>
+                        <p class="text-gray-600 mb-4">
+                            <span class="font-semibold text-gray-700">Challenge:</span> Prove and scale Google Ads as a profitable channel, matching the performance of Meta Ads.
+                        </p>
+                         <p class="text-gray-600 mb-4">
+                            <span class="font-semibold text-gray-700">Solution:</span> Scaled Google Ads budgets from scratch, optimizing for profitability and efficiency.
+                        </p>
+                        <p class="text-gray-900 font-bold accent-blue text-lg">
+                            Result: Confirmed Google Ads as an effective & profitable tool in the overall marketing strategy.
+                        </p>
+                    </div>
+
+                    <!-- Кейс 2: B2B (з відгуку Roman S.) -->
+                    <div class="case-study-card text-left p-6 gsap-fade-in-up">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 accent-blue mb-4">
+                            <path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z"></path><path d="m6.2 5.3 3.1 3.9"></path><path d="m12.4 3.6 3.1 4"></path><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path>
+                        </svg>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Case: B2B YouTube Lead Gen</h3>
+                         <p class="text-gray-600 mb-4">
+                            <span class="font-semibold text-gray-700">Client:</span> B2B Consulting Firm
+                        </p>
+                        <p class="text-gray-600 mb-4">
+                            <span class="font-semibold text-gray-700">Challenge:</span> Manage large monthly budgets ($XX,XXX) to generate high-quality leads via Google & YouTube.
+                        </p>
+                         <p class="text-gray-600 mb-4">
+                            <span class="font-semibold text-gray-700">Solution:</span> Developed lead generation strategies, created briefs for video creatives, and implemented A/B testing to increase effectiveness.
+                        </p>
+                        <p class="text-gray-900 font-bold accent-blue text-lg">
+                            Result: Successfully set up and optimized large-scale campaigns, ensuring cost-effective, high-quality lead flow.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. "Your Path to Results" Block -->
+        <section id="process" class="py-20 bg-white">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
                     <!-- АНІМАЦІЯ: Додано .gsap-fade-in -->
                     <h2 class="text-3xl md:text-4xl font-bold text-gray-900 gsap-fade-in">Your Path to Results</h2>
                     <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto gsap-fade-in">My work is a transparent process, not a "black box".</p>
                 </div>
+                
                 <!-- Process Grid -->
                 <!-- АНІМАЦІЯ: Додано .gsap-stagger-grid -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 gsap-stagger-grid">
-                    
+                                        
                     <!-- Step 1 Card (ОНОВЛЕНО) -->
-                    <div class="process-card p-6 gsap-fade-in-up">
+                    <!-- АНІМАЦІЯ: Додано #process-card-1 -->
+                    <div id="process-card-1" class="process-card p-6 gsap-fade-in-up">
                         <!-- НОВА Візуалізація: Воронка -->
                         <div class="process-viz">
                             <svg class="viz-funnel" width="80" height="60" viewBox="0 0 80 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -523,9 +629,10 @@
                             <li>Full Funnel Audit</li>
                         </ul>
                     </div>
-
+                    
                     <!-- Step 2 Card (ОНОВЛЕНО) -->
-                    <div class="process-card p-6 gsap-fade-in-up">
+                    <!-- АНІМАЦІЯ: Додано #process-card-2 -->
+                    <div id="process-card-2" class="process-card p-6 gsap-fade-in-up">
                         <!-- НОВА Візуалізація: Графік -->
                         <div class="process-viz">
                             <svg class="viz-graph" width="100" height="60" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -546,24 +653,32 @@
                             <li>Budget & Bid Management</li>
                         </ul>
                     </div>
-
+                    
                     <!-- Step 3 Card (ОНОВЛЕНО) -->
-                    <div class="process-card p-6 gsap-fade-in-up">
-                        <!-- НОВА Візуалізація: Дашборд -->
+                    <!-- АНІМАЦІЯ: Додано #process-card-3 -->
+                    <div id="process-card-3" class="process-card p-6 gsap-fade-in-up">
+                        
+                        <!-- ⭐️ ОНОВЛЕНА Візуалізація: Дашборд (SVG-стиль) -->
                         <div class="process-viz">
-                            <div class="viz-dashboard">
-                                <!-- АНІМАЦІЯ: Додано .gsap-bar та data-height -->
-                                <div class="dashboard-bar gsap-bar" data-height="30%"></div>
-                                <div class="dashboard-bar gsap-bar" data-height="50%"></div>
-                                <div class="dashboard-bar gsap-bar" data-height="75%"></div>
-                                <div class="dashboard-bar gsap-bar" data-height="40%"></div>
-                            </div>
+                            <!-- Замінено div-блоки на SVG для стилістичної єдності -->
+                            <svg class="viz-dashboard-svg" width="80" height="60" viewBox="0 0 80 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Y-axis -->
+                                <path class="gsap-svg-draw" d="M2 58V2" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+                                <!-- X-axis -->
+                                <path class="gsap-svg-draw" d="M2 58H78" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+                                <!-- Bar 1 (Short) -->
+                                <path class="gsap-svg-draw" d="M25 58V30" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+                                <!-- Bar 2 (Tall) -->
+                                <path class="gsap-svg-draw" d="M45 58V10" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+                                <!-- Bar 3 (Medium) -->
+                                <path class="gsap-svg-draw" d="M65 58V20" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+                            </svg>
                         </div>
                         <span class="text-5xl font-extrabold accent-blue mb-2 block">03</span>
                         <h3 class="text-2xl font-bold text-gray-900 mb-4">Reporting & Scaling</h3>
                         <p class="text-gray-700 mb-6">
                             You get clear, actionable reports—not just data dumps. We analyze results together and make strategic decisions to scale.
-                        </p>
+                        </S>
                         <ul class="list-disc list-inside text-gray-600 space-y-2 mt-auto">
                             <li>Automated Looker Studio Reports</li>
                             <li>Custom HTML Dashboards</li>
@@ -574,8 +689,8 @@
             </div>
         </section>
 
-        <!-- 6. "About Me" Block -->
-        <section id="about" class="py-20 bg-white">
+        <!-- 7. "About Me" Block -->
+        <section id="about" class="py-20 bg-indigo-50">
             <div class="container mx-auto px-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-12 items-center">
                     <!-- Image -->
@@ -583,6 +698,7 @@
                     <div class="md:col-span-1 flex justify-center gsap-fade-in-up">
                         <img src="https://i.ibb.co/L6V7RzN/photo-2024-05-23-14-16-11.jpg" alt="Oleksandr Serniak" class="w-64 h-64 object-cover rounded-full shadow-lg border-4 border-white" loading="lazy">
                     </div>
+                    
                     <!-- Text -->
                     <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
                     <div class="md:col-span-2 text-center md:text-left gsap-fade-in-up">
@@ -591,16 +707,16 @@
                             I'm a practitioner, not just a theorist. In PPC marketing since 2016, my focus has always been on one thing: results. I've managed budgets up to $60,000/month, generated over $1M in revenue for clients, and built YouTube channels to 660,000+ subscribers.
                         </p>
                         <p class="mt-4 text-lg text-gray-700">
-                            My background in Television Directing and Finance, combined with NLP certifications, gives me a unique perspective. I don't just understand the ads; I understand the audience, the creative, and the P&L.
+                            My background in Television Directing and Finance, combined with NLP certifications, gives me a unique perspective. I'D'm not just understand the ads; I understand the audience, the creative, and the P&L.
                         </p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 7. Final CTA Block -->
-        <section id="contact" class="py-24 bg-indigo-50"> 
-            <div class="container mx-auto px-6 text-center">
+        <!-- 8. Final CTA Block -->
+        <section id="contact" class="py-24 bg-white">
+             <div class="container mx-auto px-6 text-center">
                  <div class="max-w-2xl mx-auto">
                     <!-- АНІМАЦІЯ: Додано .gsap-fade-in -->
                     <h2 class="text-3xl md:text-4xl font-bold text-gray-900 gsap-fade-in">Ready to Build Your Profit Engine?</h2>
@@ -610,8 +726,9 @@
                      <p class="mt-6 text-lg text-gray-700 gsap-fade-in">
                          Contact me on Telegram for a <span class="font-bold">free 30-minute strategy consultation</span>. We'll diagnose your biggest challenge and outline a clear path to growth. No obligation, just pure value.
                      </p>
-                     <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up (для кнопки) -->
-                     <div class="mt-10 gsap-fade-in-up">
+                     
+                     <!-- ⭐️ ЗМІНА: Прибрано анімацію .gsap-fade-in-up, щоб кнопка була видима одразу -->
+                     <div class="mt-10">
                         <a href="https://t.me/YTube_PPC" target="_blank" rel="noopener noreferrer" class="cta-button text-lg">
                             Contact Me on Telegram
                         </a>
@@ -622,9 +739,16 @@
         </section>
     </main>
 
-    <!-- 8. Footer -->
-    <footer class="bg-gray-800 text-gray-300"> 
-        <div class="container mx-auto px-6 py-8">
+    <!-- ⭐️ НОВА КНОПКА: Sticky Telegram CTA ⭐️ -->
+    <a href="https://t.me/YTube_PPC" target="_blank" rel="noopener noreferrer" class="sticky-telegram-cta" aria-label="Contact me on Telegram">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8"> <!-- Змінено на fill="currentColor" для Telegram іконки -->
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.3 8.04l-1.01 4.7c-.12.54-.44.68-.88.42l-2.03-1.49-1 .96c-.11.1-.19.19-.32.19l.12-2.07 3.49-3.15c.15-.14 0-.22-.19-.13L8.9 12.25l-2.02-.62c-.53-.16-.54-.52.12-.77L15.3 8.3c.45-.16.85.11.7.64z"/>
+        </svg>
+    </a>
+
+    <!-- 9. Footer -->
+    <footer class="bg-gray-800 text-gray-300">
+         <div class="container mx-auto px-6 py-8">
             <div class="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
                 <p class="text-gray-400">&copy; 2024 Oleksandr Serniak. All rights reserved.</p>
                 <div class="flex justify-center space-x-6 mt-4 md:mt-0">
@@ -638,10 +762,10 @@
     <!-- 🚀 НОВІ СКРИПТИ: GSAP + SCROLLTRIGGER 🚀 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    
+        
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-
+            
             // --- Mobile Menu Toggle (Існуючий код) ---
             const menuToggle = document.getElementById('menu-toggle');
             const menuClose = document.getElementById('menu-close');
@@ -652,7 +776,7 @@
                 mobileMenu.classList.add('open');
                 document.body.style.overflow = 'hidden';
             });
-
+            
             menuClose.addEventListener('click', () => {
                 mobileMenu.classList.remove('open');
                 document.body.style.overflow = '';
@@ -680,13 +804,19 @@
                 });
             });
 
-            // --- 🚀 НОВИЙ КОД: GSAP Анімації 🚀 ---
-            
+            // --- 🚀 НОВИЙ КОД: GSAP Анімації (Повернення до V8) 🚀 ---
+                        
             // 1. Реєструємо плагін ScrollTrigger
             gsap.registerPlugin(ScrollTrigger);
+                        
+            // 2. Встановлюємо початковий стан для діаграм (безпечно)
+            // (вони невидимі, поки GSAP не запустить їх)
+            gsap.set(".viz-funnel .gsap-svg-draw", { strokeDashoffset: 1000 });
+            gsap.set(".viz-graph .gsap-svg-draw", { strokeDashoffset: 1000 });
+            gsap.set(".viz-graph .gsap-svg-dot", { opacity: 0 });
+            gsap.set(".viz-dashboard-svg .gsap-svg-draw", { strokeDashoffset: 1000 }); // ⭐️ ЗМІНЕНО .viz-dashboard .gsap-bar
 
-            // 2. Анімація першого екрану (Hero) при завантаженні
-            // Елементи з'являються "сходами" (stagger)
+            // 3. Анімація першого екрану (Hero) при завантаженні
             gsap.to("#hero .gsap-fade-in-up", {
                 opacity: 1,
                 y: 0,
@@ -696,7 +826,7 @@
                 delay: 0.2 // Легка затримка перед початком
             });
 
-            // 3. Загальна анімація для заголовків секцій (проста поява)
+            // 4. Загальна анімація для заголовків секцій (проста поява)
             gsap.utils.toArray(".gsap-fade-in").forEach(el => {
                 gsap.to(el, {
                     opacity: 1,
@@ -710,9 +840,11 @@
                 });
             });
 
-            // 4. Загальна анімація для "сіток" (картки статистики, послуг, інструментів)
+            // 5. Загальна анімація для "сіток" (статистика, послуги, інструменти, ВІДГУКИ, КЕЙСИ)
             gsap.utils.toArray(".gsap-stagger-grid").forEach(grid => {
-                gsap.to(grid.querySelectorAll(".gsap-fade-in-up"), {
+                const cards = grid.querySelectorAll(".gsap-fade-in-up");
+                                
+                gsap.to(cards, {
                     opacity: 1,
                     y: 0,
                     duration: 0.7,
@@ -726,8 +858,59 @@
                 });
             });
 
-            // 5. Спеціальна анімація для секції "About Me"
-            // Ми хочемо, щоб фото і текст з'явились разом, але з легкою затримкою
+            // 6. 🚀 ВІДНОВЛЕНО: Єдиний, надійний таймлайн для "Process"
+            const processSection = document.querySelector("#process");
+            const processCards = processSection.querySelectorAll(".process-card.gsap-fade-in-up");
+                        
+            // Створюємо головний таймлайн для всієї секції "Process"
+            const processTimeline = gsap.timeline({
+                scrollTrigger: {
+                    trigger: processSection,
+                    start: "top 60%", // Почати, коли 60% екрану пройдено
+                    toggleActions: "play none none none" // Запустити 1 раз
+                }
+            });
+
+            // Крок 1: Анімуємо появу трьох карток "сходами"
+            processTimeline.to(processCards, {
+                opacity: 1,
+                y: 0,
+                duration: 0.7,
+                stagger: 0.2, // Плавні "сходи"
+                ease: "power3.out"
+            });
+            
+            // Крок 2: Одночасно з картками (або з легкою затримкою) анімуємо діаграми
+                        
+            // Анімація Воронки (починається через 0.2с після старту таймлайну)
+            processTimeline.to(".viz-funnel .gsap-svg-draw", {
+                strokeDashoffset: 0,
+                duration: 1,
+                stagger: 0.1, 
+                ease: "power1.inOut"
+            }, "0.2"); // Почати на 0.2с
+
+            // Анімація Графіку (починається через 0.5с після старту)
+            processTimeline.to(".viz-graph .gsap-svg-draw", {
+                strokeDashoffset: 0,
+                duration: 1.2,
+                ease: "power1.inOut"
+            }, "0.5"); // Почати на 0.5с
+            
+            processTimeline.to(".viz-graph .gsap-svg-dot", {
+                opacity: 1,
+                duration: 0.3
+            }, "1.5"); // Почати на 1.5с (коли графік домалювався)
+            
+            // ⭐️ ОНОВЛЕНО: Анімація Дашборду (SVG-стиль)
+            processTimeline.to(".viz-dashboard-svg .gsap-svg-draw", { // ⭐️ ЗМІНЕНО
+                strokeDashoffset: 0,
+                duration: 1,
+                stagger: 0.15, // Малюємо осі та стовпчики по черзі
+                ease: "power1.inOut"
+            }, "0.8"); // Почати на 0.8с
+                        
+            // 7. Спеціальна анімація для секції "About Me"
             const aboutTimeline = gsap.timeline({
                 scrollTrigger: {
                     trigger: "#about",
@@ -735,6 +918,7 @@
                     toggleActions: "play none none none"
                 }
             });
+
             aboutTimeline
                 .to("#about .gsap-fade-in-up", {
                     opacity: 1,
@@ -743,52 +927,7 @@
                     stagger: 0.3, // Спочатку фото, потім текст
                     ease: "power3.out"
                 });
-
-
-            // 6. Спеціальна анімація для візуалізацій в "Process"
-            const processTimeline = gsap.timeline({
-                scrollTrigger: {
-                    trigger: "#process",
-                    start: "top 70%", // Почати, коли секція з'явиться
-                    toggleActions: "play none none none"
-                }
-            });
-
-            // Ми додаємо всі анімації візуалізацій в одну "часову шкалу",
-            // щоб вони запускались послідовно та красиво
-            processTimeline
-                // Анімуємо "малювання" воронки
-                .to(".viz-funnel .gsap-svg-draw", {
-                    strokeDashoffset: 0,
-                    duration: 1,
-                    stagger: 0.1, // Кожна лінія малюється по черзі
-                    ease: "power1.inOut"
-                }, "start") // "start" - це мітка, всі анімації з цією міткою почнуться одночасно
-
-                // Анімуємо "малювання" графіку (трохи пізніше)
-                .to(".viz-graph .gsap-svg-draw", {
-                    strokeDashoffset: 0,
-                    duration: 1.2,
-                    ease: "power1.inOut"
-                }, "start+=0.3") // Почати через 0.3с після мітки "start"
-
-                // Анімуємо появу крапки в кінці графіку
-                .to(".viz-graph .gsap-svg-dot", {
-                    opacity: 1,
-                    duration: 0.3
-                }, "start+=1.3") // Почати, коли графік майже домалювався
-
-                // Анімуємо "зростання" стовпців дашборду
-                .to(".viz-dashboard .gsap-bar", {
-                    height: (i, target) => target.dataset.height, // Беремо висоту з data-height="X%"
-                    opacity: 0.7,
-                    duration: 0.8,
-                    stagger: 0.15, // Кожен стовпець по черзі
-                    ease: "back.out(1.7)" // "Пружинистий" ефект
-                }, "start+=0.5");
-
         });
     </script>
-
 </body>
 </html>
