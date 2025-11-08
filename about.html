@@ -4,48 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oleksandr Serniak - PPC & YouTube Ads Expert</title>
+
+    <!-- 
+      ==================================================
+      == SEO-ОПТИМІЗАЦІЯ (Частина 1) ==
+      ==================================================
+    -->
+
+    <!-- Meta Description: Опис для Google (150-160 символів) -->
+    <meta name="description" content="Stop wasting ad spend. I'm Oleksandr Serniak, a PPC & YouTube Ads expert since 2016. I build data-driven marketing engines that generate $1M+ in client revenue.">
+
+    <!-- Canonical URL: Вказує Google "майстер-версію" вашого сайту, щоб уникнути дублів -->
+    <!-- ‼️ ВАЖЛИВО: Замініть YOUR-DOMAIN.com на ваш справжній домен -->
+    <link rel="canonical" href="https://www.YOUR-DOMAIN.com/" />
+
+    <!-- Open Graph (OG) Tags: Для прев'ю в Facebook, LinkedIn, Telegram -->
+    <meta property="og:title" content="Oleksandr Serniak - PPC & YouTube Ads Expert" />
+    <meta property="og:description" content="Stop wasting ad spend. I'm Oleksandr Serniak, a PPC & YouTube Ads expert since 2016. I build data-driven marketing engines that generate $1M+ in client revenue." />
+    <meta property="og:type" content="website" />
+    <!-- ‼️ ВАЖЛИВО: Замініть YOUR-DOMAIN.com на ваш справжній домен -->
+    <meta property="og:url" content="https://www.YOUR-DOMAIN.com/" />
+    <!-- Це фото буде на прев'ю посилання -->
+    <meta property="og:image" content="https://i.ibb.co/L6V7RzN/photo-2024-05-23-14-16-11.jpg" />
+
+    <!-- Twitter Card Tags: Для прев'ю в Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Oleksandr Serniak - PPC & YouTube Ads Expert">
+    <meta name="twitter:description" content="Stop wasting ad spend. I'm Oleksandr Serniak, a PPC & YouTube Ads expert since 2016. I build data-driven marketing engines that generate $1M+ in client revenue.">
+    <!-- Це фото буде на прев'ю посилання -->
+    <meta name="twitter:image" content="https://i.ibb.co/L6V7RzN/photo-2024-05-23-14-16-11.jpg">
+
+    <!-- 
+      ==================================================
+      == Кінець SEO-ОПТИМІЗАЦІЇ (Частина 1) ==
+      ==================================================
+    -->
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- 
-      ВИДАЛЕНО: Завантаження Google Fonts (Inter).
-      Ми переходимо на системні шрифти для "нативного" вигляду та швидкості.
-    -->
-
-    <!-- 
       РЕКОМЕНДАЦІЯ РОЗРОБНИКА (Performance):
-      Зараз Tailwind завантажується через CDN, що тягне весь фреймворк (багато КБ).
       Для "бойового" сайту (production) цей CSS файл потрібно скомпілювати 
       з опцією 'purge', щоб видалити всі невикористані стилі. 
-      Це кардинально зменшить розмір файлу та прискорить завантаження.
     -->
 
     <!-- 
       РЕКОМЕНДАЦІЯ РОЗРОБНИКА (Аналітика):
-      Додайте сюди ваш код Google Analytics (GA4) або Google Tag Manager (GTM) 
-      для відстеження відвідувачів та конверсій.
-    -->
-    <!-- Global site tag (gtag.js) - Google Analytics (Приклад) -->
-    <!-- 
-    <script async src="https://www.googletagmanager.com/gtag/js?id=YOUR_GA_ID"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'YOUR_GA_ID');
-    </script>
+      Додайте сюди ваш код Google Analytics (GA4) або Google Tag Manager (GTM).
     -->
     
     <style>
-        /* ОНОВЛЕНО (UI/UX): 
-          Змінено шрифт з 'Inter' на системний стек в стилі Apple.
-          Це надає "рідного" відчуття та покращує швидкість завантаження.
-        */
+        /* Системний шрифт в стилі Apple */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 
                          Helvetica, Arial, sans-serif, "Apple Color Emoji", 
                          "Segoe UI Emoji", "Segoe UI Symbol";
-            background-color: #f8fafc;
+            background-color: #f8fafc; /* Базовий фон сторінки (світло-сірий) */
             color: #111827;
         }
         .hero-gradient {
@@ -60,25 +75,26 @@
         .bg-accent-blue-hover:hover {
             background-color: #1d4ed8;
         }
-        .stat-card, .service-card, .testimonial-card {
-            background-color: #ffffff;
+        /* Уніфіковано картки */
+        .stat-card, .service-card, .process-card, .toolkit-card {
+            background-color: #ffffff; /* Усі картки мають білий фон */
             border: 1px solid #e5e7eb;
             border-radius: 12px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
             transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
             padding: 24px;
         }
-        .stat-card:hover, .service-card:hover, .testimonial-card:hover {
+        .stat-card:hover, .service-card:hover, .process-card:hover, .toolkit-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
-        .service-card {
+        .service-card, .process-card {
             display: flex;
             flex-direction: column;
-            height: 100%;
+            height: 100%; /* Для однакової висоти карток у grid */
         }
-        .service-card:hover, .testimonial-card:hover {
-             border-color: #2563eb;
+        .service-card:hover, .process-card:hover, .toolkit-card:hover {
+             border-color: #2563eb; /* Акцент при наведенні */
         }
         .cta-button {
             display: inline-block;
@@ -117,35 +133,75 @@
         #mobile-menu.open {
             transform: translateX(0);
         }
+
+        /* ==================================================
+        == 🚀 НОВІ СТИЛІ АНІМАЦІЙ 🚀 ==
+        ==================================================
+        */
         
-        /* СТИЛІ ДЛЯ НОВОГО БЛОКУ "ПРОЦЕС" */
-        .process-card {
-            background-color: #ffffff;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-        .process-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            border-color: #2563eb;
-        }
-        .process-step {
-            display: inline-block;
-            background-color: #eef2ff;
-            color: #2563eb;
-            font-weight: 700;
-            padding: 6px 12px;
-            border-radius: 9999px;
-            margin-bottom: 16px;
+        /* Проста поява (для заголовків) */
+        .fade-in {
+            opacity: 0;
+            transition: opacity 0.8s ease-out;
+            transition-delay: 200ms;
         }
 
+        /* Поява + зсув вгору (для карток та елементів) */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        /* Стан "видимості", який додає JavaScript */
+        .is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Затримки для "преміального" ефекту сходів (stagger) */
+        .stagger-1 { transition-delay: 100ms; }
+        .stagger-2 { transition-delay: 200ms; }
+        .stagger-3 { transition-delay: 300ms; }
+        .stagger-4 { transition-delay: 400ms; }
+        .stagger-5 { transition-delay: 500ms; }
+        .stagger-6 { transition-delay: 600ms; }
+        
+        /* ==================================================
+        == Кінець СТИЛІВ АНІМАЦІЙ ==
+        ==================================================
+        */
     </style>
+
+    <!-- 
+      ==================================================
+      == SEO-ОПТИМІЗАЦІЯ (Частина 2) ==
+      ==================================================
+    -->
+    <!-- Structured Data (JSON-LD) - Пояснює Google, ХТО ви -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Oleksandr Serniak",
+      // "‼️ ВАЖЛИВО: Замініть YOUR-DOMAIN.com на ваш справжній домен
+      "url": "https://www.YOUR-DOMAIN.com/",
+      "image": "https://i.ibb.co/L6V7RzN/photo-2024-05-23-14-16-11.jpg",
+      "sameAs": [
+        "https://www.linkedin.com/in/serniak",
+        "https://t.me/YTube_PPC"
+      ],
+      "jobTitle": "PPC & YouTube Ads Specialist",
+      "description": "PPC specialist since 2016, generating over $1M+ in client revenue and achieving 400,000+ conversions. Specializes in Google Ads, PMax, and YouTube channel growth.",
+      "knowsAbout": ["PPC", "Google Ads", "YouTube Ads", "Marketing Strategy", "Data Analytics", "Looker Studio"]
+    }
+    </script>
+    <!-- 
+      ==================================================
+      == Кінець SEO-ОПТИМІЗАЦІЇ (Частина 2) ==
+      ==================================================
+    -->
+
 </head>
 <body class="antialiased">
 
@@ -158,14 +214,11 @@
             <nav class="hidden md:flex space-x-6">
                 <a href="#results" class="text-gray-600 hover:text-gray-900 transition">Results</a>
                 <a href="#services" class="text-gray-600 hover:text-gray-900 transition">Services</a>
+                <a href="#process" class="text-gray-600 hover:text-gray-900 transition">Process</a>
                 <a href="#about" class="text-gray-600 hover:text-gray-900 transition">About</a>
                 <a href="#contact" class="text-gray-600 hover:text-gray-900 transition">Contact</a>
             </nav>
-            <!-- 
-              КРИТИЧНО (Маркетинг): 
-              Замініть YOUR_USERNAME на ваш актуальний нік в Telegram.
-            -->
-            <a href="https://t.me/YOUR_USERNAME" target="_blank" rel="noopener noreferrer" class="hidden md:block bg-accent-blue bg-accent-blue-hover text-white font-medium py-2 px-5 rounded-lg transition">
+            <a href="https://t.me/YTube_PPC" target="_blank" rel="noopener noreferrer" class="hidden md:block bg-accent-blue bg-accent-blue-hover text-white font-medium py-2 px-5 rounded-lg transition">
                 Contact me on Telegram
             </a>
             <!-- Mobile Menu Button -->
@@ -179,7 +232,7 @@
         </div>
     </header>
 
-    <!-- Mobile Menu (NEW) -->
+    <!-- Mobile Menu -->
     <div id="mobile-menu" class="md:hidden fixed top-0 left-0 w-3/4 h-full bg-white z-50 shadow-lg p-6">
         <div class="flex justify-between items-center mb-8">
             <span class="text-xl font-bold tracking-tight text-gray-900">Navigation</span>
@@ -192,13 +245,10 @@
         <nav class="flex flex-col space-y-6">
             <a href="#results" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">Results</a>
             <a href="#services" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">Services</a>
+            <a href="#process" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">Process</a>
             <a href="#about" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">About</a>
             <a href="#contact" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">Contact</a>
-            <!-- 
-              КРИТИЧНО (Маркетинг): 
-              Замініть YOUR_USERNAME на ваш актуальний нік в Telegram.
-            -->
-            <a href="https://t.me/YOUR_USERNAME" target="_blank" rel="noopener noreferrer" class="cta-button mt-4 text-center">
+            <a href="https://t.me/YTube_PPC" target="_blank" rel="noopener noreferrer" class="cta-button mt-4 text-center">
                 Contact me on Telegram
             </a>
         </nav>
@@ -207,25 +257,21 @@
     <main>
         <!-- 1. Hero Section -->
         <section id="hero" class="hero-gradient pt-32 pb-20 md:pt-40 md:pb-28">
-            <div class="container mx-auto px-6"> <!-- ВИДАЛЕНО: flex flex-col-reverse md:flex-row items-center gap-12 -->
+            <div class="container mx-auto px-6">
                 <!-- Hero Text -->
-                <!-- ОНОВЛЕНО: Блок тепер відцентровано, прибрано md:w-3/5, оскільки він один -->
                 <div class="max-w-3xl mx-auto text-center"> 
-                    <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight">
+                    <!-- АНІМАЦІЯ: Додано .fade-in-up -->
+                    <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight fade-in-up">
                         Stop Wasting Ad Spend.
                         <span class="block accent-blue">Start Generating Revenue.</span>
                     </h1>
-                    <!-- ОНОВЛЕНО: прибрано md:mx-0 для кращого центрування -->
-                    <p class="mt-6 text-lg text-gray-600 max-w-xl mx-auto">
+                    <!-- АНІМАЦІЯ: Додано .fade-in-up .stagger-1 -->
+                    <p class="mt-6 text-lg text-gray-600 max-w-xl mx-auto fade-in-up stagger-1">
                         I'm Oleksandr, a PPC & YouTube Ads specialist. In PPC marketing since 2016, I build data-driven marketing engines that deliver measurable results, generating over $1M+ in client revenue and achieving 400,000+ conversions.
                     </p>
-                    <!-- ОНОВЛЕНО: прибрано md:justify-start для центрування кнопок -->
-                    <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
-                        <!-- 
-                          КРИТИЧНО (Маркетинг): 
-                          Замініть YOUR_USERNAME на ваш актуальний нік в Telegram.
-                        -->
-                        <a href="https://t.me/YOUR_USERNAME" target="_blank" rel="noopener noreferrer" class="cta-button">
+                    <!-- АНІМАЦІЯ: Додано .fade-in-up .stagger-2 -->
+                    <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4 fade-in-up stagger-2">
+                        <a href="https://t.me/YTube_PPC" target="_blank" rel="noopener noreferrer" class="cta-button">
                             Contact me on Telegram
                         </a>
                         <a href="#results" class="secondary-button">
@@ -233,56 +279,51 @@
                         </a>
                     </div>
                 </div>
-                <!-- Hero Image (ВИДАЛЕНО) -->
-                <!-- 
-                <div class="md:w-2/5 flex justify-center">
-                    ...
-                </div>
-                -->
             </div>
         </section>
 
-        <!-- 2. "Results" Block (ПОВЕРНУТО) -->
-        <section id="results" class="py-20">
+        <!-- 2. "Results" Block -->
+        <section id="results" class="py-20 bg-white"> 
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Proven by Numbers</h2>
-                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">My work isn't just theory. It's about delivering tangible business outcomes.</p>
+                    <!-- АНІМАЦІЯ: Додано .fade-in -->
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 fade-in">Proven by Numbers</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto fade-in">My work isn't just theory. It's about delivering tangible business outcomes.</p>
                 </div>
                 <!-- Stats Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Stat Card -->
-                    <div class="stat-card p-6 text-center">
+                    <!-- АНІМАЦІЯ: Додано .fade-in-up та .stagger-X -->
+                    <div class="stat-card p-6 text-center fade-in-up stagger-1">
                         <div class="text-4xl md:text-5xl font-extrabold accent-blue">$1M+</div>
                         <p class="mt-2 text-lg font-semibold text-gray-900">In Client Revenue</p>
                         <p class="text-gray-500 text-sm">Generated from ad spend.</p>
                     </div>
                     <!-- Stat Card -->
-                    <div class="stat-card p-6 text-center">
+                    <div class="stat-card p-6 text-center fade-in-up stagger-2">
                         <div class="text-4xl md:text-5xl font-extrabold accent-blue">400,000+</div>
                         <p class="mt-2 text-lg font-semibold text-gray-900">Conversions Achieved</p>
                         <p class="text-gray-500 text-sm">Optimized for quality and cost.</p>
                     </div>
                     <!-- Stat Card -->
-                    <div class="stat-card p-6 text-center">
+                    <div class="stat-card p-6 text-center fade-in-up stagger-3">
                         <div class="text-4xl md:text-5xl font-extrabold accent-blue">30+</div>
                         <p class="mt-2 text-lg font-semibold text-gray-900">Projects Worked On</p>
                         <p class="text-gray-500 text-sm">Across diverse industries.</p>
                     </div>
                      <!-- Stat Card -->
-                    <div class="stat-card p-6 text-center">
+                    <div class="stat-card p-6 text-center fade-in-up stagger-4">
                         <div class="text-4xl md:text-5xl font-extrabold accent-blue">Since 2016</div>
                         <p class="mt-2 text-lg font-semibold text-gray-900">In PPC Marketing</p>
                         <p class="text-gray-500 text-sm">Proven track record.</p>
                     </div>
                      <!-- Stat Card -->
-                    <div class="stat-card p-6 text-center">
+                    <div class="stat-card p-6 text-center fade-in-up stagger-5">
                         <div class="text-4xl md:text-5xl font-extrabold accent-blue">660K+</div>
                         <p class="mt-2 text-lg font-semibold text-gray-900">YouTube Subscribers</p>
                         <p class="text-gray-500 text-sm">Acquired for client channels.</p>
                     </div>
                      <!-- Stat Card -->
-                    <div class="stat-card p-6 text-center">
+                    <div class="stat-card p-6 text-center fade-in-up stagger-6">
                         <div class="text-4xl md:text-5xl font-extrabold accent-blue">3.9M</div>
                         <p class="mt-2 text-lg font-semibold text-gray-900">Organic Views</p>
                         <p class="text-gray-500 text-sm">On a single video.</p>
@@ -291,17 +332,18 @@
             </div>
         </section>
 
-        <!-- 3. "How I Can Help You" Block (ПОВЕРНУТО) -->
+        <!-- 3. "How I Can Help You" Block -->
         <section id="services" class="py-20 bg-indigo-50">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">How I Can Help You</h2>
-                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">Full-funnel strategies to scale your business. No prices, just solutions.</p>
+                    <!-- АНІМАЦІЯ: Додано .fade-in -->
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 fade-in">How I Can Help You</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto fade-in">Full-funnel strategies to scale your business. No prices, just solutions.</p>
                 </div>
                 <!-- Services Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <!-- Service Card 1: Google Ads -->
-                    <div class="service-card">
+                    <!-- АНІМАЦІЯ: Додано .fade-in-up та .stagger-X -->
+                    <div class="service-card fade-in-up stagger-1">
                         <h3 class="text-2xl font-bold text-gray-900 mb-4">Google Ads (PPC) Mastery</h3>
                         <p class="text-gray-700 mb-6">
                             Driving targeted traffic and high-intent conversions. Specializing in complex PMax & Search campaigns.
@@ -315,7 +357,7 @@
                     </div>
 
                     <!-- Service Card 2: YouTube -->
-                    <div class="service-card">
+                    <div class="service-card fade-in-up stagger-2">
                         <h3 class="text-2xl font-bold text-gray-900 mb-4">YouTube Marketing & Growth</h3>
                         <p class="text-gray-700 mb-6">
                             From 0 to 660k+ subscribers. I build channels that create fans and drive sales.
@@ -329,7 +371,7 @@
                     </div>
 
                     <!-- Service Card 3: Audits -->
-                    <div class="service-card">
+                    <div class="service-card fade-in-up stagger-3">
                         <h3 class="text-2xl font-bold text-gray-900 mb-4">Strategic Audits & Consulting</h3>
                         <p class="text-gray-700 mb-6">
                             I'll find the leaks in your funnel and the opportunities for growth. Get a clear, actionable plan.
@@ -338,25 +380,26 @@
                             <li>Full PPC Account Audits</li>
                             <li>Marketing Strategy Development</li>
                             <li>Conversion Tracking Setup</li>
-                            <li>Looker Studio Reporting</li>
+                            <li>Looker Studio / HTML Dashboards</li>
                         </ul>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 4. "Toolkit" Block (ПОВЕРНУТО) -->
+        <!-- 4. "Toolkit" Block -->
         <section id="toolkit" class="py-20 bg-white"> 
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Toolkit for Success</h2>
-                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">The core competencies I leverage to achieve marketing excellence.</p>
+                    <!-- АНІМАЦІЯ: Додано .fade-in -->
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 fade-in">Toolkit for Success</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto fade-in">The core competencies I leverage to achieve marketing excellence.</p>
                 </div>
                 <!-- Toolkit Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     
-                    <!-- Toolkit Card 1: Marketing Strategy -->
-                    <div class="stat-card text-left p-6"> 
+                    <!-- АНІМАЦІЯ: Додано .fade-in-up та .stagger-X -->
+                    <div class="toolkit-card text-left p-6 fade-in-up stagger-1"> 
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
                             <circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle>
                         </svg>
@@ -365,7 +408,7 @@
                     </div>
 
                     <!-- Toolkit Card 2: Google Ads -->
-                    <div class="stat-card text-left p-6">
+                    <div class="toolkit-card text-left p-6 fade-in-up stagger-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
                             <path d="M2 3h20"></path><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"></path><path d="m7 21 5-5 5 5"></path>
                         </svg>
@@ -374,16 +417,16 @@
                     </div>
 
                     <!-- Toolkit Card 3: Data & Analytics -->
-                    <div class="stat-card text-left p-6">
+                    <div class="toolkit-card text-left p-6 fade-in-up stagger-3">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
                             <path d="M3 3v18h18"></path><path d="M7 12v4"></path><path d="M12 8v8"></path><path d="M17 4v12"></path>
                         </svg>
                         <h3 class="text-xl font-bold text-gray-900 mb-2">Data & Analytics</h3>
-                        <p class="text-gray-600">Utilizing Google Analytics and Looker Studio to track performance and derive insights.</p>
+                        <p class="text-gray-600">Utilizing Google Analytics, Looker Studio, and custom dashboards to derive insights.</p>
                     </div>
 
                     <!-- Toolkit Card 4: YouTube Marketing -->
-                    <div class="stat-card text-left p-6">
+                    <div class="toolkit-card text-left p-6 fade-in-up stagger-4">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
                             <path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z"></path><path d="m6.2 5.3 3.1 3.9"></path><path d="m12.4 3.6 3.1 4"></path><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path>
                         </svg>
@@ -392,16 +435,16 @@
                     </div>
 
                     <!-- Toolkit Card 5: Automation -->
-                    <div class="stat-card text-left p-6">
+                    <div class="toolkit-card text-left p-6 fade-in-up stagger-5">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
                             <path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path>
                         </svg>
                         <h3 class="text-xl font-bold text-gray-900 mb-2">Automation</h3>
-                        <p class="text-gray-600">Automating reporting and campaign management using tools like Google Sheets.</p>
+                        <p class="text-gray-600">Automating reporting (Looker, HTML) and campaign management using tools like Google Sheets.</p>
                     </div>
 
                     <!-- Toolkit Card 6: Content Creation -->
-                    <div class="stat-card text-left p-6">
+                    <div class="toolkit-card text-left p-6 fade-in-up stagger-6">
                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
                             <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle>
                         </svg>
@@ -412,73 +455,71 @@
             </div>
         </section>
 
-        <!-- 5. "About Me" Block (ПЕРЕМІЩЕНО НИЖЧЕ) -->
-        <!-- 6. "Your Path to Results" Block (НОВИЙ ПОРЯДОК + ЗМІНА ФОНУ) -->
-        <section id="process" class="py-20 bg-indigo-50"> <!-- ЗМІНЕНО: bg-white -> bg-indigo-50 -->
+        <!-- 5. "Your Path to Results" Block (NEW) -->
+        <section id="process" class="py-20 bg-indigo-50">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Your Path to Results</h2>
-                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">A transparent 3-step process for guaranteed focus on growth.</p>
+                    <!-- АНІМАЦІЯ: Додано .fade-in -->
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 fade-in">Your Path to Results</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto fade-in">My work is a transparent process, not a "black box".</p>
                 </div>
                 <!-- Process Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    
-                    <!-- Process Card 1 -->
-                    <div class="process-card">
-                        <span class="process-step">Step 1</span>
-                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Audit & Strategy</h3>
-                        <p class="text-gray-700 mb-6 flex-grow">
-                            We start with a deep dive into your current accounts, analytics, and market. I'll identify leaks, opportunities, and define clear KPIs for success.
+                    <!-- АНІМАЦІЯ: Додано .fade-in-up та .stagger-X -->
+                    <div class="process-card p-6 fade-in-up stagger-1">
+                        <span class="text-5xl font-extrabold accent-blue mb-4 block">01</span>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Discovery & Strategy</h3>
+                        <p class="text-gray-700 mb-6">
+                            We start with a deep dive into your business, goals, and existing assets. I'll conduct an audit and present a clear strategy.
                         </p>
                         <ul class="list-disc list-inside text-gray-600 space-y-2 mt-auto">
-                            <li>Full Account Analysis</li>
-                            <li>Competitor Research</li>
-                            <li>Actionable Growth Plan</li>
+                            <li>Business Goal Alignment</li>
+                            <li>Audience & Competitor Analysis</li>
+                            <li>Full Funnel Audit</li>
                         </ul>
                     </div>
-
-                    <!-- Process Card 2 -->
-                    <div class="process-card">
-                        <span class="process-step">Step 2</span>
-                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Execution & Optimization</h3>
-                        <p class="text-gray-700 mb-6 flex-grow">
-                            This is where the engine starts. I build, launch, and manage your campaigns, conducting constant A/B testing and optimizations to improve CPA and ROAS.
+                    <!-- Step 2 Card -->
+                    <div class="process-card p-6 fade-in-up stagger-2">
+                        <span class="text-5xl font-extrabold accent-blue mb-4 block">02</span>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Campaign Launch & Optimization</h3>
+                        <p class="text-gray-700 mb-6">
+                            I build and launch your campaigns based on the strategy, focusing on meticulous setup, A/B testing, and daily performance optimization.
                         </p>
                         <ul class="list-disc list-inside text-gray-600 space-y-2 mt-auto">
-                            <li>Campaign Structuring</li>
-                            <li>A/B Testing Copy & Creative</li>
-                            <li>Daily Budget Management</li>
+                            <li>Tracking & Conversion Setup</li>
+                            <li>Ad Copy & Creative A/B Testing</li>
+                            <li>Budget & Bid Management</li>
                         </ul>
                     </div>
-
-                    <!-- Process Card 3 -->
-                    <div class="process-card">
-                        <span class="process-step">Step 3</span>
+                    <!-- Step 3 Card -->
+                    <div class="process-card p-6 fade-in-up stagger-3">
+                        <span class="text-5xl font-extrabold accent-blue mb-4 block">03</span>
                         <h3 class="text-2xl font-bold text-gray-900 mb-4">Reporting & Scaling</h3>
-                        <p class="text-gray-700 mb-6 flex-grow">
-                            You get clear, data-driven reports (not 50-page fluff). We analyze what works, what doesn't, and make strategic decisions to scale your budget profitably.
+                        <p class="text-gray-700 mb-6">
+                            You get clear, actionable reports—not just data dumps. We analyze results together and make strategic decisions to scale.
                         </p>
                         <ul class="list-disc list-inside text-gray-600 space-y-2 mt-auto">
-                            <li>Custom Looker Studio Dashboards</li>
-                            <li>Weekly/Monthly Calls</li>
-                            <li>Strategic Scaling Plan</li>
+                            <li>Automated Looker Studio Reports</li>
+                            <li>Custom HTML Dashboards</li>
+                            <li>Weekly/Monthly Strategy Calls</li>
                         </ul>
                     </div>
-
                 </div>
             </div>
         </section>
 
-        <!-- 5. "About Me" Block (НОВИЙ ПОРЯДОК + ЗМІНА ФОНУ) -->
-        <section id="about" class="py-20 bg-white"> <!-- ЗМІНЕНО: bg-indigo-50 -> bg-white -->
+        <!-- 6. "About Me" Block -->
+        <section id="about" class="py-20 bg-white">
             <div class="container mx-auto px-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-12 items-center">
                     <!-- Image -->
-                    <div class="md:col-span-1 flex justify-center">
+                    <!-- АНІМАЦІЯ: Додано .fade-in-up -->
+                    <div class="md:col-span-1 flex justify-center fade-in-up">
                         <img src="https://i.ibb.co/L6V7RzN/photo-2024-05-23-14-16-11.jpg" alt="Oleksandr Serniak" class="w-64 h-64 object-cover rounded-full shadow-lg border-4 border-white" loading="lazy">
                     </div>
                     <!-- Text -->
-                    <div class="md:col-span-2 text-center md:text-left">
+                    <!-- АНІМАЦІЯ: Додано .fade-in-up .stagger-1 -->
+                    <div class="md:col-span-2 text-center md:text-left fade-in-up stagger-1">
                         <h2 class="text-3xl md:text-4xl font-bold text-gray-900">About Me</h2>
                         <p class="mt-4 text-lg text-gray-700">
                             I'm a practitioner, not just a theorist. In PPC marketing since 2016, my focus has always been on one thing: results. I've managed budgets up to $60,000/month, generated over $1M in revenue for clients, and built YouTube channels to 660,000+ subscribers.
@@ -492,88 +533,123 @@
         </section>
 
         <!-- 7. Final CTA Block -->
-        <section id="contact" class="py-24 bg-indigo-50"> <!-- Swapped background for alternation -->
+        <section id="contact" class="py-24 bg-indigo-50"> 
             <div class="container mx-auto px-6 text-center">
                  <div class="max-w-2xl mx-auto">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Ready to Build Your Profit Engine?</h2>
-                     <p class="mt-4 text-lg text-gray-600">
+                    <!-- АНІМАЦІЯ: Додано .fade-in -->
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 fade-in">Ready to Build Your Profit Engine?</h2>
+                     <p class="mt-4 text-lg text-gray-600 fade-in">
                          Stop guessing. Let's build a predictable system for acquiring customers.
                      </p>
-                     <p class="mt-6 text-lg text-gray-700">
+                     <p class="mt-6 text-lg text-gray-700 fade-in">
                          Contact me on Telegram for a <span class="font-bold">free 30-minute strategy consultation</span>. We'll diagnose your biggest challenge and outline a clear path to growth. No obligation, just pure value.
                      </p>
-                     <div class="mt-10">
-                        <!-- 
-                          КРИТИЧНО (Маркетинг): 
-                          Замініть YOUR_USERNAME на ваш актуальний нік в Telegram.
-                        -->
-                        <a href="https://t.me/YOUR_USERNAME" target="_blank" rel="noopener noreferrer" class="cta-button text-lg">
+                     <!-- АНІМАЦІЯ: Додано .fade-in-up (для кнопки) -->
+                     <div class="mt-10 fade-in-up">
+                        <a href="https://t.me/YTube_PPC" target="_blank" rel="noopener noreferrer" class="cta-button text-lg">
                             Contact Me on Telegram
                         </a>
                      </div>
-                     <!-- 
-                       КРИТИЧНО (Маркетинг): 
-                       Замініть YOUR_USERNAME на ваш актуальний нік в Telegram.
-                     -->
-                     <p class="mt-4 text-sm text-gray-500">Or find me on Telegram: @YOUR_USERNAME</p>
+                     <p class="mt-4 text-sm text-gray-500 fade-in">Or find me on Telegram: @YTube_PPC</p>
                  </div>
             </div>
         </section>
+    </main>
 
+    <!-- 8. Footer -->
     <footer class="bg-gray-800 text-gray-300"> 
         <div class="container mx-auto px-6 py-8">
             <div class="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
                 <p class="text-gray-400">&copy; 2024 Oleksandr Serniak. All rights reserved.</p>
                 <div class="flex justify-center space-x-6 mt-4 md:mt-0">
                     <a href="https://www.linkedin.com/in/serniak" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">LinkedIn</a>
-                    <!-- 
-                      КРИТИЧНО (Маркетинг): 
-                      Замініть YOUR_USERNAME на ваш актуальний нік в Telegram.
-                    -->
-                    <a href="https://t.me/YOUR_USERNAME" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">Telegram</a>
+                    <a href="https://t.me/YTube_PPC" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">Telegram</a>
                 </div>
             </div>
         </div>
     </footer>
 
     <script>
-        // --- Mobile Menu Toggle ---
-        const menuToggle = document.getElementById('menu-toggle');
-        const menuClose = document.getElementById('menu-close');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const mobileLinks = document.querySelectorAll('.mobile-link');
+        // 🚀 НОВИЙ АНІМАЦІЙНИЙ СКРИПТ 🚀
+        // Ми чекаємо, поки весь HTML завантажиться
+        document.addEventListener('DOMContentLoaded', () => {
 
-        menuToggle.addEventListener('click', () => {
-            mobileMenu.classList.add('open');
-            document.body.style.overflow = 'hidden'; // Prevent background scrolling
-        });
+            // --- Mobile Menu Toggle (Існуючий код) ---
+            const menuToggle = document.getElementById('menu-toggle');
+            const menuClose = document.getElementById('menu-close');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileLinks = document.querySelectorAll('.mobile-link');
 
-        menuClose.addEventListener('click', () => {
-            mobileMenu.classList.remove('open');
-            document.body.style.overflow = ''; // Restore scrolling
-        });
+            menuToggle.addEventListener('click', () => {
+                mobileMenu.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            });
 
-        // Close menu on link click
-        mobileLinks.forEach(link => {
-            link.addEventListener('click', () => {
+            menuClose.addEventListener('click', () => {
                 mobileMenu.classList.remove('open');
                 document.body.style.overflow = '';
             });
-        });
 
-        // --- Smooth scroll for navigation links ---
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                // Prevent default only if it's an anchor link
-                if (this.getAttribute('href').startsWith('#')) {
-                    e.preventDefault();
-                    const targetElement = document.querySelector(this.getAttribute('href'));
-                    if (targetElement) {
-                        targetElement.scrollIntoView({
-                            behavior: 'smooth'
-                        });
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.remove('open');
+                    document.body.style.overflow = '';
+                });
+            });
+
+            // --- Smooth scroll for navigation links (Існуючий код) ---
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    if (this.getAttribute('href').startsWith('#')) {
+                        e.preventDefault();
+                        const targetElement = document.querySelector(this.getAttribute('href'));
+                        if (targetElement) {
+                            targetElement.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }
                     }
-                }
+                });
+            });
+
+            // --- НОВИЙ КОД: Анімації ---
+            
+            // 1. Анімація першого екрану (Hero) при завантаженні
+            // Ми просто додаємо клас .is-visible до елементів з затримкою
+            const heroElements = document.querySelectorAll('#hero .fade-in-up');
+            heroElements.forEach((el, index) => {
+                setTimeout(() => {
+                    el.classList.add('is-visible');
+                }, index * 150); // Затримка 0ms, 150ms, 300ms
+            });
+
+            // 2. Анімація решти секцій при скролі
+            // Налаштування "спостерігача"
+            const observerOptions = {
+                root: null, // Спостерігати відносно в'юпорту
+                rootMargin: '0px',
+                threshold: 0.1 // Запускати, коли 10% елементу видно
+            };
+
+            // Функція, яка виконується, коли елемент з'являється
+            const observerCallback = (entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target); // Припинити спостереження
+                    }
+                });
+            };
+
+            // Створення "спостерігача"
+            const scrollObserver = new IntersectionObserver(observerCallback, observerOptions);
+
+            // Вибір УСІХ елементів, які треба анімувати, ОКРІМ першого екрану
+            const elementsToAnimateOnScroll = document.querySelectorAll('section:not(#hero) .fade-in-up, section:not(#hero) .fade-in');
+            
+            // Запуск спостереження для кожного елементу
+            elementsToAnimateOnScroll.forEach(el => {
+                scrollObserver.observe(el);
             });
         });
     </script>
