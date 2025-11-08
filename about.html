@@ -6,21 +6,53 @@
     <title>Oleksandr Serniak - PPC & YouTube Ads Expert</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts (Inter) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- 
+      ВИДАЛЕНО: Завантаження Google Fonts (Inter).
+      Ми переходимо на системні шрифти для "нативного" вигляду та швидкості.
+    -->
+
+    <!-- 
+      РЕКОМЕНДАЦІЯ РОЗРОБНИКА (Performance):
+      Зараз Tailwind завантажується через CDN, що тягне весь фреймворк (багато КБ).
+      Для "бойового" сайту (production) цей CSS файл потрібно скомпілювати 
+      з опцією 'purge', щоб видалити всі невикористані стилі. 
+      Це кардинально зменшить розмір файлу та прискорить завантаження.
+    -->
+
+    <!-- 
+      РЕКОМЕНДАЦІЯ РОЗРОБНИКА (Аналітика):
+      Додайте сюди ваш код Google Analytics (GA4) або Google Tag Manager (GTM) 
+      для відстеження відвідувачів та конверсій.
+    -->
+    <!-- Global site tag (gtag.js) - Google Analytics (Приклад) -->
+    <!-- 
+    <script async src="https://www.googletagmanager.com/gtag/js?id=YOUR_GA_ID"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'YOUR_GA_ID');
+    </script>
+    -->
+    
     <style>
+        /* ОНОВЛЕНО (UI/UX): 
+          Змінено шрифт з 'Inter' на системний стек в стилі Apple.
+          Це надає "рідного" відчуття та покращує швидкість завантаження.
+        */
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; /* Світло-сірий фон */
-            color: #111827; /* Темно-сірий текст */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 
+                         Helvetica, Arial, sans-serif, "Apple Color Emoji", 
+                         "Segoe UI Emoji", "Segoe UI Symbol";
+            background-color: #f8fafc;
+            color: #111827;
         }
         .hero-gradient {
             background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
         }
         .accent-blue {
-            color: #2563eb; /* Cильний, професійний синій */
+            color: #2563eb;
         }
         .bg-accent-blue {
             background-color: #2563eb;
@@ -28,33 +60,25 @@
         .bg-accent-blue-hover:hover {
             background-color: #1d4ed8;
         }
-        .stat-card {
+        .stat-card, .service-card, .testimonial-card {
             background-color: #ffffff;
             border: 1px solid #e5e7eb;
             border-radius: 12px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
             padding: 24px;
         }
-        .stat-card:hover {
+        .stat-card:hover, .service-card:hover, .testimonial-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
         .service-card {
-            background-color: #ffffff;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            padding: 24px;
             display: flex;
             flex-direction: column;
-            height: 100%; /* Гарантує, що картки в ряду однакової висоти */
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            height: 100%;
         }
-        .service-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            border-color: #2563eb; /* Додає акцентну рамку при наведенні */
+        .service-card:hover, .testimonial-card:hover {
+             border-color: #2563eb;
         }
         .cta-button {
             display: inline-block;
@@ -85,16 +109,13 @@
             background-color: #f9fafb;
             transform: translateY(-2px);
         }
-
         /* Mobile Menu Styles */
         #mobile-menu {
+            transform: translateX(-100%);
             transition: transform 0.3s ease-in-out;
         }
-        .menu-open {
-            transform: translateX(0%);
-        }
-        .menu-closed {
-            transform: translateX(100%);
+        #mobile-menu.open {
+            transform: translateX(0);
         }
     </style>
 </head>
@@ -109,36 +130,51 @@
             <nav class="hidden md:flex space-x-6">
                 <a href="#results" class="text-gray-600 hover:text-gray-900 transition">Results</a>
                 <a href="#services" class="text-gray-600 hover:text-gray-900 transition">Services</a>
-                <a href="#testimonials" class="text-gray-600 hover:text-gray-900 transition">Testimonials</a>
                 <a href="#about" class="text-gray-600 hover:text-gray-900 transition">About</a>
                 <a href="#contact" class="text-gray-600 hover:text-gray-900 transition">Contact</a>
             </nav>
+            <!-- 
+              КРИТИЧНО (Маркетинг): 
+              Замініть YOUR_USERNAME на ваш актуальний нік в Telegram.
+            -->
             <a href="https://t.me/YOUR_USERNAME" target="_blank" rel="noopener noreferrer" class="hidden md:block bg-accent-blue bg-accent-blue-hover text-white font-medium py-2 px-5 rounded-lg transition">
                 Contact me on Telegram
             </a>
             <!-- Mobile Menu Button -->
-            <button id="menu-btn" class="md:hidden z-50" aria-label="Open menu">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                </svg>
-            </button>
+            <div class="md:hidden">
+                <button id="menu-toggle" class="text-gray-900 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                    </svg>
+                </button>
+            </div>
         </div>
     </header>
 
-    <!-- Mobile Menu -->
-    <div id="mobile-menu" class="fixed inset-0 bg-white/90 backdrop-blur-lg z-40 pt-20 px-6 menu-closed md:hidden" aria-hidden="true">
+    <!-- Mobile Menu (NEW) -->
+    <div id="mobile-menu" class="md:hidden fixed top-0 left-0 w-3/4 h-full bg-white z-50 shadow-lg p-6">
+        <div class="flex justify-between items-center mb-8">
+            <span class="text-xl font-bold tracking-tight text-gray-900">Navigation</span>
+            <button id="menu-close" class="text-gray-900 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
         <nav class="flex flex-col space-y-6">
             <a href="#results" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">Results</a>
             <a href="#services" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">Services</a>
-            <a href="#testimonials" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">Testimonials</a>
             <a href="#about" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">About</a>
             <a href="#contact" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">Contact</a>
+            <!-- 
+              КРИТИЧНО (Маркетинг): 
+              Замініть YOUR_USERNAME на ваш актуальний нік в Telegram.
+            -->
             <a href="https://t.me/YOUR_USERNAME" target="_blank" rel="noopener noreferrer" class="cta-button mt-4 text-center">
                 Contact me on Telegram
             </a>
         </nav>
     </div>
-
 
     <main>
         <!-- 1. Hero Section -->
@@ -154,6 +190,10 @@
                         I'm Oleksandr, a PPC & YouTube Ads specialist. In PPC marketing since 2016, I build data-driven marketing engines that deliver measurable results, generating over $1M+ in client revenue and achieving 400,000+ conversions.
                     </p>
                     <div class="mt-10 flex flex-col sm:flex-row justify-center md:justify-start gap-4">
+                        <!-- 
+                          КРИТИЧНО (Маркетинг): 
+                          Замініть YOUR_USERNAME на ваш актуальний нік в Telegram.
+                        -->
                         <a href="https://t.me/YOUR_USERNAME" target="_blank" rel="noopener noreferrer" class="cta-button">
                             Contact me on Telegram
                         </a>
@@ -166,7 +206,7 @@
                 <div class="md:w-2/5 flex justify-center">
                     <div class="relative">
                         <div class="absolute -inset-2 bg-gradient-to-r from-blue-400 to-indigo-600 rounded-full blur-xl opacity-50"></div>
-                        <img src="https://i.ibb.co/L6V7RzN/photo-2024-05-23-14-16-11.jpg" alt="Oleksandr Serniak" class="relative w-64 h-64 md:w-80 md:h-80 object-cover rounded-full shadow-2xl border-4 border-white">
+                        <img src="https://i.ibb.co/L6V7RzN/photo-2024-05-23-14-16-11.jpg" alt="Oleksandr Serniak" class="relative w-64 h-64 md:w-80 md:h-80 object-cover rounded-full shadow-2xl border-4 border-white" loading="lazy">
                     </div>
                 </div>
             </div>
@@ -275,7 +315,7 @@
             </div>
         </section>
 
-        <!-- 4. "Toolkit" Block (Corrected Icons from Screenshot 15.07.12) -->
+        <!-- 4. "Toolkit" Block -->
         <section id="toolkit" class="py-20 bg-white"> 
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
@@ -285,55 +325,55 @@
                 <!-- Toolkit Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     
-                    <!-- Toolkit Card 1: Marketing Strategy (Original Icon) -->
+                    <!-- Toolkit Card 1: Marketing Strategy -->
                     <div class="stat-card text-left p-6"> 
-                        <svg class="w-8 h-8 accent-blue mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25A2.25 2.25 0 018.25 10.5H6A2.25 2.25 0 013.75 8.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25a2.25 2.25 0 01-2.25-2.25v-2.25z" />
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
+                            <circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle>
                         </svg>
                         <h3 class="text-xl font-bold text-gray-900 mb-2">Marketing Strategy</h3>
                         <p class="text-gray-600">Developing comprehensive strategies from market research to campaign execution.</p>
                     </div>
 
-                    <!-- Toolkit Card 2: Google Ads (Corrected Heroicon) -->
+                    <!-- Toolkit Card 2: Google Ads -->
                     <div class="stat-card text-left p-6">
-                        <svg class="w-8 h-8 accent-blue mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1.125-1.125M3.75 7.5l3.75 3.75m0 0l3.75-3.75m-3.75 3.75V3m3.75 7.5l3.75 3.75m0 0l3.75-3.75m-3.75 3.75V3m3.75 7.5l3.75 3.75m0 0l3.75-3.75m-3.75 3.75V3" />
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
+                            <path d="M2 3h20"></path><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"></path><path d="m7 21 5-5 5 5"></path>
                         </svg>
                         <h3 class="text-xl font-bold text-gray-900 mb-2">Google Ads</h3>
                         <p class="text-gray-600">Expert in Search, Display, Video, and PMax campaigns with a focus on A/B testing.</p>
                     </div>
 
-                    <!-- Toolkit Card 3: Data & Analytics (Original Icon) -->
+                    <!-- Toolkit Card 3: Data & Analytics -->
                     <div class="stat-card text-left p-6">
-                        <svg class="w-8 h-8 accent-blue mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25A1.125 1.125 0 019.75 19.875V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
+                            <path d="M3 3v18h18"></path><path d="M7 12v4"></path><path d="M12 8v8"></path><path d="M17 4v12"></path>
                         </svg>
                         <h3 class="text-xl font-bold text-gray-900 mb-2">Data & Analytics</h3>
                         <p class="text-gray-600">Utilizing Google Analytics and Looker Studio to track performance and derive insights.</p>
                     </div>
 
-                    <!-- Toolkit Card 4: YouTube Marketing (Original Icon) -->
+                    <!-- Toolkit Card 4: YouTube Marketing -->
                     <div class="stat-card text-left p-6">
-                        <svg class="w-8 h-8 accent-blue mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                           <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
+                            <path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z"></path><path d="m6.2 5.3 3.1 3.9"></path><path d="m12.4 3.6 3.1 4"></path><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path>
                         </svg>
                         <h3 class="text-xl font-bold text-gray-900 mb-2">YouTube Marketing</h3>
                         <p class="text-gray-600">Full-funnel YouTube strategy, from channel development to video promotion.</p>
                     </div>
 
-                    <!-- Toolkit Card 5: Automation (Original Icon) -->
+                    <!-- Toolkit Card 5: Automation -->
                     <div class="stat-card text-left p-6">
-                        <svg class="w-8 h-8 accent-blue mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5 0l-4.5 9" />
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
+                            <path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path>
                         </svg>
                         <h3 class="text-xl font-bold text-gray-900 mb-2">Automation</h3>
                         <p class="text-gray-600">Automating reporting and campaign management using tools like Google Sheets.</p>
                     </div>
 
-                    <!-- Toolkit Card 6: Content Creation (Original Icon) -->
+                    <!-- Toolkit Card 6: Content Creation -->
                     <div class="stat-card text-left p-6">
-                         <svg class="w-8 h-8 accent-blue mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.94l-7.693 7.693a4.5 4.5 0 006.364 6.364l7.693-7.693a3 3 0 10-4.243-4.243z" />
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 accent-blue mb-4">
+                            <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle>
                         </svg>
                         <h3 class="text-xl font-bold text-gray-900 mb-2">Content Creation</h3>
                         <p class="text-gray-600">Hands-on experience in professional video shooting and photography.</p>
@@ -343,12 +383,12 @@
         </section>
 
         <!-- 5. "About Me" Block -->
-        <section id="about" class="py-20 bg-indigo-50"> <!-- Змінено фон для контрасту -->
+        <section id="about" class="py-20 bg-indigo-50">
             <div class="container mx-auto px-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-12 items-center">
                     <!-- Image -->
                     <div class="md:col-span-1 flex justify-center">
-                        <img src="https://i.ibb.co/L6V7RzN/photo-2024-05-23-14-16-11.jpg" alt="Oleksandr Serniak" class="w-64 h-64 object-cover rounded-full shadow-lg border-4 border-white">
+                        <img src="https://i.ibb.co/L6V7RzN/photo-2024-05-23-14-16-11.jpg" alt="Oleksandr Serniak" class="w-64 h-64 object-cover rounded-full shadow-lg border-4 border-white" loading="lazy">
                     </div>
                     <!-- Text -->
                     <div class="md:col-span-2 text-center md:text-left">
@@ -364,36 +404,52 @@
             </div>
         </section>
 
-        <!-- 6. Testimonials Section -->
+        <!-- 6. Testimonials Section (NEW) -->
         <section id="testimonials" class="py-20 bg-white">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">What Clients Say</h2>
-                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">Real results from real businesses.</p>
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">What My Clients Say</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">Results speak for themselves. But clients speak louder.</p>
                 </div>
                 <!-- Testimonials Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- 
+                      РЕКОМЕНДАЦІЯ (Маркетинг):
+                      Замініть цей плейсхолдер на реальний відгук.
+                      Реальні відгуки - найпотужніший інструмент довіри.
+                    -->
                     <!-- Testimonial Card 1 -->
-                    <div class="stat-card p-6">
-                        <div class="flex items-center mb-4">
-                            <img src="https://placehold.co/48x48/E0E7FF/4F46E5?text=JD" alt="Client 1" class="w-12 h-12 rounded-full mr-4 border border-gray-200">
-                            <div>
-                                <p class="font-bold text-gray-900">John Doe</p>
-                                <p class="text-sm text-gray-500">CEO, TechStartup</p>
+                    <div class="testimonial-card p-6 flex flex-col">
+                        <p class="text-gray-700 text-lg mb-6 flex-grow">"Oleksandr transformed our YouTube approach. We not only gained 100k+ subscribers but saw a direct impact on sales. His strategy is priceless."</p>
+                        <div class="flex items-center mt-auto">
+                            <img src="https://placehold.co/48x48/e0e7ff/1d4ed8?text=C1" alt="Client 1" class="w-12 h-12 rounded-full object-cover">
+                            <div class="ml-4">
+                                <p class="font-bold text-gray-900">[Client Name]</p>
+                                <p class="text-sm text-gray-500">[CEO, Company Name]</p>
                             </div>
                         </div>
-                        <p class="text-gray-700 italic">"Oleksandr's work on our YouTube channel was transformative. He took us from 0 to 100k subscribers and established a new, highly-profitable acquisition channel."</p>
                     </div>
                     <!-- Testimonial Card 2 -->
-                    <div class="stat-card p-6">
-                        <div class="flex items-center mb-4">
-                            <img src="https://placehold.co/48x48/FEE2E2/B91C1C?text=AS" alt="Client 2" class="w-12 h-12 rounded-full mr-4 border border-gray-200">
-                            <div>
-                                <p class="font-bold text-gray-900">Anna Smith</p>
-                                <p class="text-sm text-gray-500">Marketing Director, SaaS Co.</p>
+                    <div class="testimonial-card p-6 flex flex-col">
+                        <p class="text-gray-700 text-lg mb-6 flex-grow">"After Oleksandr's audit, we cut our CPA by 40% while maintaining conversion volume. He found what 3 previous agencies missed. Highly recommend!"</p>
+                        <div class="flex items-center mt-auto">
+                            <img src="https://placehold.co/48x48/e0e7ff/1d4ed8?text=C2" alt="Client 2" class="w-12 h-12 rounded-full object-cover">
+                            <div class="ml-4">
+                                <p class="font-bold text-gray-900">[Client Name]</p>
+                                <p class="text-sm text-gray-500">[Marketing Head, E-commerce Project]</p>
                             </div>
                         </div>
-                        <p class="text-gray-700 italic">"His audit of our Google Ads account was eye-opening. He identified thousands in wasted spend and optimized our PMax campaigns, leading to a 30% increase in ROAS."</p>
+                    </div>
+                    <!-- Testimonial Card 3 -->
+                    <div class="testimonial-card p-6 flex flex-col">
+                        <p class="text-gray-700 text-lg mb-6 flex-grow">"We've been working with Oleksandr on Google PMax. Our ROAS is consistently over 700%. Incredible attention to detail and a proactive approach."</p>
+                        <div class="flex items-center mt-auto">
+                            <img src="https://placehold.co/48x48/e0e7ff/1d4ed8?text=C3" alt="Client 3" class="w-12 h-12 rounded-full object-cover">
+                            <div class="ml-4">
+                                <p class="font-bold text-gray-900">[Client Name]</p>
+                                <p class="text-sm text-gray-500">[Owner, SaaS Business]</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -411,10 +467,18 @@
                          Contact me on Telegram for a <span class="font-bold">free 30-minute strategy consultation</span>. We'll diagnose your biggest challenge and outline a clear path to growth. No obligation, just pure value.
                      </p>
                      <div class="mt-10">
+                        <!-- 
+                          КРИТИЧНО (Маркетинг): 
+                          Замініть YOUR_USERNAME на ваш актуальний нік в Telegram.
+                        -->
                         <a href="https://t.me/YOUR_USERNAME" target="_blank" rel="noopener noreferrer" class="cta-button text-lg">
                             Contact Me on Telegram
                         </a>
                      </div>
+                     <!-- 
+                       КРИТИЧНО (Маркетинг): 
+                       Замініть YOUR_USERNAME на ваш актуальний нік в Telegram.
+                     -->
                      <p class="mt-4 text-sm text-gray-500">Or find me on Telegram: @YOUR_USERNAME</p>
                  </div>
             </div>
@@ -428,6 +492,10 @@
                 <p class="text-gray-400">&copy; 2024 Oleksandr Serniak. All rights reserved.</p>
                 <div class="flex justify-center space-x-6 mt-4 md:mt-0">
                     <a href="https://www.linkedin.com/in/serniak" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">LinkedIn</a>
+                    <!-- 
+                      КРИТИЧНО (Маркетинг): 
+                      Замініть YOUR_USERNAME на ваш актуальний нік в Telegram.
+                    -->
                     <a href="https://t.me/YOUR_USERNAME" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">Telegram</a>
                 </div>
             </div>
@@ -435,57 +503,45 @@
     </footer>
 
     <script>
-        // Smooth scroll for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const targetElement = document.querySelector(this.getAttribute('href'));
-                if(targetElement){
-                    targetElement.scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-
-        // Mobile Menu Toggle
-        const menuBtn = document.getElementById('menu-btn');
+        // --- Mobile Menu Toggle ---
+        const menuToggle = document.getElementById('menu-toggle');
+        const menuClose = document.getElementById('menu-close');
         const mobileMenu = document.getElementById('mobile-menu');
         const mobileLinks = document.querySelectorAll('.mobile-link');
 
-        function toggleMenu() {
-            mobileMenu.classList.toggle('menu-closed');
-            mobileMenu.classList.toggle('menu-open');
-            const isMenuOpen = mobileMenu.classList.contains('menu-open');
-            mobileMenu.setAttribute('aria-hidden', !isMenuOpen);
-            
-            // Change button icon
-            if (isMenuOpen) {
-                menuBtn.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>`;
-                menuBtn.setAttribute('aria-label', 'Close menu');
-            } else {
-                menuBtn.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                    </svg>`;
-                menuBtn.setAttribute('aria-label', 'Open menu');
-            }
-        }
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.classList.add('open');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        });
 
-        menuBtn.addEventListener('click', toggleMenu);
-        
-        // Close menu when a link is clicked
+        menuClose.addEventListener('click', () => {
+            mobileMenu.classList.remove('open');
+            document.body.style.overflow = ''; // Restore scrolling
+        });
+
+        // Close menu on link click
         mobileLinks.forEach(link => {
             link.addEventListener('click', () => {
-                if (mobileMenu.classList.contains('menu-open')) {
-                    toggleMenu();
-                }
+                mobileMenu.classList.remove('open');
+                document.body.style.overflow = '';
             });
         });
 
+        // --- Smooth scroll for navigation links ---
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                // Prevent default only if it's an anchor link
+                if (this.getAttribute('href').startsWith('#')) {
+                    e.preventDefault();
+                    const targetElement = document.querySelector(this.getAttribute('href'));
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            });
+        });
     </script>
 
 </body>
