@@ -117,6 +117,34 @@
         #mobile-menu.open {
             transform: translateX(0);
         }
+        
+        /* СТИЛІ ДЛЯ НОВОГО БЛОКУ "ПРОЦЕС" */
+        .process-card {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .process-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-color: #2563eb;
+        }
+        .process-step {
+            display: inline-block;
+            background-color: #eef2ff;
+            color: #2563eb;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 9999px;
+            margin-bottom: 16px;
+        }
+
     </style>
 </head>
 <body class="antialiased">
@@ -212,7 +240,7 @@
             </div>
         </section>
 
-        <!-- 2. "Results" Block -->
+        <!-- 2. "Results" Block (ПОВЕРНУТО) -->
         <section id="results" class="py-20">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
@@ -261,7 +289,7 @@
             </div>
         </section>
 
-        <!-- 3. "How I Can Help You" Block -->
+        <!-- 3. "How I Can Help You" Block (ПОВЕРНУТО) -->
         <section id="services" class="py-20 bg-indigo-50">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
@@ -315,7 +343,7 @@
             </div>
         </section>
 
-        <!-- 4. "Toolkit" Block -->
+        <!-- 4. "Toolkit" Block (ПОВЕРНУТО) -->
         <section id="toolkit" class="py-20 bg-white"> 
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
@@ -382,8 +410,65 @@
             </div>
         </section>
 
-        <!-- 5. "About Me" Block -->
-        <section id="about" class="py-20 bg-indigo-50">
+        <!-- 5. "About Me" Block (ПЕРЕМІЩЕНО НИЖЧЕ) -->
+        <!-- 6. "Your Path to Results" Block (НОВИЙ ПОРЯДОК + ЗМІНА ФОНУ) -->
+        <section id="process" class="py-20 bg-indigo-50"> <!-- ЗМІНЕНО: bg-white -> bg-indigo-50 -->
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Your Path to Results</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">A transparent 3-step process for guaranteed focus on growth.</p>
+                </div>
+                <!-- Process Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    
+                    <!-- Process Card 1 -->
+                    <div class="process-card">
+                        <span class="process-step">Step 1</span>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Audit & Strategy</h3>
+                        <p class="text-gray-700 mb-6 flex-grow">
+                            We start with a deep dive into your current accounts, analytics, and market. I'll identify leaks, opportunities, and define clear KPIs for success.
+                        </p>
+                        <ul class="list-disc list-inside text-gray-600 space-y-2 mt-auto">
+                            <li>Full Account Analysis</li>
+                            <li>Competitor Research</li>
+                            <li>Actionable Growth Plan</li>
+                        </ul>
+                    </div>
+
+                    <!-- Process Card 2 -->
+                    <div class="process-card">
+                        <span class="process-step">Step 2</span>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Execution & Optimization</h3>
+                        <p class="text-gray-700 mb-6 flex-grow">
+                            This is where the engine starts. I build, launch, and manage your campaigns, conducting constant A/B testing and optimizations to improve CPA and ROAS.
+                        </p>
+                        <ul class="list-disc list-inside text-gray-600 space-y-2 mt-auto">
+                            <li>Campaign Structuring</li>
+                            <li>A/B Testing Copy & Creative</li>
+                            <li>Daily Budget Management</li>
+                        </ul>
+                    </div>
+
+                    <!-- Process Card 3 -->
+                    <div class="process-card">
+                        <span class="process-step">Step 3</span>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Reporting & Scaling</h3>
+                        <p class="text-gray-700 mb-6 flex-grow">
+                            You get clear, data-driven reports (not 50-page fluff). We analyze what works, what doesn't, and make strategic decisions to scale your budget profitably.
+                        </p>
+                        <ul class="list-disc list-inside text-gray-600 space-y-2 mt-auto">
+                            <li>Custom Looker Studio Dashboards</li>
+                            <li>Weekly/Monthly Calls</li>
+                            <li>Strategic Scaling Plan</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. "About Me" Block (НОВИЙ ПОРЯДОК + ЗМІНА ФОНУ) -->
+        <section id="about" class="py-20 bg-white"> <!-- ЗМІНЕНО: bg-indigo-50 -> bg-white -->
             <div class="container mx-auto px-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-12 items-center">
                     <!-- Image -->
@@ -399,57 +484,6 @@
                         <p class="mt-4 text-lg text-gray-700">
                             My background in Television Directing and Finance, combined with NLP certifications, gives me a unique perspective. I don't just understand the ads; I understand the audience, the creative, and the P&L.
                         </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 6. Testimonials Section (NEW) -->
-        <section id="testimonials" class="py-20 bg-white">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">What My Clients Say</h2>
-                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">Results speak for themselves. But clients speak louder.</p>
-                </div>
-                <!-- Testimonials Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- 
-                      РЕКОМЕНДАЦІЯ (Маркетинг):
-                      Замініть цей плейсхолдер на реальний відгук.
-                      Реальні відгуки - найпотужніший інструмент довіри.
-                    -->
-                    <!-- Testimonial Card 1 -->
-                    <div class="testimonial-card p-6 flex flex-col">
-                        <p class="text-gray-700 text-lg mb-6 flex-grow">"Oleksandr transformed our YouTube approach. We not only gained 100k+ subscribers but saw a direct impact on sales. His strategy is priceless."</p>
-                        <div class="flex items-center mt-auto">
-                            <img src="https://placehold.co/48x48/e0e7ff/1d4ed8?text=C1" alt="Client 1" class="w-12 h-12 rounded-full object-cover">
-                            <div class="ml-4">
-                                <p class="font-bold text-gray-900">[Client Name]</p>
-                                <p class="text-sm text-gray-500">[CEO, Company Name]</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Testimonial Card 2 -->
-                    <div class="testimonial-card p-6 flex flex-col">
-                        <p class="text-gray-700 text-lg mb-6 flex-grow">"After Oleksandr's audit, we cut our CPA by 40% while maintaining conversion volume. He found what 3 previous agencies missed. Highly recommend!"</p>
-                        <div class="flex items-center mt-auto">
-                            <img src="https://placehold.co/48x48/e0e7ff/1d4ed8?text=C2" alt="Client 2" class="w-12 h-12 rounded-full object-cover">
-                            <div class="ml-4">
-                                <p class="font-bold text-gray-900">[Client Name]</p>
-                                <p class="text-sm text-gray-500">[Marketing Head, E-commerce Project]</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Testimonial Card 3 -->
-                    <div class="testimonial-card p-6 flex flex-col">
-                        <p class="text-gray-700 text-lg mb-6 flex-grow">"We've been working with Oleksandr on Google PMax. Our ROAS is consistently over 700%. Incredible attention to detail and a proactive approach."</p>
-                        <div class="flex items-center mt-auto">
-                            <img src="https://placehold.co/48x48/e0e7ff/1d4ed8?text=C3" alt="Client 3" class="w-12 h-12 rounded-full object-cover">
-                            <div class="ml-4">
-                                <p class="font-bold text-gray-900">[Client Name]</p>
-                                <p class="text-sm text-gray-500">[Owner, SaaS Business]</p>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -483,9 +517,7 @@
                  </div>
             </div>
         </section>
-    </main>
 
-    <!-- 8. Footer -->
     <footer class="bg-gray-800 text-gray-300"> 
         <div class="container mx-auto px-6 py-8">
             <div class="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
