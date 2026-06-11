@@ -1,932 +1,458 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth"> <!-- Повернуто 'en', оскільки відгуки англійською -->
+<html lang="en" class="scroll-smooth">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oleksandr Serniak - PPC & YouTube Ads Expert</title>
-
-    <!-- 
-      ==================================================
-      == SEO-ОПТИМІЗАЦІЯ (Частина 1) ==
-      ==================================================
-    -->
-        
-    <!-- Meta Description: Опис для Google (150-160 символів) -->
-    <!-- ✅ ОНОВЛЕНО: Новий, граматично виправлений опис. -->
-    <meta name="description" content="I'm Oleksandr Serniak, a PPC & YouTube Ads specialist since 2016. I build data-driven marketing engines that deliver measurable results, including over $1M+ in client revenue.">
-        
-    <!-- Canonical URL: Вказує Google "майстер-версію" вашого сайту, щоб уникнути дублів -->
-    <!-- ✅ ОСТАТОЧНО ВИПРАВЛЕНО: Встановлено кореневий шлях / -->
+    <title>Oleksandr Serniak | Technical Marketer & AI-Driven PPC Expert</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Stop burning ad spend. I'm a Technical Marketer combining 8+ years of PPC experience with custom AI-driven analytics to build predictable revenue engines.">
     <link rel="canonical" href="https://www.ppcmarketing.pro/" />
-
-    <!-- Open Graph (OG) Tags: Для прев'ю в Facebook, LinkedIn, Telegram -->
-    <meta property="og:title" content="Oleksandr Serniak - PPC & YouTube Ads Expert" />
-    <!-- ✅ ОНОВЛЕНО: Новий, граматично виправлений опис. -->
-    <meta property="og:description" content="I'm Oleksandr Serniak, a PPC & YouTube Ads specialist since 2016. I build data-driven marketing engines that deliver measurable results, including over $1M+ in client revenue." />
+    <meta property="og:title" content="Oleksandr Serniak - Technical Marketer & PPC Expert" />
+    <meta property="og:description" content="I build data-driven marketing engines using AI and custom analytics that generate $1M+ in client revenue." />
     <meta property="og:type" content="website" />
-    <!-- ✅ ОСТАТОЧНО ВИПРАВЛЕНО: Встановлено кореневий шлях / -->
     <meta property="og:url" content="https://www.ppcmarketing.pro/" />
-    <!-- ✅ ВИПРАВЛЕНО ШЛЯХ: Використано абсолютний шлях /image/mainportret.jpg (з папки image) -->
     <meta property="og:image" content="/image/mainportret.jpg" />
-    <meta property="og:locale" content="en_US" /> <!-- Змінено локаль -->
+    <meta property="og:locale" content="en_US" />
 
-    <!-- Twitter Card Tags: Для прев'ю в Twitter -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Oleksandr Serniak - PPC & YouTube Ads Expert">
-    <!-- ✅ ОНОВЛЕНО: Новий, граматично виправлений опис. -->
-    <meta name="twitter:description" content="I'm Oleksandr Serniak, a PPC & YouTube Ads specialist since 2016. I build data-driven marketing engines that deliver measurable results, including over $1M+ in client revenue.">
-    <!-- ✅ ВИПРАВЛЕНО ШЛЯХ: Використано абсолютний шлях /image/mainportret.jpg (з папки image) -->
-    <meta name="twitter:image" content="/image/mainportret.jpg">
-
-    <!-- 
-      ==================================================
-      == Кінець SEO-ОПТИМІЗАЦІЇ (Частина 1) ==
-      ==================================================
-    -->
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-            
-    <!-- 
-      РЕКОМЕНДАЦІЯ РОЗРОБНИКА (Performance):
-      Для "бойового" сайту (production) цей CSS файл потрібно скомпілювати 
-      з опцією 'purge', щоб видалити всі невикористані стилі.
-    -->
-        
-    <!-- 
-      РЕКОМЕНДАЦІЯ РОЗРОБНИКА (Аналітика):
-      Додайте сюди ваш код Google Analytics (GA4) або Google Tag Manager (GTM).
-    -->
-            
-    <style>
-        /* Системний шрифт в стилі Apple */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 
-                        Helvetica, Arial, sans-serif, "Apple Color Emoji", 
-                        "Segoe UI Emoji", "Segoe UI Symbol";
-            background-color: #f8fafc; /* Базовий фон сторінки (світло-сірий) */
-            color: #111827;
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#0B0F19', // Deep dark slate
+                            card: '#151C2C', // Slightly lighter for cards
+                            accent: '#3B82F6', // Blue accent
+                            glow: 'rgba(59, 130, 246, 0.15)',
+                        }
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
         }
-        .hero-gradient {
-            background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
-        }
-        .accent-blue {
-            color: #2563eb;
-        }
-        .bg-accent-blue {
-            background-color: #2563eb;
-        }
-        .bg-accent-blue-hover:hover {
-            background-color: #1d4ed8;
-        }
-                
-        /* Уніфіковано картки (Повернуто до V8 стилів) */
-        .stat-card, .service-card, .process-card, .testimonial-card, .case-study-card {
-            background-color: #ffffff; /* Усі картки мають білий фон */
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-            padding: 24px;
-        }
-        .stat-card:hover, .service-card:hover, .process-card:hover, .testimonial-card:hover, .case-study-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        .service-card, .process-card, .testimonial-card, .case-study-card {
-            display: flex;
-            flex-direction: column;
-            height: 100%; /* Для однакової висоти карток у grid */
-        }
-                
-        .service-card:hover, .process-card:hover, .testimonial-card:hover, .case-study-card:hover { 
-             border-color: #2563eb; /* Акцент при наведенні */
-        }
-        /* ⭐️ НОВИЙ СТИЛЬ: для цитат у відгуках */
-        .testimonial-quote {
-            font-size: 1.125rem; /* 18px */
-            font-weight: 500;
-            line-height: 1.6;
-            color: #374151; /* gray-700 */
-            padding-left: 28px;
-            position: relative;
-            border-left: 4px solid #dbeafe; /* blue-100 */
-        }
-        /* Повернуто оригінальні стилі кнопок CTA */
-        .cta-button {
-            display: inline-block;
-            background-color: #2563eb;
-            color: #ffffff;
-            font-weight: 600;
-            padding: 14px 28px;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-        }
-        .cta-button:hover {
-            background-color: #1d4ed8;
-            transform: translateY(-2px);
-        }
-        .secondary-button {
-            display: inline-block;
-            background-color: #ffffff;
-            color: #111827;
-            font-weight: 600;
-            padding: 14px 28px;
-            border-radius: 8px;
-            text-decoration: none;
-            border: 1px solid #d1d5db;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-        }
-        .secondary-button:hover {
-            background-color: #f9fafb;
-            transform: translateY(-2px);
-        }
-
-        /* Mobile Menu Styles */
-        #mobile-menu {
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out;
-        }
-        #mobile-menu.open {
-            transform: translateX(0);
-        }
-                
-        /* ⭐️ Sticky Telegram Button ⭐️ */
-        .sticky-telegram-cta {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            background-color: #2563eb; /* accent-blue */
-            color: #ffffff;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-            z-index: 1000;
-            transition: transform 0.3s ease, background-color 0.3s ease;
-        }
-        .sticky-telegram-cta:hover {
-            background-color: #1d4ed8; /* hover color */
-            transform: scale(1.1);
-        }
-
-        /* ==================================================
-        == 🚀 СТИЛІ АНІМАЦІЙ (GSAP) 🚀 ==
-        ==================================================
-        */
-                        
-        /* Початковий стан для елементів, що "випливають" */
-        .gsap-fade-in-up {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        /* Початковий стан для елементів, що "проявляються" */
-        .gsap-fade-in {
-            opacity: 0;
-        }
-        /* ==================================================
-        == 🚀 СТИЛІ ІНТЕРАКТИВНИХ ДІАГРАМ 🚀 ==
-        ==================================================
-        */
-                        
-        /* Базовий контейнер для візуалізацій */
-        .process-viz {
-            height: 60px; /* Фіксована висота */
-            width: 100%;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-        }
-                
-        /* 3. Анімація Дашборду (CSS) */
-        .viz-dashboard {
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            gap: 8px;
-            height: 100%;
-            width: 100px;
-        }
-                
-        .dashboard-bar {
-            width: 15px;
-            background-color: #2563eb; /* accent-blue */
-            opacity: 0.5; 
-            /* Висота і прозорість тепер контролюються GSAP */
-        }
-        
-        /* ‼️ ВИДАЛЕНО: Стилі модального вікна */
-    </style>
-    <!-- 
-      ==================================================
-      == SEO-ОПТИМІЗАЦІЯ (Частина 2) ==
-      ==================================================
-    -->
-        
-    <!-- Structured Data (JSON-LD) - Пояснює Google, ХТО ви -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Person",
-      "name": "Oleksandr Serniak",
-      // ✅ ОСТАТОЧНО ВИПРАВЛЕНО: Встановлено кореневий шлях /
-      "url": "https://www.ppcmarketing.pro/", 
-      // ✅ ВИПРАВЛЕНО ШЛЯХ: Використано абсолютний шлях /image/mainportret.jpg (з папки image)
-      "image": "/image/mainportret.jpg",
-      "sameAs": [
-        "https://www.linkedin.com/in/serniak",
-        "https://t.me/YTube_PPC"
-      ],
-      "jobTitle": "PPC & YouTube Ads Specialist",
-      // ✅ ОНОВЛЕНО: Новий опис
-      "description": "PPC specialist since 2016, generating over $1M+ in client revenue and new 400,000+ conversions. Specializes in Google Ads, PMax, and YouTube channel growth.",
-      "knowsAbout": ["PPC", "Google Ads", "YouTube Ads", "Marketing Strategy", "Data Analytics", "Looker Studio"]
-    }
     </script>
-
-    <!-- 
-      ==================================================
-      == Кінець SEO-ОПТИМІЗАЦІЇ (Частина 2) ==
-      ==================================================
-    -->
+    <style>
+        body {
+            background-color: #0B0F19;
+            color: #F8FAFC;
+        }
+        .glass-card {
+            background: rgba(21, 28, 44, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #60A5FA, #A78BFA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
 </head>
-<body class="antialiased">
-    <!-- 1. Header -->
-    <header class="bg-white/90 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 border-b border-gray-200">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="#hero" class="text-xl font-bold tracking-tight text-gray-900">
-                Oleksandr Serniak
-            </a>
-            <nav class="hidden md:flex space-x-6">
-                <!-- ⭐️ ПОРЯДОК ЗМІНЕНО: Повернуто до початкового порядку -->
-                <a href="#services" class="text-gray-600 hover:text-gray-900 transition">Services</a>
-                <a href="#results" class="text-gray-600 hover:text-gray-900 transition">Results</a>
-                <a href="#testimonials" class="text-gray-600 hover:text-gray-900 transition">Reviews</a>
-                <a href="#case-studies" class="text-gray-600 hover:text-gray-900 transition">Cases</a>
-                <a href="#process" class="text-gray-600 hover:text-gray-900 transition">Process</a>
-                <a href="#about" class="text-gray-600 hover:text-gray-900 transition">About</a>
-                <!-- ‼️ ПОВЕРНУТО: Звичайне посилання на контактну секцію -->
-                <a href="#contact" class="text-gray-600 hover:text-gray-900 transition">Contact</a>
-            </nav>
-            <!-- ‼️ ПОВЕРНУТО: Звичайне посилання на Telegram -->
-            <a href="https://t.me/YTube_PPC" target="_blank" rel="noopener noreferrer" class="hidden md:block bg-accent-blue bg-accent-blue-hover text-white font-medium py-2 px-5 rounded-lg transition">
-                Contact me on Telegram
-            </a>
-            <!-- Mobile Menu Button -->
-            <div class="md:hidden">
-                <button id="menu-toggle" class="text-gray-900 focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                </button>
-            </div>
-        </div>
-    </header>
 
-    <!-- Mobile Menu -->
-    <div id="mobile-menu" class="md:hidden fixed top-0 left-0 w-3/4 h-full bg-white z-50 shadow-lg p-6">
-        <div class="flex justify-between items-center mb-8">
-            <span class="text-xl font-bold tracking-tight text-gray-900">Navigation</span>
-            <button id="menu-close" class="text-gray-900 focus:outline-none">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-        </div>
-        <nav class="flex flex-col space-y-6">
-            <!-- ⭐️ ПОРЯДОК ЗМІНЕНО: Повернуто до початкового порядку -->
-            <a href="#services" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">Services</a>
-            <a href="#results" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">Results</a>
-            <a href="#testimonials" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">Reviews</a>
-            <a href="#case-studies" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">Cases</a>
-            <a href="#process" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">Process</a>
-            <a href="#about" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">About</a>
-            <!-- ‼️ ПОВЕРНУТО: Звичайне посилання на контактну секцію -->
-            <a href="#contact" class="text-gray-700 hover:text-gray-900 text-lg mobile-link">Contact</a>
-                        
-            <!-- ‼️ ПОВЕРНУТО: Звичайне посилання на Telegram -->
-            <a href="https://t.me/YTube_PPC" target="_blank" rel="noopener noreferrer" class="cta-button mt-4 text-center">
-                Contact me on Telegram
-            </a>
-        </nav>
+<body class="antialiased selection:bg-brand-accent selection:text-white">
+
+    <!-- Background Effects -->
+    <div class="fixed inset-0 z-[-1] pointer-events-none">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-brand-glow blur-[100px] rounded-full opacity-50"></div>
     </div>
 
-    <main>
-        <!-- 1. Hero Section -->
-        <section id="hero" class="hero-gradient pt-32 pb-20 md:pt-40 md:pb-28">
-            <div class="container mx-auto px-6">
-                <!-- Hero Text -->
-                <div class="max-w-3xl mx-auto text-center">
-                     <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
-                     <!-- ‼️ ПОВЕРНУТО: Оригінальний заголовок -->
-                    <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight gsap-fade-in-up">
-                        Stop Wasting Ad Spend.
-                        <span class="block accent-blue">Start Generating Revenue.</span>
-                    </h1>
-                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
-                    <!-- ✅ ОНОВЛЕНО: Новий, граматично виправлений опис. -->
-                    <p class="mt-6 text-lg text-gray-600 max-w-xl mx-auto gsap-fade-in-up">
-                        I'm Oleksandr, a PPC & YouTube Ads specialist. In PPC marketing since 2016, I build data-driven marketing engines that deliver measurable results. I've generated over $1M+ in client revenue and achieved 400,000+ conversions.
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-card border-b border-white/5 transition-all duration-300">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-xl font-bold tracking-tight">OS.<span class="text-brand-accent">Marketing</span></a>
+            <div class="hidden md:flex space-x-8 text-sm font-medium text-slate-300">
+                <a href="#expertise" class="hover:text-white transition-colors">Expertise</a>
+                <a href="#ai-projects" class="hover:text-white transition-colors">AI & Tech</a>
+                <a href="#results" class="hover:text-white transition-colors">Results</a>
+            </div>
+            <a href="https://t.me/ia_ppc" target="_blank" class="px-5 py-2.5 bg-brand-accent hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]">
+                Book a Call
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-40 pb-20 px-6 min-h-[90vh] flex items-center">
+        <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+            <div class="space-y-8 animate-fade-in-up">
+                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full glass-card border border-brand-accent/30 text-sm font-medium text-blue-400">
+                    <span class="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></span>
+                    <span>Available for new projects</span>
+                </div>
+                
+                <h1 class="text-5xl lg:text-7xl font-bold leading-tight tracking-tight">
+                    Building <span class="gradient-text">Predictable Revenue Engines</span>
+                </h1>
+                
+                <p class="text-lg text-slate-400 leading-relaxed max-w-xl">
+                    I'm Oleksandr Serniak, a <strong>Technical Marketer</strong>. In PPC marketing since 2016, I build data-driven marketing engines that deliver measurable results. I've generated over $1M+ in client revenue and achieved 400,000+ conversions.
+                </p>
+
+                <div class="flex flex-wrap gap-4 pt-4">
+                    <a href="https://t.me/ia_ppc" target="_blank" class="px-8 py-4 bg-white text-brand-dark font-bold rounded-lg hover:bg-slate-200 transition-all">
+                        Discuss Your Project
+                    </a>
+                    <a href="#ai-projects" class="px-8 py-4 glass-card text-white font-medium rounded-lg hover:bg-white/5 transition-all">
+                        View AI Analytics Tech ↓
+                    </a>
+                </div>
+            </div>
+
+            <div class="relative hidden lg:block">
+                <!-- Decorative Elements -->
+                <div class="absolute -inset-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl blur-lg opacity-20"></div>
+                <img src="/image/mainportret.jpg" alt="Oleksandr Serniak" class="relative z-10 w-full max-w-md mx-auto rounded-2xl shadow-2xl border border-white/10 grayscale-[20%] hover:grayscale-0 transition-all duration-500">
+                
+                <!-- Floating Stats Badge -->
+                <div class="absolute -bottom-6 -left-6 glass-card p-4 rounded-xl border border-white/10 shadow-xl z-20 flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 uppercase tracking-wider">Revenue Generated</p>
+                        <p class="text-2xl font-bold text-white">$1,000,000+</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Bar -->
+    <section class="border-y border-white/5 bg-brand-card/50">
+        <div class="max-w-6xl mx-auto px-6 py-10">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-white/5">
+                <div>
+                    <h3 class="text-3xl font-bold text-white mb-1">2016</h3>
+                    <p class="text-sm text-slate-400">Started in PPC</p>
+                </div>
+                <div>
+                    <h3 class="text-3xl font-bold text-white mb-1">400k+</h3>
+                    <p class="text-sm text-slate-400">Conversions</p>
+                </div>
+                <div>
+                    <h3 class="text-3xl font-bold text-white mb-1">1,500+</h3>
+                    <p class="text-sm text-slate-400">Campaigns Launched</p>
+                </div>
+                <div>
+                    <h3 class="text-3xl font-bold text-white mb-1">660k+</h3>
+                    <p class="text-sm text-slate-400">YouTube Subs Acquired</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Unfair Advantage (AI & Tech) Section -->
+    <section id="ai-projects" class="py-24 px-6 relative">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-sm font-semibold text-brand-accent tracking-widest uppercase mb-3">The Unfair Advantage</h2>
+                <h3 class="text-3xl md:text-4xl font-bold">Why hire a "Technical Marketer"?</h3>
+                <p class="mt-4 text-slate-400 max-w-2xl mx-auto">
+                    I don't just "push buttons" in Google Ads. I build products, track revenue end-to-end, and write custom AI algorithms. This means I understand your business funnel from the server side to the creative.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- AI Project 1 -->
+                <div class="glass-card p-8 rounded-2xl hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center mb-6 text-brand-accent">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">Custom Meta Ads Dashboard</h4>
+                    <p class="text-slate-400 text-sm mb-4">
+                        Built a proprietary analytics service that pulls raw data directly from Meta Ads via API to calculate true ROI, bypassing standard ad manager limitations.
                     </p>
-                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
-                    <!-- ‼️ ПОВЕРНУТО: Оригінальні кнопки CTA -->
-                    <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4 gsap-fade-in-up">
-                        <a href="https://t.me/YTube_PPC" target="_blank" rel="noopener noreferrer" class="cta-button">
-                            Contact me on Telegram
+                    <a href="https://analytics.destinycode.online/" target="_blank" class="text-sm font-medium text-blue-400 hover:text-blue-300 flex items-center">
+                        View Project <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+                </div>
+
+                <!-- AI Project 2 -->
+                <div class="glass-card p-8 rounded-2xl hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center mb-6 text-purple-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">Destiny Code Web App</h4>
+                    <p class="text-slate-400 text-sm mb-4">
+                        Developed a full-stack astrology web service and CRM admin panel using AI tools to handle product delivery and payment tracking internally.
+                    </p>
+                    <a href="https://destinycode.online/admin/feedback.html" target="_blank" class="text-sm font-medium text-purple-400 hover:text-purple-300 flex items-center">
+                        View Project <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+                </div>
+
+                <!-- AI Project 3 -->
+                <div class="glass-card p-8 rounded-2xl hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center mb-6 text-green-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">iOS Apps & Utilities</h4>
+                    <p class="text-slate-400 text-sm mb-4">
+                        Indie developer of utility applications including "Shadow Boxing Timer" (iOS) and a custom web-based Personal Finance Tracker.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="https://shadowboxingtimer.com/" target="_blank" class="text-sm font-medium text-green-400 hover:text-green-300 flex items-center">
+                            Boxing App
                         </a>
-                        <a href="#results" class="secondary-button">
-                            See My Results
+                        <span class="text-slate-600">|</span>
+                        <a href="https://finance-app-d76c4.web.app/transactions" target="_blank" class="text-sm font-medium text-green-400 hover:text-green-300 flex items-center">
+                            Finance App
                         </a>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- 2. "How I Can Help You" (ПОСЛУГИ) -->
-        <section id="services" class="py-20 bg-white"> 
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in -->
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 gsap-fade-in">How I Can Help You</h2>
-                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto gsap-fade-in">Full-funnel strategies to scale your business. No prices, just solutions.</p>
+    <!-- How I Can Help You -->
+    <section id="expertise" class="py-24 px-6 bg-brand-card/30">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold">How I Can Help You</h2>
+                <p class="mt-4 text-slate-400 max-w-2xl mx-auto">
+                    Full-funnel strategies to scale your business. No prices, just solutions.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Service 1 -->
+                <div class="glass-card p-8 rounded-2xl border-t-2 border-brand-accent flex flex-col hover:-translate-y-1 transition-transform">
+                    <h3 class="text-xl font-bold mb-3">Google Ads (PPC) Mastery</h3>
+                    <p class="text-slate-400 text-sm mb-6 flex-grow">
+                        Driving targeted traffic and high-intent conversions. Specializing in complex PMax & Search campaigns.
+                    </p>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start"><span class="text-brand-accent mr-2">✓</span> Google PMax & Search</li>
+                        <li class="flex items-start"><span class="text-brand-accent mr-2">✓</span> Display & Remarketing</li>
+                        <li class="flex items-start"><span class="text-brand-accent mr-2">✓</span> A/B Testing & CRO</li>
+                        <li class="flex items-start"><span class="text-brand-accent mr-2">✓</span> Budget Management ($60k+/mo)</li>
+                    </ul>
                 </div>
-                                
-                <!-- Services Grid -->
-                <!-- АНІМАЦІЯ: Додано .gsap-stagger-grid -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 gsap-stagger-grid">
-                                        
-                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
-                    <div class="service-card gsap-fade-in-up">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Google Ads (PPC) Mastery</h3>
-                        <p class="text-gray-700 mb-6">
-                            Driving targeted traffic and high-intent conversions. Specializing in complex PMax & Search campaigns.
-                        </p>
-                        <ul class="list-disc list-inside text-gray-600 space-y-2 mt-auto">
-                            <li>Google PMax & Search</li>
-                            <li>Display & Remarketing</li>
-                            <li>A/B Testing & CRO</li>
-                            <li>Budget Management ($60k+/mo)</li>
-                        </ul>
-                    </div>
-                                        
-                    <!-- Service Card 2: YouTube -->
-                    <div class="service-card gsap-fade-in-up">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-4">YouTube Marketing & Growth</h3>
-                        <p class="text-gray-700 mb-6">
-                            From 0 to 660k+ subscribers. I build channels that create fans and drive sales.
-                        </p>
-                        <ul class="list-disc list-inside text-gray-600 space-y-2 mt-auto">
-                            <li>YouTube SEO & Channel Growth</li>
-                            <li>Video Ad Campaigns (TrueView)</li>
-                            <li>Organic Content Strategy</li>
-                            <li>(3.9M+ views on one video)</li>
-                        </ul>
-                    </div>
-                                        
-                    <!-- Service Card 3: Audits -->
-                    <div class="service-card gsap-fade-in-up">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Strategic Audits & Consulting</h3>
-                        <p class="text-gray-700 mb-6">
-                            I'll find the leaks in your funnel and the opportunities for growth. Get a clear, actionable plan.
-                        </p>
-                        <ul class="list-disc list-inside text-gray-600 space-y-2 mt-auto">
-                            <li>Full PPC Account Audits</li>
-                            <li>Marketing Strategy Development</li>
-                            <li>Conversion Tracking Setup</li>
-                            <li>Looker Studio / HTML Dashboards</li>
-                        </ul>
-                    </div>
+                <!-- Service 2 -->
+                <div class="glass-card p-8 rounded-2xl border-t-2 border-purple-500 flex flex-col hover:-translate-y-1 transition-transform">
+                    <h3 class="text-xl font-bold mb-3">YouTube Marketing & Growth</h3>
+                    <p class="text-slate-400 text-sm mb-6 flex-grow">
+                        From 0 to 660k+ subscribers. I build channels that create fans and drive sales.
+                    </p>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start"><span class="text-purple-400 mr-2">✓</span> YouTube SEO & Channel Growth</li>
+                        <li class="flex items-start"><span class="text-purple-400 mr-2">✓</span> Video Ad Campaigns (TrueView)</li>
+                        <li class="flex items-start"><span class="text-purple-400 mr-2">✓</span> Organic Content Strategy</li>
+                        <li class="flex items-start"><span class="text-purple-400 mr-2">✓</span> (3.9M+ views on one video)</li>
+                    </ul>
+                </div>
+                <!-- Service 3 -->
+                <div class="glass-card p-8 rounded-2xl border-t-2 border-green-500 flex flex-col hover:-translate-y-1 transition-transform">
+                    <h3 class="text-xl font-bold mb-3">Strategic Audits & Consulting</h3>
+                    <p class="text-slate-400 text-sm mb-6 flex-grow">
+                        I'll find the leaks in your funnel and the opportunities for growth. Get a clear, actionable plan.
+                    </p>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start"><span class="text-green-400 mr-2">✓</span> Full PPC Account Audits</li>
+                        <li class="flex items-start"><span class="text-green-400 mr-2">✓</span> Marketing Strategy Development</li>
+                        <li class="flex items-start"><span class="text-green-400 mr-2">✓</span> Conversion Tracking Setup</li>
+                        <li class="flex items-start"><span class="text-green-400 mr-2">✓</span> Looker Studio / HTML Dashboards</li>
+                    </ul>
+                </div>
+                <!-- Service 4 -->
+                <div class="glass-card p-8 rounded-2xl border-t-2 border-blue-400 flex flex-col hover:-translate-y-1 transition-transform">
+                    <h3 class="text-xl font-bold mb-3">AI-Driven Analytics & Tech</h3>
+                    <p class="text-slate-400 text-sm mb-6 flex-grow">
+                        Beyond standard tools. I build custom AI algorithms and web dashboards to stop ad waste and uncover hidden revenue.
+                    </p>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start"><span class="text-blue-400 mr-2">✓</span> Custom API Dashboards (Meta/Google)</li>
+                        <li class="flex items-start"><span class="text-blue-400 mr-2">✓</span> SQL & Looker Studio Integration</li>
+                        <li class="flex items-start"><span class="text-blue-400 mr-2">✓</span> AI-Powered Creatives & Copy</li>
+                        <li class="flex items-start"><span class="text-blue-400 mr-2">✓</span> Automated Performance Tracking</li>
+                    </ul>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- 3. "Proven by Numbers" -->
-        <section id="results" class="py-20 bg-indigo-50"> 
-             <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in -->
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 gsap-fade-in">Proven by Numbers</h2>
-                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto gsap-fade-in">My work isn't just theory. It's about delivering tangible business outcomes.</p>
-                </div>
-                                
-                <!-- Stats Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 gsap-stagger-grid">
-                                        
-                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
-                    <div class="stat-card p-6 text-center gsap-fade-in-up">
-                        <div class="text-4xl md:text-5xl font-extrabold accent-blue">$1M+</div>
-                        <p class="mt-2 text-lg font-semibold text-gray-900">In Client Revenue</p>
-                        <p class="text-gray-500 text-sm">Generated from ad spend.</p>
-                    </div>
-                                        
-                    <!-- Stat Card -->
-                    <div class="stat-card p-6 text-center gsap-fade-in-up">
-                        <div class="text-4xl md:text-5xl font-extrabold accent-blue">400,000+</div>
-                        <p class="mt-2 text-lg font-semibold text-gray-900">Conversions Achieved</p>
-                        <p class="text-gray-500 text-sm">Optimized for quality and cost.</p>
-                    </div>
-                                        
-                    <!-- Stat Card -->
-                    <div class="stat-card p-6 text-center gsap-fade-in-up">
-                        <div class="text-4xl md:text-5xl font-extrabold accent-blue">30+</div>
-                        <p class="mt-2 text-lg font-semibold text-gray-900">Projects Worked On</p>
-                        <p class="text-gray-500 text-sm">Across diverse industries.</p>
-                    </div>
-                                        
-                    <!-- Stat Card -->
-                    <div class="stat-card p-6 text-center gsap-fade-in-up">
-                        <div class="text-4xl md:text-5xl font-extrabold accent-blue">Since 2016</div>
-                        <p class="mt-2 text-lg font-semibold text-gray-900">In PPC Marketing</p>
-                        <p class="text-gray-500 text-sm">Proven track record.</p>
-                    </div>
-                                        
-                    <!-- Stat Card -->
-                    <div class="stat-card p-6 text-center gsap-fade-in-up">
-                        <div class="text-4xl md:text-5xl font-extrabold accent-blue">660K+</div>
-                        <p class="mt-2 text-lg font-semibold text-gray-900">YouTube Subscribers</p>
-                        <p class="text-gray-500 text-sm">Acquired for client channels.</p>
-                    </div>
-                                        
-                    <!-- Stat Card ‼️ ПОВЕРНУТО: Оригінальний контент -->
-                    <div class="stat-card p-6 text-center gsap-fade-in-up">
-                        <div class="text-4xl md:text-5xl font-extrabold accent-blue">3.9M</div>
-                        <p class="mt-2 text-lg font-semibold text-gray-900">Organic Views</p>
-                        <p class="text-gray-500 text-sm">On a single video.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 4. "Testimonials" (АНОНІМІЗОВАНО) -->
-        <section id="testimonials" class="py-20 bg-white">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in -->
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 gsap-fade-in">What My Clients Say</h2>
-                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto gsap-fade-in">Numbers are important. But real trust comes from real people.</p>
-                </div>
-                <!-- Testimonials Grid -->
-                <!-- АНІМАЦІЯ: Додано .gsap-stagger-grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 gsap-stagger-grid">
-                                        
-                    <!-- Відгук 1 (Artem B.) -->
-                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
-                    <div class="testimonial-card gsap-fade-in-up">
-                        <p class="testimonial-quote mb-6">
-                            "Thanks to his professionalism, he was able to scale Google Ads budgets from scratch... to the level of Meta, while maintaining profitability. This confirmed the importance of the channel as an effective and profitable tool in the overall marketing strategy."
-                        </p>
-                        <div class="flex items-center mt-auto pt-4 border-t border-gray-100">
-                            <!-- ‼️ ПОВЕРНУТО: Оригінальна заглушка з placehold.co -->
-                            <img src="https://placehold.co/50x50/E0E7FF/4338CA?text=AB" alt="Artem B." class="w-12 h-12 rounded-full object-cover mr-4">
-                            <div>
-                                <p class="font-bold text-gray-900">Artem B.</p>
-                                <p class="text-sm text-gray-500">Head of Performance, EdTech</p>
-                            </div>
+    <!-- Testimonials -->
+    <section id="testimonials" class="py-24 px-6 border-y border-white/5 bg-brand-card/20">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold mb-12 text-center">What My Clients Say</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Testimonial 1 -->
+                <div class="glass-card p-8 rounded-2xl flex flex-col">
+                    <p class="text-slate-300 italic mb-6 flex-grow">
+                        "Thanks to his professionalism, he was able to scale Google Ads budgets from scratch... to the level of Meta, while maintaining profitability. This confirmed the importance of the channel as an effective and profitable tool in the overall marketing strategy."
+                    </p>
+                    <div class="flex items-center pt-4 border-t border-white/10">
+                        <div class="w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold flex items-center justify-center border border-blue-500/30 mr-4">AB</div>
+                        <div>
+                            <p class="font-bold text-white">Artem B.</p>
+                            <p class="text-xs text-slate-500">Head of Performance, EdTech</p>
                         </div>
                     </div>
-
-                    <!-- Відгук 2 (Tati S.) -->
-                    <div class="testimonial-card gsap-fade-in-up">
-                        <p class="testimonial-quote mb-6">
-                            "Oleksandr is a senior PPC specialist understanding how to build and optimize the funnel. He develops comprehensive strategies... With a focus on analytics and performance metrics, Oleksandr pro-actively adjusts campaigns to deliver the results with the best economy."
-                        </p>
-                        <div class="flex items-center mt-auto pt-4 border-t border-gray-100">
-                            <!-- ‼️ ПОВЕРНУТО: Оригінальна заглушка з placehold.co -->
-                            <img src="https://placehold.co/50x50/FEF3C7/D97706?text=TS" alt="Tati S." class="w-12 h-12 rounded-full object-cover mr-4">
-                            <div>
-                                <p class="font-bold text-gray-900">Tati S.</p>
-                                <p class="text-sm text-gray-500">Senior Marketing Director, SaaS</p>
-                            </div>
+                </div>
+                <!-- Testimonial 2 -->
+                <div class="glass-card p-8 rounded-2xl flex flex-col">
+                    <p class="text-slate-300 italic mb-6 flex-grow">
+                        "Oleksandr is a senior PPC specialist understanding how to build and optimize the funnel. He develops comprehensive strategies... With a focus on analytics and performance metrics, Oleksandr pro-actively adjusts campaigns to deliver the results with the best economy."
+                    </p>
+                    <div class="flex items-center pt-4 border-t border-white/10">
+                        <div class="w-12 h-12 rounded-full bg-yellow-500/20 text-yellow-500 font-bold flex items-center justify-center border border-yellow-500/30 mr-4">TS</div>
+                        <div>
+                            <p class="font-bold text-white">Tati S.</p>
+                            <p class="text-xs text-slate-500">Senior Marketing Director, SaaS</p>
                         </div>
                     </div>
-                    
-                    <!-- Відгук 3 (Roman S.) -->
-                    <div class="testimonial-card gsap-fade-in-up">
-                        <p class="testimonial-quote mb-6">
-                            "Oleksandr is a strong specialist in Google Ads and YouTube marketing... He set up and optimized ad campaigns with large budgets, developed lead generation strategies, created briefs for video creatives, and implemented A/B testing to increase effectiveness."
-                        </p>
-                        <div class="flex items-center mt-auto pt-4 border-t border-gray-100">
-                            <!-- ‼️ ПОВЕРНУТО: Оригінальна заглушка з placehold.co -->
-                            <img src="https://placehold.co/50x50/D1FAE5/047857?text=RS" alt="Roman S." class="w-12 h-12 rounded-full object-cover mr-4">
-                            <div>
-                                <p class="font-bold text-gray-900">Roman S.</p>
-                                <p class="text-sm text-gray-500">Chief Marketing Officer, B2B</p>
-                            </div>
+                </div>
+                <!-- Testimonial 3 -->
+                <div class="glass-card p-8 rounded-2xl flex flex-col">
+                    <p class="text-slate-300 italic mb-6 flex-grow">
+                        "Oleksandr is a strong specialist in Google Ads and YouTube marketing... He set up and optimized ad campaigns with large budgets, developed lead generation strategies, created briefs for video creatives, and implemented A/B testing to increase effectiveness."
+                    </p>
+                    <div class="flex items-center pt-4 border-t border-white/10">
+                        <div class="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center border border-emerald-500/30 mr-4">RS</div>
+                        <div>
+                            <p class="font-bold text-white">Roman S.</p>
+                            <p class="text-xs text-slate-500">Chief Marketing Officer, B2B</p>
                         </div>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- 5. "Mini Case Studies" (АНОНІМІЗОВАНО) -->
-        <section id="case-studies" class="py-20 bg-indigo-50"> 
-             <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in -->
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 gsap-fade-in">Real Results in Action</h2>
-                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto gsap-fade-in">This is how I turn strategy into revenue.</p>
+    <!-- Case Studies -->
+    <section id="case-studies" class="py-24 px-6 relative">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold mb-12 text-center">Real Results in Action</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="glass-card p-8 rounded-2xl border-l-4 border-brand-accent">
+                    <h3 class="text-xl font-bold mb-4">Case: EdTech Google Ads Scaling</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><span class="text-brand-accent font-semibold">Client:</span> <span class="text-slate-300">English EdTech Startup</span></li>
+                        <li><span class="text-brand-accent font-semibold">Challenge:</span> <span class="text-slate-300">Prove and scale Google Ads as a profitable channel, matching Meta Ads.</span></li>
+                        <li><span class="text-brand-accent font-semibold">Solution:</span> <span class="text-slate-300">Scaled budgets from scratch, optimizing for profitability and efficiency.</span></li>
+                        <li><span class="text-brand-accent font-semibold">Result:</span> <span class="text-white font-bold">Confirmed Google Ads as a profitable tool in the overall strategy.</span></li>
+                    </ul>
                 </div>
-                                
-                <!-- Case Studies Grid -->
-                <!-- АНІМАЦІЯ: Додано .gsap-stagger-grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 gsap-stagger-grid">
-                                                            
-                    <!-- Кейс 1: EdTech (з відгуку Artem B.) ‼️ ПОВЕРНУТО: Оригінальний контент -->
-                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
-                    <div class="case-study-card text-left p-6 gsap-fade-in-up"> 
-                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 accent-blue mb-4">
-                            <path d="M2 3h20"></path><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"></path><path d="m7 21 5-5 5 5"></path>
-                        </svg>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Case: EdTech Google Ads Scaling</h3>
-                        <p class="text-gray-600 mb-4">
-                            <span class="font-semibold text-gray-700">Client:</span> English EdTech Startup
-                        </p>
-                        <p class="text-gray-600 mb-4">
-                            <span class="font-semibold text-gray-700">Challenge:</span> Prove and scale Google Ads as a profitable channel, matching the performance of Meta Ads.
-                        </p>
-                         <p class="text-gray-600 mb-4">
-                            <span class="font-semibold text-gray-700">Solution:</span> Scaled Google Ads budgets from scratch, optimizing for profitability and efficiency.
-                        </p>
-                        <p class="text-gray-900 font-bold accent-blue text-lg">
-                            Result: Confirmed Google Ads as an effective & profitable tool in the overall marketing strategy.
-                        </p>
-                    </div>
-
-                    <!-- Кейс 2: B2B (з відгуку Roman S.) ‼️ ПОВЕРНУТО: Оригінальний контент -->
-                    <div class="case-study-card text-left p-6 gsap-fade-in-up">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 accent-blue mb-4">
-                            <path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z"></path><path d="m6.2 5.3 3.1 3.9"></path><path d="m12.4 3.6 3.1 4"></path><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path>
-                        </svg>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Case: B2B YouTube Lead Gen</h3>
-                         <p class="text-gray-600 mb-4">
-                            <span class="font-semibold text-gray-700">Client:</span> B2B Consulting Firm
-                        </p>
-                        <p class="text-gray-600 mb-4">
-                            <span class="font-semibold text-gray-700">Challenge:</span> Manage large monthly budgets ($XX,XXX) to generate high-quality leads via Google & YouTube.
-                        </p>
-                         <p class="text-gray-600 mb-4">
-                            <span class="font-semibold text-gray-700">Solution:</span> Developed lead generation strategies, created briefs for video creatives, and implemented A/B testing to increase effectiveness.
-                        </p>
-                        <p class="text-gray-900 font-bold accent-blue text-lg">
-                            Result: Successfully set up and optimized large-scale campaigns, ensuring cost-effective, high-quality lead flow.
-                        </p>
-                    </div>
+                <div class="glass-card p-8 rounded-2xl border-l-4 border-purple-500">
+                    <h3 class="text-xl font-bold mb-4">Case: B2B YouTube Lead Gen</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><span class="text-purple-400 font-semibold">Client:</span> <span class="text-slate-300">B2B Consulting Firm</span></li>
+                        <li><span class="text-purple-400 font-semibold">Challenge:</span> <span class="text-slate-300">Manage large monthly budgets ($XX,XXX) to generate high-quality leads via Google & YouTube.</span></li>
+                        <li><span class="text-purple-400 font-semibold">Solution:</span> <span class="text-slate-300">Developed lead generation strategies, created briefs for video creatives, implemented A/B testing.</span></li>
+                        <li><span class="text-purple-400 font-semibold">Result:</span> <span class="text-white font-bold">Successfully optimized large-scale campaigns, ensuring cost-effective lead flow.</span></li>
+                    </ul>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- 6. "Your Path to Results" Block -->
-        <section id="process" class="py-20 bg-white">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in -->
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 gsap-fade-in">Your Path to Results</h2>
-                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto gsap-fade-in">My work is a transparent process, not a "black box".</p>
+    <!-- Process -->
+    <section id="process" class="py-24 px-6 border-y border-white/5 bg-brand-card/20">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold">Your Path to Results</h2>
+                <p class="mt-4 text-slate-400">My work is a transparent process, not a "black box".</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8 relative">
+                <!-- Process lines hidden on mobile -->
+                <div class="hidden md:block absolute top-12 left-[15%] right-[15%] h-0.5 bg-gradient-to-r from-brand-accent/50 via-purple-500/50 to-brand-accent/50 z-0"></div>
+                
+                <!-- Step 1 -->
+                <div class="relative z-10 text-center">
+                    <div class="w-24 h-24 mx-auto glass-card rounded-full flex items-center justify-center text-3xl font-bold text-brand-accent mb-6 shadow-[0_0_20px_rgba(59,130,246,0.2)]">01</div>
+                    <h3 class="text-xl font-bold mb-3">Discovery & Strategy</h3>
+                    <p class="text-slate-400 text-sm">Deep dive into your business, goals, and existing assets. I'll conduct an audit and present a clear strategy.</p>
                 </div>
-                                
-                <!-- Process Grid -->
-                <!-- АНІМАЦІЯ: Додано .gsap-stagger-grid -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 gsap-stagger-grid">
-                                                            
-                    <!-- Step 1 Card (ОНОВЛЕНО) -->
-                    <!-- АНІМАЦІЯ: Додано #process-card-1 -->
-                    <div id="process-card-1" class="process-card p-6 gsap-fade-in-up">
-                        <!-- НОВА Візуалізація: Воронка -->
-                        <div class="process-viz">
-                            <svg class="viz-funnel" width="80" height="60" viewBox="0 0 80 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <!-- АНІМАЦІЯ: Додано .gsap-svg-draw -->
-                                <path class="gsap-svg-draw" d="M2 2L30 2" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
-                                <path class="gsap-svg-draw" d="M50 2L78 2" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
-                                <path class="gsap-svg-draw" d="M30 2L40 28L50 2" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
-                                <path class="gsap-svg-draw" d="M28 58L52 58" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
-                                <path class="gsap-svg-draw" d="M40 28L28 58" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
-                                <path class="gsap-svg-draw" d="M40 28L52 58" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
-                            </svg>
-                        </div>
-                        <span class="text-5xl font-extrabold accent-blue mb-2 block">01</span>
-                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Discovery & Strategy</h3>
-                        <p class="text-gray-700 mb-6">
-                            We start with a deep dive into your business, goals, and existing assets. I'll conduct an audit and present a clear strategy.
-                        </p>
-                        <ul class="list-disc list-inside text-gray-600 space-y-2 mt-auto">
-                            <li>Business Goal Alignment</li>
-                            <li>Audience & Competitor Analysis</li>
-                            <li>Full Funnel Audit</li>
-                        </ul>
-                    </div>
-
-                    <!-- Step 2 Card (ОНОВЛЕНО) -->
-                    <!-- АНІМАЦІЯ: Додано #process-card-2 -->
-                    <div id="process-card-2" class="process-card p-6 gsap-fade-in-up">
-                        <!-- НОВА Візуалізація: Графік -->
-                        <div class="process-viz">
-                            <svg class="viz-graph" width="100" height="60" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <!-- АНІМАЦІЯ: Додано .gsap-svg-draw -->
-                                <path class="gsap-svg-draw" d="M2 58C14.1667 53.8333 34.6 34.6 42 30C49.4 25.4 58.6667 43.1667 70 30C81.3333 16.8333 90.1667 8.33333 98 2" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
-                                <!-- АНІМАЦІЯ: Додано .gsap-svg-dot -->
-                                <circle class="gsap-svg-dot" cx="98" cy="2" r="2" fill="#2563eb" stroke="#fff" stroke-width="2"/>
-                            </svg>
-                        </div>
-                        <span class="text-5xl font-extrabold accent-blue mb-2 block">02</span>
-                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Campaign Launch & Optimization</h3>
-                        <p class="text-gray-700 mb-6">
-                            I build and launch your campaigns based on the strategy, focusing on meticulous setup, A/B testing, and daily performance optimization.
-                        </p>
-                        <ul class="list-disc list-inside text-gray-600 space-y-2 mt-auto">
-                            <li>Tracking & Conversion Setup</li>
-                            <li>Ad Copy & Creative A/B Testing</li>
-                            <li>Budget & Bid Management</li>
-                        </ul>
-                    </div>
-
-                    <!-- Step 3 Card (ОНОВЛЕНО) -->
-                    <!-- АНІМАЦІЯ: Додано #process-card-3 -->
-                    <div id="process-card-3" class="process-card p-6 gsap-fade-in-up">
-                                                
-                        <!-- ⭐️ ОНОВЛЕНА Візуалізація: Дашборд (SVG-стиль) -->
-                        <div class="process-viz">
-                            <!-- Замінено div-блоки на SVG для стилістичної єдності -->
-                            <svg class="viz-dashboard-svg" width="80" height="60" viewBox="0 0 80 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <!-- Y-axis -->
-                                <path class="gsap-svg-draw" d="M2 58V2" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
-                                <!-- X-axis -->
-                                <path class="gsap-svg-draw" d="M2 58H78" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
-                                <!-- Bar 1 (Short) -->
-                                <path class="gsap-svg-draw" d="M25 58V30" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
-                                <!-- Bar 2 (Tall) -->
-                                <path class="gsap-svg-draw" d="M45 58V10" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
-                                <!-- Bar 3 (Medium) -->
-                                <path class="gsap-svg-draw" d="M65 58V20" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
-                            </svg>
-                        </div>
-                        <span class="text-5xl font-extrabold accent-blue mb-2 block">03</span>
-                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Reporting & Scaling</h3>
-                        <p class="text-gray-700 mb-6">
-                            You get clear, actionable reports—not just data dumps. We analyze results together and make strategic decisions to scale.
-                        </p>
-                        <ul class="list-disc list-inside text-gray-600 space-y-2 mt-auto">
-                            <li>Automated Looker Studio Reports</li>
-                            <li>Custom HTML Dashboards</li>
-                            <li>Weekly/Monthly Strategy Calls</li>
-                        </ul>
-                    </div>
+                <!-- Step 2 -->
+                <div class="relative z-10 text-center">
+                    <div class="w-24 h-24 mx-auto glass-card rounded-full flex items-center justify-center text-3xl font-bold text-purple-400 mb-6 shadow-[0_0_20px_rgba(168,85,247,0.2)]">02</div>
+                    <h3 class="text-xl font-bold mb-3">Launch & Optimization</h3>
+                    <p class="text-slate-400 text-sm">Building and launching your campaigns based on strategy, focusing on meticulous setup and daily performance optimization.</p>
+                </div>
+                <!-- Step 3 -->
+                <div class="relative z-10 text-center">
+                    <div class="w-24 h-24 mx-auto glass-card rounded-full flex items-center justify-center text-3xl font-bold text-green-400 mb-6 shadow-[0_0_20px_rgba(74,222,128,0.2)]">03</div>
+                    <h3 class="text-xl font-bold mb-3">Reporting & Scaling</h3>
+                    <p class="text-slate-400 text-sm">You get clear, actionable reports. We analyze results together and make strategic decisions to scale using custom SQL/Web dashboards.</p>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- 7. "About Me" Block -->
-        <section id="about" class="py-20 bg-indigo-50">
-            <div class="container mx-auto px-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-12 items-center">
-                    <!-- Image -->
-                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
-                    <div class="md:col-span-1 flex justify-center gsap-fade-in-up">
-                        <!-- ✅ ВИПРАВЛЕНО ШЛЯХ: Використано абсолютний шлях /image/mainportret.jpg (з папки image) -->
-                        <img src="/image/mainportret.jpg" alt="Oleksandr Serniak" class="w-64 h-64 object-cover rounded-full shadow-lg border-4 border-white" loading="lazy">
-                    </div>
-                                        
-                    <!-- Text -->
-                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in-up -->
-                    <div class="md:col-span-2 text-center md:text-left gsap-fade-in-up">
-                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900">About Me</h2>
-                        <p class="mt-4 text-lg text-gray-700">
-                            I'm a practitioner, not just a theorist. In PPC marketing since 2016, my focus has always been on one thing: results. I've managed budgets up to $60,000/month, generated over $1M in revenue for clients, and built YouTube channels to 660,000+ subscribers.
-                        </p>
-                        <!-- ‼️ ПОВЕРНУТО: Оригінальний стиль тексту -->
-                        <p class="mt-4 text-lg text-gray-700">
-                            My background in Television Directing and Finance, combined with NLP certifications, gives me a unique perspective. I don't just understand the ads; I understand the audience, the creative, and the P&L.
-                        </p>
-                    </div>
+    <!-- About Me -->
+    <section id="about" class="py-24 px-6 relative">
+        <div class="max-w-6xl mx-auto">
+            <div class="glass-card rounded-3xl p-8 md:p-12 border border-white/10 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden">
+                <!-- Background glow -->
+                <div class="absolute -right-20 -bottom-20 w-64 h-64 bg-brand-accent/20 blur-[80px] rounded-full pointer-events-none"></div>
+                
+                <div class="flex-shrink-0 relative">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-brand-accent to-purple-500 rounded-full blur-md opacity-50"></div>
+                    <img src="/image/mainportret.jpg" alt="Oleksandr Serniak" class="relative w-48 h-48 md:w-64 md:h-64 object-cover rounded-full border-4 border-brand-card shadow-2xl grayscale-[20%]">
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold mb-6">About Me</h2>
+                    <p class="text-slate-300 text-lg mb-4">
+                        I'm a practitioner, not just a theorist. In PPC marketing since 2016, my focus has always been on one thing: results. I've managed budgets up to $60,000/month, generated over $1M in revenue for clients, and built YouTube channels to 660,000+ subscribers.
+                    </p>
+                    <p class="text-slate-400 text-base">
+                        My background in Television Directing and Finance, combined with NLP certifications, gives me a unique perspective. I don't just understand the ads; I understand the audience, the creative, and the P&L. I build data-driven marketing engines that deliver measurable outcomes.
+                    </p>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- 8. Final CTA Block -->
-        <section id="contact" class="py-24 bg-white"> 
-             <div class="container mx-auto px-6 text-center">
-                 <div class="max-w-2xl mx-auto">
-                    <!-- АНІМАЦІЯ: Додано .gsap-fade-in -->
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 gsap-fade-in">Ready to Build Your Profit Engine?</h2>
-                     <p class="mt-4 text-lg text-gray-600 gsap-fade-in">
-                         Stop guessing. Let's build a predictable system for acquiring customers.
-                     </p>
-                     <p class="mt-6 text-lg text-gray-700 gsap-fade-in">
-                         Contact me on Telegram for a <span class="font-bold">free 30-minute strategy consultation</span>. We'll diagnose your biggest challenge and outline a clear path to growth. No obligation, just pure value.
-                     </p>
-                                          
-                     <!-- ‼️ ПОВЕРНУТО: Оригінальна кнопка CTA -->
-                     <div class="mt-10">
-                        <a href="https://t.me/YTube_PPC" target="_blank" rel="noopener noreferrer" class="cta-button text-lg">
-                            Contact Me on Telegram
-                        </a>
-                     </div>
-                     <p class="mt-4 text-sm text-gray-500 gsap-fade-in">Or find me on Telegram: @YTube_PPC</p>
-                 </div>
+    <!-- Call to Action -->
+    <section class="py-24 px-6 relative overflow-hidden">
+        <div class="absolute inset-0 bg-brand-accent/5"></div>
+        <div class="max-w-4xl mx-auto text-center relative z-10 glass-card p-12 rounded-3xl border border-brand-accent/20">
+            <h2 class="text-3xl md:text-5xl font-bold mb-6">Ready to scale your business?</h2>
+            <p class="text-slate-400 text-lg mb-8 max-w-2xl mx-auto">
+                Currently taking on select part-time projects and consulting roles. Let's discuss your marketing funnel and see where we can unlock hidden revenue.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <a href="https://t.me/ia_ppc" target="_blank" class="px-8 py-4 bg-brand-accent text-white font-bold rounded-lg hover:bg-blue-500 transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] w-full sm:w-auto">
+                    Message me on Telegram
+                </a>
+                <a href="mailto:sernyak.a@gmail.com" class="px-8 py-4 glass-card text-white font-medium rounded-lg hover:bg-white/5 transition-all w-full sm:w-auto">
+                    Email me
+                </a>
             </div>
-        </section>
-    </main>
+        </div>
+    </section>
 
-    <!-- ‼️ ВИДАЛЕНО: HTML модального вікна -->
-
-    <!-- ⭐️ Sticky Telegram CTA ⭐️ -->
-    <!-- ‼️ ПОВЕРНУТО: Звичайне посилання на Telegram -->
-    <a href="https://t.me/YTube_PPC" target="_blank" rel="noopener noreferrer" class="sticky-telegram-cta" aria-label="Contact me on Telegram">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8"> <!-- Змінено на fill="currentColor" для Telegram іконки -->
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.3 8.04l-1.01 4.7c-.12.54-.44.68-.88.42l-2.03-1.49-1 .96c-.11.1-.19.19-.32.19l.12-2.07 3.49-3.15c.15-.14 0-.22-.19-.13L8.9 12.25l-2.02-.62c-.53-.16-.54-.52.12-.77L15.3 8.3c.45-.16.85.11.7.64z"/>
-        </svg>
-    </a>
-    
-    <!-- 9. Footer -->
-    <footer class="bg-gray-800 text-gray-300"> 
-         <div class="container mx-auto px-6 py-8">
-            <div class="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
-                <p class="text-gray-400">&copy; 2024 Oleksandr Serniak. All rights reserved.</p>
-                <div class="flex justify-center space-x-6 mt-4 md:mt-0">
-                    <a href="https://www.linkedin.com/in/serniak" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">LinkedIn</a>
-                    <a href="https://t.me/YTube_PPC" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">Telegram</a>
-                </div>
+    <!-- Footer -->
+    <footer class="border-t border-white/5 py-8 text-center text-slate-500 text-sm">
+        <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
+            <p>© 2026 Oleksandr Serniak. Technical Marketer.</p>
+            <div class="flex space-x-6 mt-4 md:mt-0">
+                <a href="https://linkedin.com/in/serniak" target="_blank" class="hover:text-white transition-colors">LinkedIn</a>
+                <a href="https://t.me/ia_ppc" target="_blank" class="hover:text-white transition-colors">Telegram</a>
             </div>
         </div>
     </footer>
 
-    <!-- 🚀 НОВІ СКРИПТИ: GSAP + SCROLLTRIGGER 🚀 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-            
-    <script>
-        // ‼️ ВИДАЛЕНО: Функції модального вікна
-        
-        document.addEventListener('DOMContentLoaded', () => {
-
-            // ‼️ ВИДАЛЕНО: Event Listeners для модального вікна
-            
-            // --- Mobile Menu Toggle (Існуючий код) ---
-            const menuToggle = document.getElementById('menu-toggle');
-            const menuClose = document.getElementById('menu-close');
-            const mobileMenu = document.getElementById('mobile-menu');
-            const mobileLinks = document.querySelectorAll('.mobile-link');
-
-            menuToggle.addEventListener('click', () => {
-                mobileMenu.classList.add('open');
-                document.body.style.overflow = 'hidden';
-            });
-                        
-            menuClose.addEventListener('click', () => {
-                mobileMenu.classList.remove('open');
-                document.body.style.overflow = '';
-            });
-
-            // Використовуємо оригінальний цикл, щоб уникнути помилок після видалення модалу
-            mobileLinks.forEach(link => {
-                link.addEventListener('click', () => {
-                    mobileMenu.classList.remove('open');
-                    document.body.style.overflow = '';
-                });
-            });
-
-
-            // --- Smooth scroll for navigation links (Існуючий код) ---
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    if (this.getAttribute('href').startsWith('#')) {
-                        e.preventDefault();
-                        const targetElement = document.querySelector(this.getAttribute('href'));
-                        if (targetElement) {
-                            targetElement.scrollIntoView({
-                                behavior: 'smooth'
-                            });
-                        }
-                    }
-                });
-            });
-
-            // --- 🚀 GSAP Анімації (Повернуто до V8 логіки) 🚀 ---
-                                    
-            // 1. Реєструємо плагін ScrollTrigger
-            gsap.registerPlugin(ScrollTrigger);
-                                    
-            // 2. Встановлюємо початковий стан для діаграм (безпечно)
-            // Додано strokeDasharray: 1000 для коректної роботи SVG-малювання
-            gsap.set(".viz-funnel .gsap-svg-draw", { opacity: 0, strokeDashoffset: 1000, strokeDasharray: 1000 });
-            gsap.set(".viz-graph .gsap-svg-draw", { opacity: 0, strokeDashoffset: 1000, strokeDasharray: 1000 });
-            gsap.set(".viz-graph .gsap-svg-dot", { opacity: 0 });
-            gsap.set(".viz-dashboard-svg .gsap-svg-draw", { opacity: 0, strokeDashoffset: 1000, strokeDasharray: 1000 }); 
-
-            // 3. Анімація першого екрану (Hero) при завантаженні
-            gsap.to("#hero .gsap-fade-in-up", {
-                opacity: 1,
-                y: 0,
-                duration: 0.8,
-                stagger: 0.2, // Затримка 0.2с між H1, P, та кнопками
-                ease: "power3.out",
-                delay: 0.2 // Легка затримка перед початком
-            });
-
-            // 4. Загальна анімація для заголовків секцій (проста поява)
-            gsap.utils.toArray(".gsap-fade-in").forEach(el => {
-                gsap.to(el, {
-                    opacity: 1,
-                    duration: 1.2,
-                    ease: "power1.inOut",
-                    scrollTrigger: {
-                        trigger: el,
-                        start: "top 85%", // Почати, коли 85% екрану пройдено
-                        toggleActions: "play none none none" // Запустити 1 раз
-                    }
-                });
-            });
-
-            // 5. Загальна анімація для "сіток" (статистика, послуги, інструменти, ВІДГУКИ, КЕЙСИ)
-            gsap.utils.toArray(".gsap-stagger-grid").forEach(grid => {
-                const cards = grid.querySelectorAll(".gsap-fade-in-up");
-                                                
-                gsap.to(cards, {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.7,
-                    stagger: 0.15, // Плавні "сходи" для карток
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: grid,
-                        start: "top 80%",
-                        toggleActions: "play none none none"
-                    }
-                });
-            });
-
-            // 6. 🚀 ВІДНОВЛЕНО: Єдиний, надійний таймлайн для "Process"
-            const processSection = document.querySelector("#process");
-            const processCards = processSection.querySelectorAll(".process-card.gsap-fade-in-up");
-                                    
-            // Створюємо головний таймлайн для всієї секції "Process"
-            const processTimeline = gsap.timeline({
-                scrollTrigger: {
-                    trigger: processSection,
-                    start: "top 60%", // Почати, коли 60% екрану пройдено
-                    toggleActions: "play none none none" // Запустити 1 раз
-                }
-            });
-
-            // Крок 1: Анімуємо появу трьох карток "сходами"
-            processTimeline.to(processCards, {
-                opacity: 1,
-                y: 0,
-                duration: 0.7,
-                stagger: 0.2, // Плавні "сходи"
-                ease: "power3.out"
-            });
-                        
-            // Крок 2: Одночасно з картками (або з легкою затримкою) анімуємо діаграми
-            
-            // Анімація Воронки
-            processTimeline.to(".viz-funnel .gsap-svg-draw", {
-                opacity: 1,
-                strokeDashoffset: 0,
-                duration: 1,
-                stagger: 0.1, 
-                ease: "power1.inOut"
-            }, "0.2"); 
-            // Анімація Графіку 
-            processTimeline.to(".viz-graph .gsap-svg-draw", {
-                opacity: 1,
-                strokeDashoffset: 0,
-                duration: 1.2,
-                ease: "power1.inOut"
-            }, "0.5"); 
-                        
-            processTimeline.to(".viz-graph .gsap-svg-dot", {
-                opacity: 1,
-                duration: 0.3
-            }, "1.5"); 
-                        
-            // Анімація Дашборду (SVG-стиль)
-            processTimeline.to(".viz-dashboard-svg .gsap-svg-draw", { 
-                opacity: 1,
-                strokeDashoffset: 0,
-                duration: 1,
-                stagger: 0.15, // Малюємо осі та стовпчики по черзі
-                ease: "power1.inOut"
-            }, "0.8"); 
-                                    
-            // 7. Спеціальна анімація для секції "About Me"
-            const aboutTimeline = gsap.timeline({
-                scrollTrigger: {
-                    trigger: "#about",
-                    start: "top 70%",
-                    toggleActions: "play none none none"
-                }
-            });
-
-            aboutTimeline
-                .to("#about .gsap-fade-in-up", {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.8,
-                    stagger: 0.3, // Спочатку фото, потім текст
-                    ease: "power3.out"
-                });
-        });
-    </script>
 </body>
 </html>
