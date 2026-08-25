@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="uk" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Олександр Сєрняк | Що я будую за допомогою ШІ</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Портфоліо AI-систем: астрологічний SaaS з оплатами, аналітичний дашборд воронки з ШІ, розпізнавання банківських виписок, аналіз дзвінків, генерація контенту, автопостинг в Instagram.">
+    <link rel="canonical" href="https://ppcmarketing.pro/ai/" />
+    <meta property="og:title" content="Олександр Сєрняк — що я будую за допомогою ШІ" />
+    <meta property="og:description" content="Не сайти, а системи, які приймають гроші й доставляють результат без участі людини. Шість реальних проєктів і технології під ними." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://ppcmarketing.pro/ai/" />
+    <meta property="og:image" content="https://ppcmarketing.pro/image/mainportret.jpg" />
+    <meta property="og:locale" content="uk_UA" />
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#0B0F19', // Deep dark slate
+                            card: '#151C2C', // Slightly lighter for cards
+                            accent: '#3B82F6', // Blue accent
+                            glow: 'rgba(59, 130, 246, 0.15)',
+                        }
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0B0F19;
+            color: #F8FAFC;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(21, 28, 44, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #60A5FA, #A78BFA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        /* Scroll reveal — only active when JS is available */
+        .js .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .js .reveal.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        a:focus-visible,
+        button:focus-visible {
+            outline: 2px solid #3B82F6;
+            outline-offset: 3px;
+            border-radius: 4px;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
+            .js .reveal { opacity: 1; transform: none; }
+        }
+    </style>
+</head>
+
+<body class="antialiased selection:bg-brand-accent selection:text-white">
+    <script>document.documentElement.classList.add('js');</script>
+
+    <!-- Background Effects -->
+    <div class="fixed inset-0 z-[-1] pointer-events-none">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-brand-glow blur-[100px] rounded-full opacity-50"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-card border-b border-white/5 transition-all duration-300">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center gap-4">
+            <a href="/ai/" class="leading-tight cursor-pointer">
+                <span class="block text-lg font-bold tracking-tight text-white">Олександр <span class="text-brand-accent">Сєрняк</span></span>
+                <span class="block text-[11px] font-medium tracking-wide text-slate-400">AI-системи та автоматизація</span>
+            </a>
+            <div class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300">
+                <a href="#projects" class="hover:text-white transition-colors cursor-pointer">Проєкти</a>
+                <a href="#how" class="hover:text-white transition-colors cursor-pointer">Як я працюю</a>
+                <a href="/" class="text-slate-500 hover:text-slate-300 transition-colors cursor-pointer">EN</a>
+            </div>
+            <a href="https://t.me/ai_ppc" target="_blank" rel="noopener" class="shrink-0 px-5 py-2.5 bg-brand-accent hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] cursor-pointer">
+                Написати
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="relative pt-32 md:pt-40 pb-16 md:pb-20 px-6">
+        <div class="max-w-4xl mx-auto space-y-8 animate-fade-in-up">
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full glass-card border border-brand-accent/30 text-sm font-medium text-blue-400">
+                <span class="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></span>
+                <span>Відкритий до нових замовлень</span>
+            </div>
+
+            <h1 class="text-4xl md:text-6xl font-bold leading-tight tracking-tight">
+                Що я будую <span class="gradient-text">за допомогою ШІ</span>
+            </h1>
+
+            <p class="text-lg text-slate-400 leading-relaxed">
+                Мене звати <strong class="text-slate-200">Олександр Сєрняк</strong>, я технічний PPC-маркетолог із 2016 року.
+                Я не «роблю сайти» — я будую системи, які приймають гроші й доставляють результат без участі людини:
+                від форми оплати й розрахунків до звіту, який сам приходить клієнту на пошту.
+                Проєктування, код, деплой і підтримка — самостійно, з ШІ як інструментом розробки.
+            </p>
+
+            <div class="flex flex-wrap gap-4 pt-2">
+                <a href="#projects" class="px-7 py-3.5 bg-white text-brand-dark font-bold rounded-lg hover:bg-slate-200 transition-all cursor-pointer">
+                    Подивитись проєкти
+                </a>
+                <a href="mailto:sernyak.a@gmail.com" class="px-7 py-3.5 glass-card text-white font-medium rounded-lg hover:bg-white/5 transition-all cursor-pointer">
+                    Написати на пошту
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects -->
+    <section id="projects" class="py-16 md:py-24 px-6 relative">
+        <div class="max-w-6xl mx-auto">
+            <div class="mb-12 md:mb-16 reveal">
+                <h2 class="text-sm font-semibold text-brand-accent tracking-widest uppercase mb-3">Проєкти</h2>
+                <h3 class="text-3xl md:text-4xl font-bold">Шість систем, які я побудував</h3>
+                <p class="mt-4 text-slate-400 max-w-2xl">
+                    Для кожної — що це, на чому зроблено і чи є що показати просто зараз.
+                    Частина проєктів закрита автентифікацією або містить дані клієнтів, тому там чесно написано «демо за запитом».
+                </p>
+            </div>
+
+            <!-- 01 — DestinyCode -->
+            <article class="glass-card rounded-2xl p-7 md:p-10 mb-6 border-l-4 border-purple-500 reveal">
+                <div class="flex flex-col md:flex-row md:items-start md:gap-10">
+                    <div class="md:flex-1">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="text-sm font-bold text-purple-400">01</span>
+                            <span class="inline-block text-[11px] font-semibold text-purple-400 bg-purple-500/10 px-2.5 py-0.5 rounded-full">Живий продукт</span>
+                        </div>
+                        <h4 class="text-2xl md:text-3xl font-bold mb-4">DestinyCode — астрологічний SaaS під ключ</h4>
+                        <p class="text-slate-400 leading-relaxed mb-4">
+                            Повний цикл без участі людини: клієнтка вводить дані народження, система рахує натальну карту,
+                            ШІ пише персональний звіт, PDF формується й приходить на пошту.
+                            Оплата — через Monobank Acquiring, зі збереженими картками й автоматичними поверненнями.
+                        </p>
+                        <p class="text-slate-300 text-sm mb-6">
+                            Через систему пройшло <strong class="text-white">120 реальних оплат</strong>.
+                        </p>
+                    </div>
+                    <div class="md:w-72 md:shrink-0">
+                        <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-3">Технології</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Cloud Functions (Node 22, 23 функції)</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Vertex AI / Gemini з каскадом резервних моделей</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firestore</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Puppeteer (PDF)</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Resend</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">2 Telegram-боти</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Meta CAPI</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Cloud Tasks + Cloud Scheduler</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-6 mt-2 border-t border-white/10">
+                    <a href="https://destinycode.online" target="_blank" rel="noopener" class="inline-flex items-center text-sm font-semibold text-purple-400 hover:text-purple-300 transition-colors cursor-pointer">
+                        destinycode.online
+                        <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+                </div>
+            </article>
+
+            <!-- 02 — Analytics dashboard (featured) -->
+            <article class="glass-card rounded-3xl p-7 md:p-10 mb-6 border border-brand-accent/30 shadow-[0_0_60px_rgba(59,130,246,0.08)] relative overflow-hidden reveal">
+                <div class="absolute -right-24 -top-24 w-72 h-72 bg-brand-accent/20 blur-[90px] rounded-full pointer-events-none" aria-hidden="true"></div>
+
+                <div class="relative grid lg:grid-cols-2 gap-10 items-center">
+                    <div>
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="text-sm font-bold text-brand-accent">02</span>
+                            <span class="inline-block text-[11px] font-semibold text-brand-accent bg-blue-500/10 px-2.5 py-0.5 rounded-full">Демо з тестовими даними</span>
+                        </div>
+                        <h4 class="text-2xl md:text-3xl font-bold mb-4">Аналітичний дашборд воронки з ШІ-співрозмовником</h4>
+                        <p class="text-slate-400 leading-relaxed mb-4">
+                            Дашборд моделювання маркетингової воронки: підтягує дані з Meta Ads, рахує сценарії
+                            («що буде, якщо змінити бюджет або конверсію на кроці») і має вбудований ШІ,
+                            з яким можна просто поговорити про ці цифри — запитати, чому падає ланка, і отримати відповідь по своїх даних.
+                        </p>
+                        <p class="text-slate-300 text-sm mb-6">
+                            За посиланням — спеціально зібрана демо-версія з вигаданими даними, без бекенду. Можна клікати все.
+                        </p>
+
+                        <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-3">Технології</p>
+                        <div class="flex flex-wrap gap-2 mb-8">
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">React 19</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">TypeScript</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Vite</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Tailwind</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Recharts</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Meta Marketing API</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Gemini</span>
+                        </div>
+
+                        <a href="https://destinycode-analytics-demo.web.app" target="_blank" rel="noopener" class="inline-flex items-center px-7 py-3.5 bg-brand-accent hover:bg-blue-500 text-white font-semibold rounded-lg transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] cursor-pointer">
+                            Відкрити демо
+                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </a>
+                    </div>
+
+                    <!-- Abstract, data-free illustration -->
+                    <div class="relative" aria-hidden="true">
+                        <div class="glass-card rounded-2xl border border-white/10 p-5 md:p-6 shadow-2xl">
+                            <div class="flex items-center justify-between mb-6">
+                                <div class="space-y-1.5">
+                                    <div class="w-24 h-2 rounded-full bg-white/20"></div>
+                                    <div class="w-16 h-2 rounded-full bg-white/10"></div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <div class="w-2 h-2 rounded-full bg-slate-600"></div>
+                                    <div class="w-2 h-2 rounded-full bg-slate-600"></div>
+                                    <div class="w-2 h-2 rounded-full bg-slate-600"></div>
+                                </div>
+                            </div>
+
+                            <svg viewBox="0 0 320 150" class="w-full h-auto mb-6" role="presentation">
+                                <line x1="0" y1="30" x2="320" y2="30" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+                                <line x1="0" y1="70" x2="320" y2="70" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+                                <line x1="0" y1="110" x2="320" y2="110" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+                                <line x1="0" y1="149" x2="320" y2="149" stroke="rgba(255,255,255,0.08)" stroke-width="1" />
+                                <rect x="6"   y="100" width="34" height="49"  rx="4" fill="rgba(255,255,255,0.06)" />
+                                <rect x="52"  y="82"  width="34" height="67"  rx="4" fill="rgba(255,255,255,0.06)" />
+                                <rect x="98"  y="90"  width="34" height="59"  rx="4" fill="rgba(255,255,255,0.06)" />
+                                <rect x="144" y="62"  width="34" height="87"  rx="4" fill="rgba(255,255,255,0.10)" />
+                                <rect x="190" y="46"  width="34" height="103" rx="4" fill="rgba(255,255,255,0.10)" />
+                                <rect x="236" y="24"  width="34" height="125" rx="4" fill="url(#barGrad)" />
+                                <rect x="282" y="54"  width="34" height="95"  rx="4" fill="rgba(255,255,255,0.10)" />
+                                <path d="M23 92 L69 76 L115 80 L161 54 L207 40 L253 18 L299 44" fill="none" stroke="#A78BFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.9" />
+                                <defs>
+                                    <linearGradient id="barGrad" x1="0" y1="1" x2="0" y2="0">
+                                        <stop offset="0%" stop-color="#3B82F6" />
+                                        <stop offset="100%" stop-color="#A78BFA" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+
+                            <div class="space-y-3 pt-4 border-t border-white/10">
+                                <div class="flex justify-end">
+                                    <div class="max-w-[70%] rounded-2xl rounded-br-sm bg-brand-accent/20 border border-brand-accent/30 px-3 py-2 space-y-1.5">
+                                        <div class="w-28 h-1.5 rounded-full bg-blue-300/40"></div>
+                                        <div class="w-20 h-1.5 rounded-full bg-blue-300/30"></div>
+                                    </div>
+                                </div>
+                                <div class="flex justify-start">
+                                    <div class="max-w-[80%] rounded-2xl rounded-bl-sm bg-white/5 border border-white/10 px-3 py-2 space-y-1.5">
+                                        <div class="w-40 h-1.5 rounded-full bg-white/20"></div>
+                                        <div class="w-32 h-1.5 rounded-full bg-white/15"></div>
+                                        <div class="w-24 h-1.5 rounded-full bg-white/10"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-center text-[11px] text-slate-500 mt-3">Схематична ілюстрація інтерфейсу. Даних клієнтів тут немає.</p>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 03–06 grid -->
+            <div class="grid md:grid-cols-2 gap-6">
+
+                <!-- 03 — Bank statements -->
+                <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-sm font-bold text-teal-400">03</span>
+                        <div class="w-9 h-9 bg-teal-500/10 rounded-lg flex items-center justify-center text-teal-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">ШІ-розпізнавання банківських виписок</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-5">
+                        Фінансовий застосунок, де виписка у форматі PDF, XLSX, DOCX або CSV перетворюється на структуровані транзакції:
+                        розпізнавання через ШІ, виявлення дублікатів, зшивання внутрішніх переказів між своїми рахунками,
+                        точна грошова арифметика без похибок округлення і синхронізація з Google Sheets.
+                    </p>
+                    <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">React 19</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Vite</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Tailwind 4</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Cloud Functions</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Vertex AI / Gemini зі структурованою схемою відповіді</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">pdf.js</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">тести на грошову логіку</span>
+                    </div>
+                    <div class="mt-auto pt-5 border-t border-white/10">
+                        <span class="inline-flex items-start text-sm font-medium text-slate-500">
+                            <svg class="w-4 h-4 mr-1.5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            Демо за запитом
+                        </span>
+                    </div>
+                </article>
+
+                <!-- 04 — Call intelligence -->
+                <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-sm font-bold text-green-400">04</span>
+                        <div class="w-9 h-9 bg-green-500/10 rounded-lg flex items-center justify-center text-green-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 18v-6a9 9 0 0118 0v6m0 0a3 3 0 01-3 3h-1a1 1 0 01-1-1v-4a1 1 0 011-1h4M3 18a3 3 0 003 3h1a1 1 0 001-1v-4a1 1 0 00-1-1H3"></path></svg>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">AI Call Intelligence — аналіз дзвінків відділу продажів</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                        Запис дзвінка перетворюється на транскрипцію з розділенням спікерів, а далі — на резюме для керівника,
+                        список дій, оцінку настрою клієнта, скоринг ліда від 1 до 10 і автозаповнену CRM-картку.
+                        Керівник не переслуховує години розмов, а читає структуровану вижимку.
+                    </p>
+                    <p class="text-slate-300 text-sm mb-5">
+                        Обробка 100 дзвінків по 5 хвилин коштує близько <strong class="text-white">$3,5 на місяць</strong> — це перевірена оцінка з проєкту.
+                    </p>
+                    <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Google Cloud Speech-to-Text v2</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Gemini на Vertex AI зі структурованим виводом</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Functions</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Storage</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firestore</span>
+                    </div>
+                    <div class="mt-auto pt-5 border-t border-white/10">
+                        <span class="inline-flex items-start text-sm font-medium text-slate-500">
+                            <svg class="w-4 h-4 mr-1.5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            Демо за запитом
+                        </span>
+                    </div>
+                </article>
+
+                <!-- 05 — Voice content generator -->
+                <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-sm font-bold text-amber-400">05</span>
+                        <div class="w-9 h-9 bg-amber-500/10 rounded-lg flex items-center justify-center text-amber-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">Генератор контенту в голосі конкретної людини</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-5">
+                        Система вчиться на архіві текстів експерта: розбирає стиль за 11 вимірами й тримає корпус реальних постів,
+                        а потім пише нові тексти його голосом, а не «нейтральним ШІ-тоном».
+                        Обгорнуто в мобільний застосунок, щоб експерт генерував пости просто з телефона.
+                    </p>
+                    <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">React</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">TypeScript</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Vite</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">PWA</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Cloud Functions</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Gemini і Claude через єдиний інтерфейс провайдерів</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">ключі лише на бекенді</span>
+                    </div>
+                    <div class="mt-auto pt-5 border-t border-white/10">
+                        <span class="inline-flex items-start text-sm font-medium text-slate-500">
+                            <svg class="w-4 h-4 mr-1.5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            Демо за запитом — застосунок за автентифікацією
+                        </span>
+                    </div>
+                </article>
+
+                <!-- 06 — Instagram autoposting -->
+                <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-sm font-bold text-rose-400">06</span>
+                        <div class="w-9 h-9 bg-rose-500/10 rounded-lg flex items-center justify-center text-rose-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">Автоматична публікація в Instagram за календарем</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-5">
+                        Конвеєр без ручної роботи: контент-календар ведеться в Notion, система генерує зображення,
+                        публікує карусель в Instagram через офіційний API і повертає статус публікації назад у Notion.
+                        Працює за розкладом — людина потрібна лише щоб наповнити календар.
+                    </p>
+                    <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Python</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Notion API</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Instagram Graph API</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">генерація зображень</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">планувальник</span>
+                    </div>
+                    <div class="mt-auto pt-5 border-t border-white/10">
+                        <span class="inline-flex items-start text-sm font-medium text-slate-500">
+                            <svg class="w-4 h-4 mr-1.5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            Демо за запитом
+                        </span>
+                    </div>
+                </article>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- How I work -->
+    <section id="how" class="py-16 md:py-24 px-6 border-y border-white/5 bg-brand-card/20">
+        <div class="max-w-3xl mx-auto reveal">
+            <h2 class="text-sm font-semibold text-brand-accent tracking-widest uppercase mb-3">Як я працюю</h2>
+            <h3 class="text-2xl md:text-3xl font-bold mb-6">Одна людина відповідає за весь шлях</h3>
+            <p class="text-slate-400 text-lg leading-relaxed">
+                Беру задачу цілком: архітектура, код, інтеграції, деплой і підтримка — без передачі між виконавцями й без загублених домовленостей.
+                Починаю не з дизайну, а з питання, який саме результат система має видавати сама, без людини, і що вважається доказом, що вона працює.
+                ШІ для мене — інструмент розробки, який дає швидкість, але за архітектуру, гроші й дані відповідаю я.
+            </p>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section class="py-16 md:py-24 px-6 relative overflow-hidden">
+        <div class="absolute inset-0 bg-brand-accent/5" aria-hidden="true"></div>
+        <div class="max-w-4xl mx-auto text-center relative z-10 glass-card p-8 md:p-12 rounded-3xl border border-brand-accent/20 reveal">
+            <h2 class="text-2xl md:text-4xl font-bold mb-5">Маєте задачу — напишіть</h2>
+            <p class="text-slate-400 text-base md:text-lg mb-8 max-w-2xl mx-auto">
+                Опишіть, що має робити система і який результат ви хочете отримати на виході.
+                Відповім, чи це реально зробити, за скільки й з чого починати. Якщо задача не моя — так і скажу.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <a href="https://t.me/ai_ppc" target="_blank" rel="noopener" class="px-8 py-4 bg-brand-accent text-white font-bold rounded-lg hover:bg-blue-500 transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] w-full sm:w-auto cursor-pointer">
+                    Telegram: @ai_ppc
+                </a>
+                <a href="mailto:sernyak.a@gmail.com" class="px-8 py-4 glass-card text-white font-medium rounded-lg hover:bg-white/5 transition-all w-full sm:w-auto cursor-pointer break-words">
+                    sernyak.a@gmail.com
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 py-8 text-center text-slate-500 text-sm">
+        <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p>© 2026 Олександр Сєрняк. Технічний PPC-маркетолог.</p>
+            <div class="flex flex-wrap justify-center gap-6">
+                <a href="/" class="hover:text-white transition-colors cursor-pointer">English version</a>
+                <a href="https://linkedin.com/in/serniak" target="_blank" rel="noopener" class="hover:text-white transition-colors cursor-pointer">LinkedIn</a>
+                <a href="https://t.me/ai_ppc" target="_blank" rel="noopener" class="hover:text-white transition-colors cursor-pointer">Telegram</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var items = document.querySelectorAll('.reveal');
+            if (!('IntersectionObserver' in window)) {
+                items.forEach(function (el) { el.classList.add('is-visible'); });
+                return;
+            }
+            var observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { rootMargin: '0px 0px -60px 0px', threshold: 0.05 });
+            items.forEach(function (el) { observer.observe(el); });
+        })();
+    </script>
+
+</body>
+</html>
