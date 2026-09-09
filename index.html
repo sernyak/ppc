@@ -66,6 +66,8 @@
         /* висота сцени зарезервована наперед — інакше макет стрибає до старту скрипта */
         #fx-scene { aspect-ratio: 360 / 346; }
         @media (min-width: 1024px) { #fx-scene { aspect-ratio: 600 / 660; } }
+        /* планшет: сцена в одній колонці, але не на всю її ширину */
+        @media (max-width: 1023px) { #fx-scene { max-width: 520px; margin-left: auto; margin-right: auto; } }
         .gradient-text {
             background: linear-gradient(to right, #60A5FA, #A78BFA);
             -webkit-background-clip: text;
@@ -104,7 +106,7 @@
     <section class="relative pt-32 lg:pt-40 pb-20 px-6 min-h-[90vh] flex items-center">
         <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-6 lg:gap-12 items-center animate-fade-in-up">
             <div class="contents lg:block lg:space-y-8">
-                <div class="order-1 inline-flex items-center space-x-2 px-3 py-1 rounded-full glass-card border border-brand-accent/30 text-sm font-medium text-blue-400">
+                <div class="order-1 justify-self-start inline-flex items-center space-x-2 px-3 py-1 rounded-full glass-card border border-brand-accent/30 text-sm font-medium text-blue-400">
                     <span class="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></span>
                     <span>Available for new projects</span>
                 </div>
@@ -470,14 +472,17 @@
   var MONO = '"JetBrains Mono", ui-monospace, Menlo, monospace';
   var cv = document.getElementById('fx-funnel');
   var sceneEl = document.getElementById('fx-scene');
-  var heroEl = sceneEl ? sceneEl.closest('section') : null;
+  if (!cv || !sceneEl || !cv.getContext) return;
+  var heroEl = sceneEl.closest('section');
   var ctx = cv.getContext('2d');
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var lgMQ = window.matchMedia ? window.matchMedia('(min-width:1024px)') : null;
+  function isWide(){ return !!(lgMQ && lgMQ.matches); }
 
   /* ---------- конфіги сцени в дизайн-пікселях ---------- */
   var WIDE = {
     w:600, h:660, cx:300, topY:150, topR:170, botY:436, botR:44, k:0.30,
-    basinY:472, plate:{ y:512, w:334, h:92, big:32 }, fs:12, N:130, ribs:11,
+    basinY:472, plate:{ y:512, w:334, h:92, big:32 }, fs:12, N:130, ribs:11, dot:2.1, story:0.40,
     top:{ t:'Ad spend', s:'$60,000 / mo' },
     stages:[
       { u:0.34, side: 1, c:'#60A5FA', t:'Tracked end-to-end',   s:'server-side + custom API' },
@@ -486,9 +491,12 @@
   };
   var NARROW = {
     w:360, h:346, cx:180, topY:80, topR:106, botY:222, botR:27, k:0.30,
-    basinY:244, plate:{ y:274, w:266, h:60, big:22 }, fs:10, N:64, ribs:8,
+    basinY:244, plate:{ y:274, w:266, h:60, big:22 }, fs:10, N:64, ribs:8, dot:1.5, story:0.55,
     top:{ t:'Ad spend', s:'$60,000 / mo' },
-    stages:[ { u:0.68, side:-1, c:'#22C55E', t:'400,000+ conversions', s:'' } ]
+    stages:[
+      { u:0.34, side: 1, c:'#60A5FA', t:'', s:'' },                       /* кільце без підпису */
+      { u:0.68, side:-1, c:'#22C55E', t:'400,000+ conversions', s:'' }
+    ]
   };
   var cfg = WIDE, scale = 1, dpr = Math.min(window.devicePixelRatio || 1, 2);
 
@@ -497,19 +505,38 @@
   function seedParticles(n){
     P.length = 0;
     for (var i = 0; i < n; i++){
-      P.push({
-        u: i / n,
-        a: Math.random() * Math.PI * 2,
-        lane: 0.34 + Math.random() * 0.56,
-        sp: 0.82 + Math.random() * 0.42,
-        r: 1 + Math.random()
-      });
+      P.push({ u: i / n, a: Math.random() * Math.PI * 2, lane: 0.34 + Math.random() * 0.56,
+               sp: 0.82 + Math.random() * 0.42, r: 1 + Math.random(), pop: 0 });
     }
+  }
+
+  /* сяйливі крапки малюються один раз у спрайти — далі лише штампуються,
+     без розмитих тіней у кожному кадрі (на Safari це найдорожча операція) */
+  var SPR = 48, SPR_R = 10, sprites = {};
+  function sprite(rgb){
+    var key = rgb.join(',');
+    if (sprites[key]) return sprites[key];
+    var c = document.createElement('canvas'); c.width = c.height = SPR;
+    var g = c.getContext('2d');
+    g.fillStyle = 'rgb(' + key + ')'; g.shadowColor = g.fillStyle; g.shadowBlur = 14;
+    g.beginPath(); g.arc(SPR / 2, SPR / 2, SPR_R, 0, Math.PI * 2); g.fill();
+    g.shadowBlur = 0; g.fillStyle = 'rgba(255,255,255,.5)';
+    g.beginPath(); g.arc(SPR / 2, SPR / 2, SPR_R * 0.42, 0, Math.PI * 2); g.fill();
+    sprites[key] = c; return c;
+  }
+  var C_RAW = [203,213,225], C_TRK = [96,165,250], C_CNV = [34,197,94];
+  /* стан частинки: витрата → відстежене → конверсія; на межах — суміш двох спрайтів */
+  function stateOf(u){
+    if (u < 0.34) return [C_RAW, null, 0];
+    if (u < 0.40) return [C_RAW, C_TRK, (u - 0.34) / 0.06];
+    if (u < 0.72) return [C_TRK, null, 0];
+    if (u < 0.78) return [C_TRK, C_CNV, (u - 0.72) / 0.06];
+    return [C_CNV, null, 0];
   }
 
   function layout(){
     var cssW = sceneEl.clientWidth || 600;
-    cfg = window.matchMedia('(min-width:1024px)').matches ? WIDE : NARROW;
+    cfg = isWide() ? WIDE : NARROW;
     scale = cssW / cfg.w;
     cv.style.width = cssW + 'px';
     cv.style.height = Math.round(cfg.h * scale) + 'px';
@@ -520,12 +547,15 @@
 
   /* ---------- стан ---------- */
   var t = 0, intro = 0, flowBoost = 0, prevY = window.scrollY;
-  var splashes = [];                                  // кільця в чаші від кожного, хто долетів
   var mx = 0, my = 0, tmx = 0, tmy = 0, moved = false;
-  var last = 0, running = false, visible = true;
+  var last = 0, running = false, frameNo = 0;
+  var splashes = [];                 // кільця в чаші від тих, хто долетів
+  var hits = [];                     // спалахи на кільцях етапів від тих, хто крізь них пройшов
+  var shown = 0;                     // фантомна сума — наздоганяє ціль з інерцією
+  var plateFlash = 0, flashArmed = true;
 
   function progress(){
-    var h = (heroEl ? heroEl.offsetHeight : window.innerHeight) * 0.60;
+    var h = (heroEl ? heroEl.offsetHeight : window.innerHeight) * cfg.story;
     return Math.max(0, Math.min(1, window.scrollY / Math.max(1, h)));
   }
 
@@ -539,7 +569,7 @@
     g.closePath();
   }
   function chip(g, cx, cy, title, sub, color, fs, maxX, alpha){
-    if (alpha <= 0.01) return;
+    if (alpha <= 0.01 || !title) return;
     g.save(); g.globalAlpha = alpha;
     g.font = '600 ' + fs + 'px ' + FONT;
     var w1 = g.measureText(title).width;
@@ -568,19 +598,8 @@
     }
     g.restore();
   }
-  function mix(a, b, x){ return a + (b - a) * x; }
   function clamp01(x){ return x < 0 ? 0 : x > 1 ? 1 : x; }
-  /* колір частинки: витрата → відстежене → конверсія */
-  var C_RAW = [203,213,225], C_TRK = [96,165,250], C_CNV = [34,197,94];
-  function stateColor(u){
-    var c;
-    if (u < 0.34)      c = C_RAW;
-    else if (u < 0.44) { var k = (u - 0.34) / 0.10; c = [mix(C_RAW[0],C_TRK[0],k), mix(C_RAW[1],C_TRK[1],k), mix(C_RAW[2],C_TRK[2],k)]; }
-    else if (u < 0.72) c = C_TRK;
-    else if (u < 0.82) { var k2 = (u - 0.72) / 0.10; c = [mix(C_TRK[0],C_CNV[0],k2), mix(C_TRK[1],C_CNV[1],k2), mix(C_TRK[2],C_CNV[2],k2)]; }
-    else               c = C_CNV;
-    return c;
-  }
+  function money(v){ return '$' + (Math.round(v / 100) * 100).toLocaleString('en-US'); }
 
   /* ---------- один кадр ---------- */
   function draw(){
@@ -597,14 +616,6 @@
 
     function R(u){ return o.topR + (o.botR - o.topR) * u; }
     function Y(u){ return o.topY + (o.botY - o.topY) * u; }
-    function sil(sc, y0, y1, r0, r1){
-      g.beginPath();
-      g.moveTo(cx - r0 * sc, y0);
-      g.ellipse(cx, y0, r0 * sc, r0 * sc * kk, 0, Math.PI, Math.PI * 2);
-      g.lineTo(cx + r1 * sc, y1);
-      g.ellipse(cx, y1, r1 * sc, r1 * sc * kk, 0, 0, Math.PI);
-      g.closePath();
-    }
 
     /* сяйво довкола */
     var mid = (o.topY + o.botY) / 2;
@@ -616,7 +627,12 @@
 
     /* корпус */
     g.globalAlpha = ei;
-    sil(1, o.topY, o.botY, o.topR, o.botR);
+    g.beginPath();
+    g.moveTo(cx - o.topR, o.topY);
+    g.ellipse(cx, o.topY, o.topR, o.topR * kk, 0, Math.PI, Math.PI * 2);
+    g.lineTo(cx + o.botR, o.botY);
+    g.ellipse(cx, o.botY, o.botR, o.botR * kk, 0, 0, Math.PI);
+    g.closePath();
     var bg = g.createLinearGradient(0, o.topY, 0, o.botY);
     bg.addColorStop(0, 'rgba(59,130,246,.13)');
     bg.addColorStop(1, 'rgba(34,197,94,' + (0.05 + 0.08 * p) + ')');
@@ -626,37 +642,39 @@
     /* кільця машини — по черзі «дихають», знизу вгору при вступі */
     for (var i = 1; i < o.ribs; i++){
       var u = i / o.ribs;
-      if (u < 1 - ei * 1.08) continue;                            // вступ: збирається знизу вгору
+      if (u < 1 - ei * 1.08) continue;
       var pulse = 0.5 + 0.5 * Math.sin(t * 1.7 - i * 0.62);
       g.strokeStyle = 'rgba(148,163,184,' + (0.05 + 0.075 * pulse) + ')';
       g.lineWidth = 1;
       g.beginPath(); g.ellipse(cx, Y(u), R(u), R(u) * kk, 0, 0, Math.PI * 2); g.stroke();
     }
 
-    /* частинки: спершу дальні, потім ближні */
+    /* частинки: спершу дальні, потім ближні; штампуються спрайтами */
     var pts = [];
     for (var j = 0; j < P.length; j++){
       var q = P[j];
       if (q.u < 1 - ei * 1.15) continue;
-      var rr2 = R(q.u) * q.lane;
-      var d = Math.sin(q.a);
+      var rr2 = R(q.u) * q.lane, d = Math.sin(q.a);
+      var st = stateOf(q.u);
       pts.push({
-        x: cx + rr2 * Math.cos(q.a),
-        y: Y(q.u) + rr2 * kk * d,
-        c: stateColor(q.u),
-        s: (o === WIDE ? 2.1 : 1.5) * q.r * (0.72 + 0.28 * (d + 1) / 2),
-        al: (0.34 + 0.5 * (d + 1) / 2) * ei
+        x: cx + rr2 * Math.cos(q.a), y: Y(q.u) + rr2 * kk * d,
+        s: o.dot * q.r * (0.72 + 0.28 * (d + 1) / 2) * (1 + 0.85 * q.pop),
+        al: Math.min(1, (0.34 + 0.5 * (d + 1) / 2) * (1 + 0.6 * q.pop)) * ei,
+        c0: st[0], c1: st[1], mixk: st[2]
       });
     }
     pts.sort(function(a, b){ return a.y - b.y; });
+    var stretch = 1 + 1.9 * flowBoost;
     for (var m = 0; m < pts.length; m++){
-      var s = pts[m];
-      g.globalAlpha = s.al;
-      g.fillStyle = 'rgb(' + (s.c[0] | 0) + ',' + (s.c[1] | 0) + ',' + (s.c[2] | 0) + ')';
-      g.shadowColor = g.fillStyle; g.shadowBlur = 7;
-      g.beginPath(); g.ellipse(s.x, s.y, s.s, s.s * (1 + 1.9 * flowBoost), 0, 0, Math.PI * 2); g.fill();
+      var s = pts[m], w = s.s * (SPR / SPR_R), h = w * stretch;
+      if (s.c1){
+        g.globalAlpha = s.al * (1 - s.mixk); g.drawImage(sprite(s.c0), s.x - w / 2, s.y - h / 2, w, h);
+        g.globalAlpha = s.al * s.mixk;       g.drawImage(sprite(s.c1), s.x - w / 2, s.y - h / 2, w, h);
+      } else {
+        g.globalAlpha = s.al; g.drawImage(sprite(s.c0), s.x - w / 2, s.y - h / 2, w, h);
+      }
     }
-    g.shadowBlur = 0; g.globalAlpha = ei;
+    g.globalAlpha = ei;
 
     /* дзеркало бюджету вгорі + блиск */
     var sh = 0.5 + 0.5 * Math.sin(t * 0.9);
@@ -671,42 +689,48 @@
     g.beginPath(); g.ellipse(cx, o.topY, o.topR, o.topR * kk, 0, 0, Math.PI * 2); g.stroke();
 
     /* етапи: спалахують по черзі під час скролу */
-    for (var st = 0; st < o.stages.length; st++){
-      var S = o.stages[st];
-      var lit = clamp01((p - (0.16 + st * 0.30)) / 0.24);
+    for (var si = 0; si < o.stages.length; si++){
+      var S = o.stages[si];
+      var lit = clamp01((p - (0.16 + si * 0.30)) / 0.24);
       var a0 = 0.30 + 0.70 * lit;
-      var isBlue = S.c === '#60A5FA';
-      g.strokeStyle = (isBlue ? 'rgba(96,165,250,' : 'rgba(34,197,94,') + a0 + ')';
+      var blue = S.c === '#60A5FA';
+      g.strokeStyle = (blue ? 'rgba(96,165,250,' : 'rgba(34,197,94,') + a0 + ')';
       g.lineWidth = 2 + 1.6 * lit;
       g.shadowColor = g.strokeStyle; g.shadowBlur = 10 + 16 * lit;
       g.beginPath(); g.ellipse(cx, Y(S.u), R(S.u), R(S.u) * kk, 0, 0, Math.PI * 2); g.stroke();
       g.shadowBlur = 0;
-      var chx = cx + S.side * (R(S.u) + (o === WIDE ? 96 : 62));
-      chip(g, chx, Y(S.u), S.t, S.s, S.c, o.fs, o.w, ei);
+      chip(g, cx + S.side * (R(S.u) + (o === WIDE ? 96 : 62)), Y(S.u), S.t, S.s, S.c, o.fs, o.w, ei);
+    }
+    /* кожен, хто пройшов крізь кільце, лишає на ньому короткий спалах — етап «обробив» його */
+    for (var hi = 0; hi < hits.length; hi++){
+      var H = hits[hi], HS = o.stages[H.st]; if (!HS) continue;
+      var hq = 1 - H.t / 0.5;
+      g.strokeStyle = (HS.c === '#60A5FA' ? 'rgba(191,219,254,' : 'rgba(187,247,208,') + (0.9 * hq * ei) + ')';
+      g.lineWidth = 2.2 + 2.4 * hq;
+      g.beginPath(); g.ellipse(cx, Y(HS.u), R(HS.u), R(HS.u) * kk, 0, H.a - 0.24, H.a + 0.24); g.stroke();
     }
 
     /* чаша доходу */
     var bg2 = g.createRadialGradient(cx, o.basinY, 2, cx, o.basinY, o.topR * 0.9);
-    var ba = 0.30 + 0.42 * p;
-    bg2.addColorStop(0, 'rgba(74,222,128,' + ba + ')');
+    bg2.addColorStop(0, 'rgba(74,222,128,' + (0.30 + 0.42 * p) + ')');
     bg2.addColorStop(1, 'rgba(34,197,94,0)');
     g.fillStyle = bg2;
     g.beginPath(); g.ellipse(cx, o.basinY, o.topR * 0.9, o.topR * 0.9 * kk * 1.5, 0, 0, Math.PI * 2); g.fill();
-
-    /* кільця від тих, хто щойно долетів у чашу */
-    for (var si = 0; si < splashes.length; si++){
-      var SP = splashes[si], sq = SP.t / 0.6;
+    for (var pi = 0; pi < splashes.length; pi++){
+      var SP = splashes[pi], sq = SP.t / 0.6;
       var srr = (o === WIDE ? 5 : 3) + (o === WIDE ? 32 : 19) * sq;
       g.strokeStyle = 'rgba(74,222,128,' + ((1 - sq) * 0.5 * ei) + ')';
       g.lineWidth = 1.6;
       g.beginPath(); g.ellipse(cx + SP.dx * o.botR, o.basinY, srr, srr * kk * 1.3, 0, 0, Math.PI * 2); g.stroke();
     }
 
-    /* підсумок */
+    /* підсумок — рамка спалахує один раз, коли фантом «сідає» в неї */
     var pl = o.plate, px = o.cx - pl.w / 2;
-    g.globalAlpha = ei;
     g.fillStyle = 'rgba(19,26,42,.96)'; rr(g, px, pl.y, pl.w, pl.h, 14); g.fill();
-    g.strokeStyle = 'rgba(34,197,94,' + (0.34 + 0.3 * p) + ')'; g.lineWidth = 1; g.stroke();
+    g.strokeStyle = 'rgba(34,197,94,' + (0.34 + 0.3 * p + 0.6 * plateFlash) + ')';
+    g.lineWidth = 1 + 1.6 * plateFlash;
+    g.shadowColor = 'rgba(74,222,128,.9)'; g.shadowBlur = 40 * plateFlash;
+    g.stroke(); g.shadowBlur = 0;
     g.textAlign = 'center'; g.textBaseline = 'middle';
     g.fillStyle = '#94A3B8'; g.font = '500 ' + (o.fs - 1) + 'px ' + MONO;
     g.fillText('REVENUE GENERATED', o.cx, pl.y + 20);
@@ -718,11 +742,10 @@
       g.fillText('1,500+ campaigns · tracked end-to-end', o.cx, pl.y + pl.h - 17);
     }
 
-    /* фантом: сума, яку воронка наробила просто зараз. Піднімається з-під дна
-       воронки над плашкою й набігає від скролу, а наприкінці розчиняється —
-       у плашці лишається постійне $1,000,000+ */
-    var pe = 1 - Math.pow(1 - clamp01(p), 2);
-    var ghostA = clamp01(p / 0.05) * (1 - clamp01((p - 0.86) / 0.14)) * ei;
+    /* фантом: сума, яку воронка наробила просто зараз. Зʼявляється з першим
+       скролом, наздоганяє ціль з інерцією, а сягнувши мільйона — розчиняється */
+    var pe = shown / 1000000;
+    var ghostA = clamp01(p / 0.05) * (1 - clamp01((pe - 0.88) / 0.12)) * ei;
     if (ghostA > 0.012){
       var gy = o.basinY + (o === WIDE ? 18 : 12) - (o === WIDE ? 30 : 18) * pe;
       var gs = (o === WIDE ? 26 : 18) + (o === WIDE ? 17 : 9) * pe;
@@ -732,11 +755,11 @@
       g.font = '700 ' + gs.toFixed(1) + 'px ' + FONT;
       g.shadowColor = 'rgba(74,222,128,.9)'; g.shadowBlur = 18 + 16 * pe;
       g.fillStyle = 'rgba(226,252,235,' + (0.55 + 0.42 * pe) + ')';
-      g.fillText('$' + Math.round(1000000 * pe).toLocaleString('en-US'), o.cx + shear * 0.4, gy);
+      g.fillText(money(shown), o.cx + shear * 0.4, gy);
       g.shadowBlur = 0; g.restore();
     }
 
-    /* верхній чип */
+    /* верхній чип — не вилазить за край, коли воронка розвертається */
     var topChipY = Math.max(o.fs + 15, o.topY - o.topR * kk - (o === WIDE ? 30 : 22));
     chip(g, o.cx, topChipY, o.top.t, o.top.s, '#60A5FA', o.fs, o.w, ei);
     g.globalAlpha = 1;
@@ -745,6 +768,10 @@
   /* ---------- цикл ---------- */
   function frame(now){
     if (!running) return;
+    frameNo++;
+    /* у спокої малюємо кожен другий кадр: на око те саме, батареї — половина */
+    var idle = intro >= 1 && flowBoost < 0.012 && Math.abs(tmx - mx) + Math.abs(tmy - my) < 0.003 && plateFlash < 0.02;
+    if (idle && (frameNo & 1)){ requestAnimationFrame(frame); return; }
     var dt = last ? Math.min((now - last) / 1000, 0.05) : 0.016;   // обмежений крок: iOS гальмує старт
     last = now;
     t += dt;
@@ -753,20 +780,33 @@
     var y = window.scrollY, dy = Math.abs(y - prevY); prevY = y;
     flowBoost = Math.min(1.3, flowBoost * Math.pow(0.06, dt) + dy * 0.010);
 
-    var flow = (0.055 + 1.5 * flowBoost) * dt;
+    var flow = (0.08 + 1.5 * flowBoost) * dt, stages = cfg.stages;
     for (var i = 0; i < P.length; i++){
-      var q = P[i];
+      var q = P[i], u0 = q.u;
       q.u += flow * q.sp;
       q.a += dt * (0.30 + 0.7 * flowBoost) * (q.lane * 0.9);
+      if (q.pop > 0) q.pop *= Math.exp(-dt * 6);
+      for (var s = 0; s < stages.length; s++){
+        if (u0 < stages[s].u && q.u >= stages[s].u){
+          q.pop = 1;
+          if (hits.length < 40) hits.push({ st: s, a: q.a, t: 0 });
+        }
+      }
       if (q.u > 1){
         q.u -= 1; q.a = Math.random() * Math.PI * 2; q.lane = 0.34 + Math.random() * 0.56;
         if (splashes.length < 22 && Math.random() < 0.55) splashes.push({ dx: (Math.random() - 0.5) * 1.7, t: 0 });
       }
     }
-    for (var sp2 = splashes.length - 1; sp2 >= 0; sp2--){
-      splashes[sp2].t += dt;
-      if (splashes[sp2].t > 0.6) splashes.splice(sp2, 1);
-    }
+    for (var k = splashes.length - 1; k >= 0; k--){ splashes[k].t += dt; if (splashes[k].t > 0.6) splashes.splice(k, 1); }
+    for (var h = hits.length - 1; h >= 0; h--){ hits[h].t += dt; if (hits[h].t > 0.5) hits.splice(h, 1); }
+
+    /* фантомна сума: ціль від скролу, значення наздоганяє її плавно */
+    var pr = progress(), target = 1000000 * pr * pr * (3 - 2 * pr);
+    shown += (target - shown) * Math.min(1, dt * 4.2);
+    if (flashArmed && shown > 970000){ plateFlash = 1; flashArmed = false; }
+    if (shown < 500000) flashArmed = true;
+    plateFlash *= Math.exp(-dt * 2.8);
+
     mx += (tmx - mx) * Math.min(1, dt * 5);
     my += (tmy - my) * Math.min(1, dt * 5);
 
@@ -789,19 +829,16 @@
       if (!moved){ moved = true; sceneEl.classList.add('moved'); }
     }, { passive:true });
     if (window.IntersectionObserver){
-      new IntersectionObserver(function(es){
-        visible = es[0].isIntersecting;
-        if (visible) start(); else stop();
-      }, { rootMargin:'80px' }).observe(sceneEl);
+      new IntersectionObserver(function(es){ if (es[0].isIntersecting) start(); else stop(); },
+                               { rootMargin:'80px' }).observe(sceneEl);
     } else { start(); }
   }
 
-  function boot(){
-    layout();
-    if (reduced){ intro = 1; draw(); }        // нерухомий кадр, жодних слухачів і жодного rAF
-    else { draw(); start(); }
-  }
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(boot, boot); else boot();
+  /* перший кадр — одразу, системним шрифтом; коли довантажиться Inter, кадр перемалюється сам */
+  layout();
+  if (reduced){ intro = 1; draw(); }          // нерухомий кадр, жодних слухачів і жодного rAF
+  else { draw(); start(); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ draw(); }, function(){});
 })();
 </script>
 </body>
