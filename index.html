@@ -552,6 +552,7 @@
   var splashes = [];                 // кільця в чаші від тих, хто долетів
   var shown = 0;                     // фантомна сума — наздоганяє ціль з інерцією
   var plateFlash = 0, flashArmed = true;
+  var hlAng = 0;                     // кут блікa, що обходить кільця етапів
 
   function progress(){
     var h = (heroEl ? heroEl.offsetHeight : window.innerHeight) * cfg.story;
@@ -698,6 +699,28 @@
       g.shadowColor = g.strokeStyle; g.shadowBlur = 10 + 16 * lit;
       g.beginPath(); g.ellipse(cx, Y(S.u), R(S.u), R(S.u) * kk, 0, 0, Math.PI * 2); g.stroke();
       g.shadowBlur = 0;
+      /* мʼякий блік плавно обходить кільце; яскравість і швидкість ростуть від скролу.
+         Це не спалах: одна повільна хвиля, ~0,3–0,8 оберту на секунду */
+      var inten = Math.min(1, 0.28 + 0.45 * lit + 0.6 * Math.min(1, flowBoost));
+      var head = hlAng + si * Math.PI, hc = blue ? '191,219,254' : '187,247,208';
+      var ry = R(S.u) * kk, hy = Y(S.u), hr = R(S.u);
+      g.lineWidth = 3 + 2.4 * inten;
+      g.shadowColor = 'rgba(' + hc + ',' + (0.9 * inten) + ')'; g.shadowBlur = 8 + 16 * inten;
+      if (g.createConicGradient){
+        var cg = g.createConicGradient(head - Math.PI, cx, hy);
+        cg.addColorStop(0.30, 'rgba(' + hc + ',0)');
+        cg.addColorStop(0.50, 'rgba(' + hc + ',' + (0.95 * inten * ei) + ')');
+        cg.addColorStop(0.58, 'rgba(' + hc + ',0)');
+        g.strokeStyle = cg;
+        g.beginPath(); g.ellipse(cx, hy, hr, ry, 0, 0, Math.PI * 2); g.stroke();
+      } else {
+        for (var seg = 0; seg < 10; seg++){
+          var f = seg / 9, aA = head - 1.1 + 1.55 * f, wgt = Math.sin(f * Math.PI);
+          g.strokeStyle = 'rgba(' + hc + ',' + (0.95 * inten * ei * wgt * wgt) + ')';
+          g.beginPath(); g.ellipse(cx, hy, hr, ry, 0, aA, aA + 0.18); g.stroke();
+        }
+      }
+      g.shadowBlur = 0;
       chip(g, cx + S.side * (R(S.u) + (o === WIDE ? 96 : 62)), Y(S.u), S.t, S.s, S.c, o.fs, o.w, ei);
     }
 
@@ -794,6 +817,7 @@
     if (shown < 500000) flashArmed = true;
     plateFlash *= Math.exp(-dt * 2.8);
 
+    hlAng = (hlAng + dt * (1.6 + 3.2 * Math.min(1, flowBoost))) % (Math.PI * 2);
     mx += (tmx - mx) * Math.min(1, dt * 5);
     my += (tmy - my) * Math.min(1, dt * 5);
 
