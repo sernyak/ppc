@@ -550,7 +550,6 @@
   var mx = 0, my = 0, tmx = 0, tmy = 0, moved = false;
   var last = 0, running = false, frameNo = 0;
   var splashes = [];                 // кільця в чаші від тих, хто долетів
-  var hits = [];                     // спалахи на кільцях етапів від тих, хто крізь них пройшов
   var shown = 0;                     // фантомна сума — наздоганяє ціль з інерцією
   var plateFlash = 0, flashArmed = true;
 
@@ -701,14 +700,6 @@
       g.shadowBlur = 0;
       chip(g, cx + S.side * (R(S.u) + (o === WIDE ? 96 : 62)), Y(S.u), S.t, S.s, S.c, o.fs, o.w, ei);
     }
-    /* кожен, хто пройшов крізь кільце, лишає на ньому короткий спалах — етап «обробив» його */
-    for (var hi = 0; hi < hits.length; hi++){
-      var H = hits[hi], HS = o.stages[H.st]; if (!HS) continue;
-      var hq = 1 - H.t / 0.5;
-      g.strokeStyle = (HS.c === '#60A5FA' ? 'rgba(191,219,254,' : 'rgba(187,247,208,') + (0.9 * hq * ei) + ')';
-      g.lineWidth = 2.2 + 2.4 * hq;
-      g.beginPath(); g.ellipse(cx, Y(HS.u), R(HS.u), R(HS.u) * kk, 0, H.a - 0.24, H.a + 0.24); g.stroke();
-    }
 
     /* чаша доходу */
     var bg2 = g.createRadialGradient(cx, o.basinY, 2, cx, o.basinY, o.topR * 0.9);
@@ -786,11 +777,8 @@
       q.u += flow * q.sp;
       q.a += dt * (0.30 + 0.7 * flowBoost) * (q.lane * 0.9);
       if (q.pop > 0) q.pop *= Math.exp(-dt * 6);
-      for (var s = 0; s < stages.length; s++){
-        if (u0 < stages[s].u && q.u >= stages[s].u){
-          q.pop = 1;
-          if (hits.length < 40) hits.push({ st: s, a: q.a, t: 0 });
-        }
+      for (var s = 0; s < stages.length; s++){          /* на кільці кружечок коротко «підстрибує» — етап його прийняв */
+        if (u0 < stages[s].u && q.u >= stages[s].u) q.pop = 1;
       }
       if (q.u > 1){
         q.u -= 1; q.a = Math.random() * Math.PI * 2; q.lane = 0.34 + Math.random() * 0.56;
@@ -798,7 +786,6 @@
       }
     }
     for (var k = splashes.length - 1; k >= 0; k--){ splashes[k].t += dt; if (splashes[k].t > 0.6) splashes.splice(k, 1); }
-    for (var h = hits.length - 1; h >= 0; h--){ hits[h].t += dt; if (hits[h].t > 0.5) hits.splice(h, 1); }
 
     /* фантомна сума: ціль від скролу, значення наздоганяє її плавно */
     var pr = progress(), target = 1000000 * pr * pr * (3 - 2 * pr);
