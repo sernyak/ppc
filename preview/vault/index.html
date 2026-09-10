@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="uk" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Олександр Серняк | Що я будую за допомогою ШІ</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Портфоліо AI-систем: астрологічний SaaS з оплатами, вебсервіс обліку фінансів із ШІ-імпортом виписок, аналітичний дашборд воронки з ШІ, аналіз дзвінків, Telegram-боти, автоматизація, мобільні застосунки та лендінги.">
+    <link rel="canonical" href="https://ppcmarketing.pro/ai/" />
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/favicon.ico" sizes="32x32">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta name="theme-color" content="#0B0F19">
+    <meta property="og:title" content="Олександр Серняк — що я будую за допомогою ШІ" />
+    <meta property="og:description" content="Не сайти, а системи, які приймають гроші й доставляють результат без участі людини. Одинадцять реальних проєктів і технології під ними." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://ppcmarketing.pro/ai/" />
+    <meta property="og:image" content="https://ppcmarketing.pro/image/mainportret.jpg" />
+    <meta property="og:locale" content="uk_UA" />
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#0B0F19', // Deep dark slate
+                            card: '#151C2C', // Slightly lighter for cards
+                            accent: '#3B82F6', // Blue accent
+                            glow: 'rgba(59, 130, 246, 0.15)',
+                        }
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0B0F19;
+            color: #F8FAFC;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(21, 28, 44, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #60A5FA, #A78BFA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        /* Scroll reveal — only active when JS is available */
+        .js .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .js .reveal.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        a:focus-visible,
+        button:focus-visible {
+            outline: 2px solid #3B82F6;
+            outline-offset: 3px;
+            border-radius: 4px;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
+            .js .reveal { opacity: 1; transform: none; }
+        }
+        /* Перший екран: «Сховище» */
+        #vault-canvas { display: block; width: 100%; height: 100%; touch-action: pan-y; }
+        #vault-scene.vault-nogl { background: radial-gradient(60% 60% at 50% 55%, rgba(59,130,246,.22), rgba(11,15,25,0) 70%); }
+        #vault-scene::before, #vault-scene::after { content: ""; position: absolute; left: 0; right: 0; height: 56px; pointer-events: none; }
+        #vault-scene::before { top: 0; background: linear-gradient(180deg, #0B0F19, rgba(11,15,25,0)); }
+        #vault-scene::after { bottom: 0; background: linear-gradient(0deg, #0B0F19, rgba(11,15,25,0)); }
+        .vault-veil { background: linear-gradient(90deg, rgba(11,15,25,.9) 0%, rgba(11,15,25,.66) 30%, rgba(11,15,25,0) 56%), linear-gradient(180deg, rgba(11,15,25,0) 74%, #0B0F19 100%); }
+        @media (min-width: 1024px) { #vault-scene::before, #vault-scene::after { display: none; } }
+    </style>
+</head>
+
+<body class="antialiased selection:bg-brand-accent selection:text-white">
+    <script>document.documentElement.classList.add('js');</script>
+
+    <!-- Background Effects -->
+    <div class="fixed inset-0 z-[-1] pointer-events-none">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-brand-glow blur-[100px] rounded-full opacity-50"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-card border-b border-white/5 transition-all duration-300">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center gap-4">
+            <a href="/ai/" class="leading-tight cursor-pointer">
+                <span class="block text-lg font-bold tracking-tight text-white">Олександр <span class="text-brand-accent">Серняк</span></span>
+                <span class="block text-[11px] font-medium tracking-wide text-slate-400">AI-системи та автоматизація</span>
+            </a>
+            <div class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300">
+                <a href="#projects" class="hover:text-white transition-colors cursor-pointer">Проєкти</a>
+                <a href="#how" class="hover:text-white transition-colors cursor-pointer">Як я працюю</a>
+                <a href="/" class="text-slate-500 hover:text-slate-300 transition-colors cursor-pointer">EN</a>
+            </div>
+            <a href="https://t.me/ai_ppc" target="_blank" rel="noopener" class="shrink-0 px-5 py-2.5 bg-brand-accent hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] cursor-pointer">
+                Написати
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero: «Сховище» — кристал на постаменті в залі, стіни вкриті формулами; проєкція повзе по стінах від скролу -->
+    <section id="vault-hero" class="relative overflow-hidden pt-32 md:pt-40 pb-16 md:pb-20 px-6 lg:min-h-[86vh] lg:flex lg:items-center">
+        <div class="vault-veil hidden lg:block absolute inset-0 z-[1] pointer-events-none" aria-hidden="true"></div>
+        <div class="max-w-6xl mx-auto w-full grid gap-6 lg:block">
+            <div class="contents lg:block lg:relative lg:z-[2] lg:max-w-[600px] lg:space-y-8 lg:animate-fade-in-up">
+                <div class="order-1 justify-self-start inline-flex items-center space-x-2 px-3 py-1 rounded-full glass-card border border-brand-accent/30 text-sm font-medium text-blue-400">
+                    <span class="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></span>
+                    <span>Безкоштовний зразок на ваших даних</span>
+                </div>
+
+                <h1 class="order-2 text-4xl md:text-6xl font-bold leading-tight tracking-tight">
+                    Що я будую <span class="gradient-text">за допомогою ШІ</span>
+                </h1>
+
+                <p class="order-4 text-lg text-slate-400 leading-relaxed">
+                    Мене звати <strong class="text-slate-200">Олександр Серняк</strong>, я технічний PPC-маркетолог із 2016 року.
+                    Я не «роблю сайти» — я будую системи, які приймають гроші й доставляють результат без участі людини:
+                    від форми оплати й розрахунків до звіту, який сам приходить клієнту на пошту,
+                    і до Telegram-ботів, які спілкуються з клієнтами замість менеджера.
+                    Проєктування, код, деплой і підтримка — самостійно, з ШІ як інструментом розробки.
+                </p>
+
+                <div class="order-5 flex flex-wrap gap-4 pt-2">
+                    <a href="#projects" class="px-7 py-3.5 bg-white text-brand-dark font-bold rounded-lg hover:bg-slate-200 transition-all cursor-pointer">
+                        Подивитись проєкти
+                    </a>
+                    <a href="mailto:sernyak.a@gmail.com" class="px-7 py-3.5 glass-card text-white font-medium rounded-lg hover:bg-white/5 transition-all cursor-pointer">
+                        Написати на пошту
+                    </a>
+                </div>
+            </div>
+
+            <div id="vault-scene" class="order-3 relative w-full aspect-[5/6] max-h-[68vh] lg:absolute lg:inset-0 lg:aspect-auto lg:max-h-none lg:w-auto lg:z-0">
+                <canvas id="vault-canvas" role="img" aria-label="Скляний кристал на постаменті в темній залі; його світло проєктує на стіни формули систем"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects -->
+    <section id="projects" class="py-16 md:py-24 px-6 relative">
+        <div class="max-w-6xl mx-auto">
+            <div class="mb-12 md:mb-16 reveal">
+                <h2 class="text-sm font-semibold text-brand-accent tracking-widest uppercase mb-3">Проєкти</h2>
+                <h3 class="text-3xl md:text-4xl font-bold">Одинадцять систем, які я побудував</h3>
+                <p class="mt-4 text-slate-400 max-w-2xl">
+                    Для кожної — що це, на чому зроблено і чи є що показати просто зараз.
+                    Частина проєктів закрита автентифікацією або містить дані клієнтів, тому там чесно написано «демо за запитом».
+                </p>
+            </div>
+
+            <!-- ГРУПА 1 -->
+            <header class="mb-6 reveal">
+                <div class="flex items-center gap-4">
+                    <h3 class="text-xl md:text-2xl font-bold">Продукти під ключ</h3>
+                    <span class="h-px flex-1 bg-white/10"></span>
+                </div>
+                <p class="text-slate-500 text-sm mt-2">Цілісні системи з повним циклом — від дії користувача до готового результату.</p>
+            </header>
+
+            <!-- 01 — DestinyCode -->
+            <article class="glass-card rounded-2xl p-7 md:p-10 mb-6 border-l-4 border-purple-500 reveal">
+                <div class="flex flex-col md:flex-row md:items-start md:gap-10">
+                    <div class="md:flex-1">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="text-sm font-bold text-purple-400">01</span>
+                            <span class="inline-block text-[11px] font-semibold text-purple-400 bg-purple-500/10 px-2.5 py-0.5 rounded-full">Живий продукт</span>
+                        </div>
+                        <h4 class="text-2xl md:text-3xl font-bold mb-4">DestinyCode — астрологічний SaaS під ключ</h4>
+                        <p class="text-slate-400 leading-relaxed mb-4">
+                            Повний цикл без участі людини: клієнт вводить дані народження, система рахує натальну карту,
+                            ШІ пише персональний звіт, PDF формується й приходить на пошту.
+                            Оплата — через Monobank Acquiring, зі збереженими картками й автоматичними поверненнями.
+                        </p>
+                        <p class="text-slate-300 text-sm mb-6">
+                            Через систему пройшло <strong class="text-white">120 реальних оплат</strong>.
+                        </p>
+                    </div>
+                    <div class="md:w-72 md:shrink-0">
+                        <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-3">Технології</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Cloud Functions (Node 22, 23 функції)</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Vertex AI / Gemini з каскадом резервних моделей</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firestore</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Puppeteer (PDF)</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Resend</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">2 Telegram-боти</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Meta CAPI</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Cloud Tasks + Cloud Scheduler</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-6 mt-2 border-t border-white/10">
+                    <a href="https://destinycode.online" target="_blank" rel="noopener" class="inline-flex items-center text-sm font-semibold text-purple-400 hover:text-purple-300 transition-colors cursor-pointer">
+                        destinycode.online
+                        <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+                </div>
+            </article>
+
+            <!-- 02 — Analytics dashboard (featured) -->
+            <article class="glass-card rounded-3xl p-7 md:p-8 mb-6 border border-brand-accent/30 shadow-[0_0_60px_rgba(59,130,246,0.08)] relative overflow-hidden reveal">
+                <div class="absolute -right-24 -top-24 w-72 h-72 bg-brand-accent/20 blur-[90px] rounded-full pointer-events-none" aria-hidden="true"></div>
+
+                <div class="relative grid lg:grid-cols-[1.35fr_1fr] gap-10 items-center">
+                    <div>
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="text-sm font-bold text-brand-accent">02</span>
+                            <span class="inline-block text-[11px] font-semibold text-brand-accent bg-blue-500/10 px-2.5 py-0.5 rounded-full">Продукт у продакшні</span>
+                        </div>
+                        <h4 class="text-2xl md:text-3xl font-bold mb-4">Вебсервіс обліку особистих фінансів</h4>
+                        <p class="text-slate-400 leading-relaxed mb-4">
+                            Продукт, а не функція: рахунки, категорії, планування бюджету, борги, статистика й фінансові цілі,
+                            плюс версія для iOS. Найважче — занесення даних — узяв на себе ШІ: виписка у форматі PDF, XLSX, DOCX
+                            або CSV перетворюється на структуровані транзакції.
+                        </p>
+                        <p class="text-slate-300 text-sm mb-6">
+                            Із виявленням дублікатів, зшиванням переказів між власними рахунками, точною грошовою
+                            арифметикою без похибок округлення і синхронізацією з Google Sheets.
+                        </p>
+
+                        <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-3">Технології</p>
+                        <div class="flex flex-wrap gap-2 mb-8">
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">React 19</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Vite</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Tailwind 4</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Cloud Functions</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Vertex AI / Gemini зі структурованою схемою відповіді</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">pdf.js</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">тести на грошову логіку</span>
+                        </div>
+
+                        <a href="https://commandfinance.online" target="_blank" rel="noopener" class="inline-flex items-center px-7 py-3.5 bg-brand-accent hover:bg-blue-500 text-white font-semibold rounded-lg transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] cursor-pointer">
+                            Відкрити продукт
+                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </a>
+                    </div>
+
+                    <!-- Головний екран продукту -->
+                    <div class="relative">
+                        <img src="/ai/commandfinance-hero.png"
+                             alt="Банківська виписка, яку ШІ розбирає на транзакції з категоріями: Зарплата — дохід, Сільпо — продукти, Spotify — підписки"
+                             width="1000" height="1010" loading="lazy" decoding="async"
+                             class="w-full h-auto max-w-[420px] mx-auto rounded-2xl border border-white/10 shadow-2xl">
+                    </div>
+                </div>
+            </article>
+
+            <!-- 03–04 -->
+            <div class="grid md:grid-cols-2 gap-6">
+
+                <!-- 03 — Funnel analytics dashboard -->
+                <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-sm font-bold text-teal-400">03</span>
+                        <div class="w-9 h-9 bg-teal-500/10 rounded-lg flex items-center justify-center text-teal-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        </div>
+                        <span class="inline-block text-[11px] font-semibold text-teal-400 bg-teal-500/10 px-2.5 py-0.5 rounded-full">Демо з тестовими даними</span>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">Аналітичний дашборд воронки з ШІ-співрозмовником</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-5">
+                        Дашборд моделювання маркетингової воронки: підтягує дані з Meta Ads і рахує сценарії —
+                        що станеться з виручкою, якщо змінити бюджет або конверсію на конкретному кроці.
+                        Замість таблиці з цифрами власник бачить, де саме рветься ланцюжок і скільки це коштує.
+                        За посиланням — спеціально зібрана демо-версія з вигаданими даними, без бекенду.
+                    </p>
+                    <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">React 19</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">TypeScript</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Vite</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Tailwind</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Recharts</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Meta Marketing API</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Gemini</span>
+                    </div>
+                    <div class="mt-auto pt-5 border-t border-white/10">
+                        <a href="https://destinycode-analytics-demo.web.app" target="_blank" rel="noopener" class="inline-flex items-center text-sm font-semibold text-teal-400 hover:text-teal-300 transition-colors cursor-pointer">
+                            Відкрити демо
+                            <svg class="w-4 h-4 ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- 04 — Call intelligence -->
+                <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-sm font-bold text-green-400">04</span>
+                        <div class="w-9 h-9 bg-green-500/10 rounded-lg flex items-center justify-center text-green-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 18v-6a9 9 0 0118 0v6m0 0a3 3 0 01-3 3h-1a1 1 0 01-1-1v-4a1 1 0 011-1h4M3 18a3 3 0 003 3h1a1 1 0 001-1v-4a1 1 0 00-1-1H3"></path></svg>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">AI Call Intelligence — аналіз дзвінків відділу продажів</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                        Запис дзвінка перетворюється на транскрипцію з розділенням спікерів, а далі — на резюме для керівника,
+                        список дій, оцінку настрою клієнта, скоринг ліда від 1 до 10 і автозаповнену CRM-картку.
+                        Керівник не переслуховує години розмов, а читає структуровану вижимку.
+                    </p>
+                    <p class="text-slate-300 text-sm mb-5">
+                        Обробка 100 дзвінків по 5 хвилин коштує близько <strong class="text-white">$3,5 на місяць</strong> — це перевірена оцінка з проєкту.
+                    </p>
+                    <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Google Cloud Speech-to-Text v2</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Gemini на Vertex AI зі структурованим виводом</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Functions</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Storage</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firestore</span>
+                    </div>
+                    <div class="mt-auto pt-5 border-t border-white/10">
+                        <span class="inline-flex items-start text-sm font-medium text-slate-500">
+                            <svg class="w-4 h-4 mr-1.5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            Демо за запитом
+                        </span>
+                    </div>
+                </article>
+
+            </div>
+
+            <!-- ГРУПА 2 -->
+            <header class="mt-16 mb-6 reveal">
+                <div class="flex items-center gap-4">
+                    <h3 class="text-xl md:text-2xl font-bold">Боти й автоматизація</h3>
+                    <span class="h-px flex-1 bg-white/10"></span>
+                </div>
+                <p class="text-slate-500 text-sm mt-2">Процеси, які виконуються самі: за розкладом, за подією або у відповідь на повідомлення.</p>
+            </header>
+
+            <!-- 05–08 -->
+            <div class="grid md:grid-cols-2 gap-6">
+
+                <!-- 05 — Telegram bots -->
+                <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-sm font-bold text-sky-400">05</span>
+                        <div class="w-9 h-9 bg-sky-500/10 rounded-lg flex items-center justify-center text-sky-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">Telegram-боти в продакшні</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                        Два боти працюють всередині DestinyCode. Перший — бот підтримки: відповідає клієнтам через ШІ,
+                        тримає контекст діалогу між повідомленнями, обмежує частоту запитів на користувача,
+                        ескалює складні звернення до адміністратора, а планувальник закриває залишені сесії.
+                        Другий — бот доставки: видає клієнтці куплений звіт, оформлює підписку й надсилає бонусні матеріали.
+                    </p>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-5">
+                        Під капотом: перевірка підпису вебхука, захист від повторних запитів, збереження історії діалогу
+                        й окремий ендпоінт логів для розбору інцидентів.
+                    </p>
+                    <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Node.js</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Telegraf</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Cloud Functions</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firestore</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Vertex AI / Gemini</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Cloud Scheduler</span>
+                    </div>
+                    <div class="mt-auto pt-5 border-t border-white/10">
+                        <span class="inline-flex items-start text-sm font-medium text-slate-500">
+                            <svg class="w-4 h-4 mr-1.5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            Демо за запитом
+                        </span>
+                    </div>
+                </article>
+
+                <!-- 06 — Reddit lead-finding agent -->
+                <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-sm font-bold text-orange-400">06</span>
+                        <div class="w-9 h-9 bg-orange-500/10 rounded-lg flex items-center justify-center text-orange-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">Агент пошуку клієнтів на Reddit</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-5">
+                        Автономний агент: кожні 12 годин переглядає чотири тематичні спільноти Reddit і шукає пости,
+                        де людина описує проблему, яку вирішує продукт. ШІ пише чернетку корисної відповіді,
+                        і все це лягає в дашборд, де людина лише схвалює або відхиляє.
+                        Один і той самий пост повторно не обробляється.
+                    </p>
+                    <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Cloud Functions</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Cloud Scheduler</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Gemini</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">React</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firestore</span>
+                    </div>
+                    <div class="mt-auto pt-5 border-t border-white/10">
+                        <span class="inline-flex items-start text-sm font-medium text-slate-500">
+                            <svg class="w-4 h-4 mr-1.5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            Демо за запитом
+                        </span>
+                    </div>
+                </article>
+
+                <!-- 07 — Voice content generator -->
+                <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-sm font-bold text-amber-400">07</span>
+                        <div class="w-9 h-9 bg-amber-500/10 rounded-lg flex items-center justify-center text-amber-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">Генератор контенту в голосі конкретної людини</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-5">
+                        Система вчиться на архіві текстів експерта: розбирає стиль за 11 вимірами й тримає корпус реальних постів,
+                        а потім пише нові тексти його голосом, а не «нейтральним ШІ-тоном».
+                        Обгорнуто в мобільний застосунок, щоб експерт генерував пости просто з телефона.
+                    </p>
+                    <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">React</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">TypeScript</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Vite</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">PWA</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Cloud Functions</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Gemini і Claude через єдиний інтерфейс провайдерів</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">ключі лише на бекенді</span>
+                    </div>
+                    <div class="mt-auto pt-5 border-t border-white/10">
+                        <span class="inline-flex items-start text-sm font-medium text-slate-500">
+                            <svg class="w-4 h-4 mr-1.5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            Демо за запитом — застосунок за автентифікацією
+                        </span>
+                    </div>
+                </article>
+
+                <!-- 08 — Instagram autoposting -->
+                <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-sm font-bold text-rose-400">08</span>
+                        <div class="w-9 h-9 bg-rose-500/10 rounded-lg flex items-center justify-center text-rose-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">Автоматична публікація в Instagram за календарем</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-5">
+                        Конвеєр без ручної роботи: контент-календар ведеться в Notion, система генерує зображення,
+                        публікує карусель в Instagram через офіційний API і повертає статус публікації назад у Notion.
+                        Працює за розкладом — людина потрібна лише щоб наповнити календар.
+                    </p>
+                    <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Python</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Notion API</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Instagram Graph API</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">генерація зображень</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">планувальник</span>
+                    </div>
+                    <div class="mt-auto pt-5 border-t border-white/10">
+                        <span class="inline-flex items-start text-sm font-medium text-slate-500">
+                            <svg class="w-4 h-4 mr-1.5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            Демо за запитом
+                        </span>
+                    </div>
+                </article>
+
+            </div>
+
+            <!-- ГРУПА 3 -->
+            <header class="mt-16 mb-6 reveal">
+                <div class="flex items-center gap-4">
+                    <h3 class="text-xl md:text-2xl font-bold">Застосунки</h3>
+                    <span class="h-px flex-1 bg-white/10"></span>
+                </div>
+                <p class="text-slate-500 text-sm mt-2">Інтерфейси, якими користуються з телефона — у русі, однією рукою.</p>
+            </header>
+
+            <!-- 09–10 -->
+            <div class="grid md:grid-cols-2 gap-6">
+
+                <!-- 09 — ShadowBoxing Timer -->
+                <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-sm font-bold text-indigo-400">09</span>
+                        <div class="w-9 h-9 bg-indigo-500/10 rounded-lg flex items-center justify-center text-indigo-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">ShadowBoxing Timer — застосунок для iOS</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                        Таймер інтервальних тренувань для боксу. Ключове — керування голосом: команди «start», «pause», «resume»,
+                        щоб не знімати рукавички. Складні інтервали, де кожен раунд і кожна пауза мають власну тривалість;
+                        звукові сигнали мікшуються поверх музики, не зупиняючи її.
+                    </p>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-5">
+                        Таймер живе на екрані блокування і в Dynamic Island, є віджет і застосунок для Apple Watch,
+                        налаштовувана затримка перед першим раундом, режим простого секундоміра й пауза дотиком до циферблата.
+                    </p>
+                    <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Swift</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">SwiftUI</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Live Activities</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">WidgetKit</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">watchOS</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Speech Recognition</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">StoreKit</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Analytics</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">три мови інтерфейсу</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">юніт- і UI-тести</span>
+                    </div>
+                    <div class="mt-auto pt-5 border-t border-white/10">
+                        <a href="https://sernyak.github.io/-ShadowBoxingTimer/" target="_blank" rel="noopener" class="inline-flex items-center text-sm font-medium text-green-400 hover:text-green-300 transition-colors">
+                            Сайт застосунку
+                            <svg class="w-4 h-4 ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- 10 — IRONLOG -->
+                <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-sm font-bold text-emerald-400">10</span>
+                        <div class="w-9 h-9 bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">IRONLOG — щоденник силових тренувань</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                        PWA українською для залу: таймер відпочинку між підходами, відмітка виконаних підходів,
+                        історія тренувань, графіки прогресу, калькулятор млинців на штангу й шаблони тренувань.
+                    </p>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-5">
+                        Спроєктовано під реальні умови залу — одна рука зайнята, екран мокрий: кожна дія в один дотик,
+                        великі цілі натискання, інтерфейс читається з відстані витягнутої руки.
+                        Працює офлайн і ставиться на телефон як застосунок.
+                    </p>
+                    <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">React 19</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">TypeScript</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Vite 6</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">zustand з persist</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">vite-plugin-pwa (офлайн, автооновлення)</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Hosting</span>
+                    </div>
+                    <div class="mt-auto pt-5 border-t border-white/10">
+                        <a href="https://shadowboxing-agent.web.app" target="_blank" rel="noopener" class="inline-flex items-center px-6 py-3 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 font-semibold rounded-lg transition-all cursor-pointer">
+                            Відкрити застосунок
+                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </a>
+                    </div>
+                </article>
+
+            </div>
+
+            <!-- ГРУПА 4 -->
+            <header class="mt-16 mb-6 reveal">
+                <div class="flex items-center gap-4">
+                    <h3 class="text-xl md:text-2xl font-bold">Сайти й лендінги</h3>
+                    <span class="h-px flex-1 bg-white/10"></span>
+                </div>
+                <p class="text-slate-500 text-sm mt-2">Односторінкові сайти під конкретну задачу.</p>
+            </header>
+
+            <!-- 11 — Landing pages -->
+            <article class="glass-card rounded-2xl p-7 md:p-10 border-l-4 border-cyan-500 reveal">
+                <div class="flex flex-col md:flex-row md:items-start md:gap-10">
+                    <div class="md:flex-1">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="text-sm font-bold text-cyan-400">11</span>
+                            <div class="w-9 h-9 bg-cyan-500/10 rounded-lg flex items-center justify-center text-cyan-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            </div>
+                        </div>
+                        <h4 class="text-xl md:text-2xl font-bold mb-4">Лендінги під ключ</h4>
+                        <p class="text-slate-400 text-sm md:text-base leading-relaxed mb-4">
+                            Закриваю задачу цілком: структура сторінки, тексти, адаптив під телефон,
+                            анімації появи при прокрутці й форма запису.
+                        </p>
+                        <p class="text-slate-400 text-sm md:text-base leading-relaxed mb-6">
+                            Приклад — персональний сайт психотерапевта Миколи Олофінського.
+                            Ще один приклад — сайт, на якому ви зараз читаєте цю сторінку: ppcmarketing.pro.
+                        </p>
+                    </div>
+                    <div class="md:w-72 md:shrink-0">
+                        <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-3">Технології</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">HTML, CSS, JavaScript без фреймворків</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">адаптивна верстка</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Intersection Observer для анімацій</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">GitHub Pages</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-6 mt-2 border-t border-white/10 flex flex-wrap items-center gap-x-8 gap-y-3">
+                    <a href="https://sernyak.github.io/Olofinskiy/v6/" target="_blank" rel="noopener" class="inline-flex items-center text-sm font-semibold text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer">
+                        Сайт психотерапевта
+                        <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+                    <a href="/" class="inline-flex items-center text-sm font-medium text-slate-400 hover:text-white transition-colors cursor-pointer">
+                        ppcmarketing.pro
+                        <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+                </div>
+            </article>
+
+        </div>
+    </section>
+
+    <!-- How I work -->
+    <section id="how" class="py-16 md:py-24 px-6 border-y border-white/5 bg-brand-card/20">
+        <div class="max-w-3xl mx-auto reveal">
+            <h2 class="text-sm font-semibold text-brand-accent tracking-widest uppercase mb-3">Як я працюю</h2>
+            <h3 class="text-2xl md:text-3xl font-bold mb-6">Одна людина відповідає за весь шлях</h3>
+            <p class="text-slate-400 text-lg leading-relaxed">
+                Закриваю задачу цілком: архітектура, код, інтеграції, деплой і підтримка — без передачі між виконавцями й без загублених домовленостей.
+                Починаю не з дизайну, а з питання, який саме результат система має видавати сама, без людини, і що вважається доказом, що вона працює.
+                ШІ для мене — інструмент розробки, який дає швидкість, але за архітектуру, гроші й дані відповідаю я.
+            </p>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section class="py-16 md:py-24 px-6 relative overflow-hidden">
+        <div class="absolute inset-0 bg-brand-accent/5" aria-hidden="true"></div>
+        <div class="max-w-4xl mx-auto text-center relative z-10 glass-card p-8 md:p-12 rounded-3xl border border-brand-accent/20 reveal">
+            <h2 class="text-2xl md:text-4xl font-bold mb-5">Маєте запит — напишіть</h2>
+            <p class="text-slate-400 text-base md:text-lg mb-8 max-w-2xl mx-auto">
+                Опишіть, що має робити система і який результат ви хочете отримати на виході.
+                Відповім, чи це реально зробити, за скільки й з чого починати. Якщо задача не моя — так і скажу.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <a href="https://t.me/ai_ppc" target="_blank" rel="noopener" class="px-8 py-4 bg-brand-accent text-white font-bold rounded-lg hover:bg-blue-500 transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] w-full sm:w-auto cursor-pointer">
+                    Telegram: @ai_ppc
+                </a>
+                <a href="mailto:sernyak.a@gmail.com" class="px-8 py-4 glass-card text-white font-medium rounded-lg hover:bg-white/5 transition-all w-full sm:w-auto cursor-pointer break-words">
+                    sernyak.a@gmail.com
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 py-8 text-center text-slate-500 text-sm">
+        <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p>© 2026 Олександр Серняк. Технічний PPC-маркетолог.</p>
+            <div class="flex flex-wrap justify-center gap-6">
+                <a href="/" class="hover:text-white transition-colors cursor-pointer">English version</a>
+                <a href="https://linkedin.com/in/serniak" target="_blank" rel="noopener" class="hover:text-white transition-colors cursor-pointer">LinkedIn</a>
+                <a href="https://t.me/ai_ppc" target="_blank" rel="noopener" class="hover:text-white transition-colors cursor-pointer">Telegram</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var items = document.querySelectorAll('.reveal');
+            if (!('IntersectionObserver' in window)) {
+                items.forEach(function (el) { el.classList.add('is-visible'); });
+                return;
+            }
+            var observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { rootMargin: '0px 0px -60px 0px', threshold: 0.05 });
+            items.forEach(function (el) { observer.observe(el); });
+        })();
+    </script>
+
+    <script type="importmap">{"imports":{"three":"/js/vendor/three.module.min.js","three/addons/":"/js/vendor/addons/"}}</script>
+    <script type="module" src="/js/hero-vault.js"></script>
+</body>
+</html>
