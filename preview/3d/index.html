@@ -9,6 +9,7 @@
     <!-- SEO Meta Tags -->
     <meta name="description" content="Портфоліо AI-систем: астрологічний SaaS з оплатами, вебсервіс обліку фінансів із ШІ-імпортом виписок, аналітичний дашборд воронки з ШІ, аналіз дзвінків, Telegram-боти, автоматизація, мобільні застосунки та лендінги.">
     <link rel="canonical" href="https://ppcmarketing.pro/ai/" />
+    <meta name="robots" content="noindex, nofollow">
     <link rel="icon" href="/favicon.ico" sizes="32x32">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
@@ -99,6 +100,16 @@
             }
             .js .reveal { opacity: 1; transform: none; }
         }
+        /* Перший екран: кристал */
+        #cr-scene { position: relative; }
+        #cr-canvas { display: block; width: 100%; height: 100%; }
+        #cr-scene.cr-nogl { background: radial-gradient(60% 60% at 50% 45%, rgba(59,130,246,.22), rgba(11,15,25,0) 70%); }
+        .cr-phases { position: absolute; left: 0; right: 0; bottom: 6px; margin: 0; padding: 0; list-style: none; display: flex; justify-content: center; gap: 14px; font-size: 12px; color: #64748B; pointer-events: none; }
+        .cr-phases li { display: flex; align-items: center; gap: 6px; transition: color .5s; }
+        .cr-phases li::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #334155; transition: background .5s, box-shadow .5s; }
+        .cr-phases li.is-on { color: #E2E8F0; }
+        .cr-phases li.is-on::before { background: #60A5FA; box-shadow: 0 0 8px #60A5FA; }
+        @media (max-width: 767px) { .cr-phases { gap: 10px; font-size: 11px; } }
     </style>
 </head>
 
@@ -128,19 +139,20 @@
         </div>
     </nav>
 
-    <!-- Hero -->
+    <!-- Hero: кристал збирає себе (точки → лінії → грані → ядро), далі все веде скрол -->
     <section class="relative pt-32 md:pt-40 pb-16 md:pb-20 px-6">
-        <div class="max-w-4xl mx-auto space-y-8 animate-fade-in-up">
-            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full glass-card border border-brand-accent/30 text-sm font-medium text-blue-400">
-                <span class="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></span>
-                <span>Безкоштовний зразок на ваших даних</span>
-            </div>
+        <div class="max-w-6xl mx-auto grid lg:grid-cols-[minmax(0,11fr)_minmax(0,10fr)] gap-6 lg:gap-12 items-center animate-fade-in-up">
+            <div class="contents lg:block lg:space-y-8">
+                <div class="order-1 justify-self-start inline-flex items-center space-x-2 px-3 py-1 rounded-full glass-card border border-brand-accent/30 text-sm font-medium text-blue-400">
+                    <span class="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></span>
+                    <span>Безкоштовний зразок на ваших даних</span>
+                </div>
 
-            <h1 class="text-4xl md:text-6xl font-bold leading-tight tracking-tight">
-                Що я будую <span class="gradient-text">за допомогою ШІ</span>
-            </h1>
+                <h1 class="order-2 text-4xl md:text-6xl font-bold leading-tight tracking-tight">
+                    Що я будую <span class="gradient-text">за допомогою ШІ</span>
+                </h1>
 
-            <p class="text-lg text-slate-400 leading-relaxed">
+                <p class="order-4 text-lg text-slate-400 leading-relaxed">
                 Мене звати <strong class="text-slate-200">Олександр Серняк</strong>, я технічний PPC-маркетолог із 2016 року.
                 Я не «роблю сайти» — я будую системи, які приймають гроші й доставляють результат без участі людини:
                 від форми оплати й розрахунків до звіту, який сам приходить клієнту на пошту,
@@ -148,13 +160,19 @@
                 Проєктування, код, деплой і підтримка — самостійно, з ШІ як інструментом розробки.
             </p>
 
-            <div class="flex flex-wrap gap-4 pt-2">
+                <div class="order-5 flex flex-wrap gap-4 pt-2">
                 <a href="#projects" class="px-7 py-3.5 bg-white text-brand-dark font-bold rounded-lg hover:bg-slate-200 transition-all cursor-pointer">
                     Подивитись проєкти
                 </a>
                 <a href="mailto:sernyak.a@gmail.com" class="px-7 py-3.5 glass-card text-white font-medium rounded-lg hover:bg-white/5 transition-all cursor-pointer">
                     Написати на пошту
                 </a>
+                </div>
+            </div>
+
+            <div id="cr-scene" class="order-3 relative w-full aspect-[31/28] lg:aspect-[31/30] max-h-[72vh]">
+                <canvas id="cr-canvas" role="img" aria-label="Скляний кристал збирає себе: точки, лінії, грані, ядро — і починає працювати"></canvas>
+                <ol class="cr-phases" aria-hidden="true"><li>проєктування</li><li>код</li><li>деплой</li><li>підтримка</li></ol>
             </div>
         </div>
     </section>
@@ -689,6 +707,8 @@
             items.forEach(function (el) { observer.observe(el); });
         })();
     </script>
+
+    <script type="module" src="/js/hero-crystal.js"></script>
 
 </body>
 </html>

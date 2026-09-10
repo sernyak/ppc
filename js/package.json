@@ -1,0 +1,1 @@
+{ "type": "module", "private": true, "description": "ES-модулі першого екрана /ai; тести: node --test js/*.test.js" }
