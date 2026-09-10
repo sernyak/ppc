@@ -1,17 +1,20 @@
 /*
- * Перший екран /ai — «Каркас збирає себе».
- * Кубооктаедр як металевий каркас із матового алюмінію: порожні грані,
- * усередині вкладена ґратка (менша копія фігури + дванадцять спиць), і сині
- * світлові лінії лише на внутрішній ґратці. При відкритті каркас збирає себе
- * (вузли → внутрішня ґратка → зовнішні бруси → світло), далі все веде скрол:
- * світло всередині розгоряється і пульсує повільною хвилею, ґратка ледь
- * дихає, камера обходить каркас. Миша на компʼютері дає паралакс. Поза
- * екраном цикл не працює, при «зменшити рух» — один нерухомий кадр.
+ * Перший екран /ai — радіант: металевий каркас кубооктаедра, всередині
+ * вкладена ґратка зі спицями, сині світлові лінії лише на внутрішній ґратці.
+ *
+ * При відкритті (~1,5 с) збирається лише порожній зовнішній каркас і далі
+ * повільно обертається. Головне веде скрол: каркас розсувається, всередині
+ * малюється ґратка, спиці зʼєднують її з вузлами, ґратка провертається на
+ * чверть оберту, каркас замикається, всередині займається світло і пульсує
+ * повільною хвилею; камера обходить фігуру. На компʼютері перший екран на
+ * час історії закріплений (sticky), на телефоні історію веде положення
+ * сторінки. Миша дає паралакс. Поза екраном цикл не працює, при «зменшити
+ * рух» — один нерухомий кадр без закріплення.
  *
  * Для знімків: ?p=0.5 фіксує прогрес скролу, ?intro=1 — вступ, ?still=1 — один кадр.
  */
 import * as THREE from './vendor/three.module.min.js';
-import { getFrame, clamp01 } from './hero-crystal-frame.js';
+import { getFrame, clamp01 } from './hero-crystal-frame.js?v=7';
 
 const sceneEl = document.getElementById('cr-scene');
 const canvas = document.getElementById('cr-canvas');
@@ -24,7 +27,9 @@ function init() {
   const still = q.has('still');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const lgMQ = matchMedia('(min-width: 1024px)');
   const lo = matchMedia('(max-width: 767px)').matches || !fine;   // телефон/планшет: без сяйва навколо ліній, 30 к/с
+  if (reduced) document.documentElement.classList.add('cr-reduced');
 
   let renderer;
   try {
@@ -41,9 +46,9 @@ function init() {
   /* усе спільне — до першого використання */
   const R = 1.55, CY = R + 0.5;
   const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), tmpC = new THREE.Vector3(), tmpD = new THREE.Vector3();
-  const tmpS = new THREE.Vector3(), tmpT = new THREE.Vector3();          // кінці брусів, що рухаються зі скролом
+  const tmpS = new THREE.Vector3(), tmpT = new THREE.Vector3();
   const UP = new THREE.Vector3(0, 1, 0), RIGHT = new THREE.Vector3(1, 0, 0), mtx = new THREE.Matrix4();
-  const LIGHT = new THREE.Color(0x47a0ff);           // синє світло ліній (акцент сайту, трохи холодніший)
+  const LIGHT = new THREE.Color(0x47a0ff);
 
   const scene = new THREE.Scene();
   scene.environment = studioEnv(renderer);
@@ -51,7 +56,7 @@ function init() {
   const target = new THREE.Vector3(0, CY - 0.05, 0);
 
   const key = new THREE.DirectionalLight(0xe8eeff, 1.5);
-  key.position.set(-2.2, 9, 4.5); key.castShadow = true;                 // майже згори: тінь компактна, під фігурою
+  key.position.set(-2.2, 9, 4.5); key.castShadow = true;
   key.shadow.mapSize.set(lo ? 1024 : 2048, lo ? 1024 : 2048);
   key.shadow.camera.left = -4; key.shadow.camera.right = 4; key.shadow.camera.top = 6; key.shadow.camera.bottom = -3;
   key.shadow.camera.near = 1; key.shadow.camera.far = 30; key.shadow.bias = -0.0006; key.shadow.radius = 9;
@@ -65,7 +70,7 @@ function init() {
 
   const outer = new THREE.Group(); outer.rotation.set(0.22, 0, 0.12); outer.position.set(0, CY, 0);
   const spin = new THREE.Group(); outer.add(spin); scene.add(outer);
-  const innerGrp = new THREE.Group(); spin.add(innerGrp);              // внутрішня ґратка (дихає окремо)
+  const innerGrp = new THREE.Group(); spin.add(innerGrp);              // внутрішня ґратка (провертається окремо)
 
   /* матеріали: матовий шліфований алюміній */
   const brushed = brushedTexture();
@@ -78,42 +83,36 @@ function init() {
   const VI = C.V.map((v) => v.clone().multiplyScalar(R * 0.52));
   const thO = R * 0.062, thI = R * 0.036, thS = R * 0.03;
 
-  const joints = [];
-  VO.forEach((v) => joints.push({ m: joint(v, thO * 0.74, metalOuter, spin), v, outer: true }));
-  VI.forEach((v) => joints.push({ m: joint(v, thI * 0.8, metalInner, innerGrp), v, outer: false }));
-  joints.sort((a, b) => a.v.y - b.v.y);
+  const jointsOuter = VO.map((v) => ({ m: joint(v, thO * 0.74, metalOuter, spin), v })).sort((a, b) => a.v.y - b.v.y);
+  const jointsInner = VI.map((v) => ({ m: joint(v, thI * 0.8, metalInner, innerGrp), v })).sort((a, b) => a.v.y - b.v.y);
+  const outerBeams = C.E.map((e) => ({ m: beam(VO[e[0]], VO[e[1]], thO, metalOuter, 0, spin), i: e[0], j: e[1], y: Math.min(VO[e[0]].y, VO[e[1]].y) })).sort((a, b) => a.y - b.y);
 
-  const outerBeams = C.E.map((e) => ({ m: beam(VO[e[0]], VO[e[1]], thO, metalOuter, 0, spin), i: e[0], j: e[1], y: Math.min(VO[e[0]].y, VO[e[1]].y) }));
-  outerBeams.sort((a, b) => a.y - b.y);
-
-  /* внутрішня ґратка: ребра меншої копії + спиці до зовнішніх вершин; кожна лінія — брус + світлова смужка (+ сяйво на компʼютері) */
-  const innerSegs = C.E.map((e) => ({ a: VI[e[0]], b: VI[e[1]], parent: innerGrp, th: thI, off: thI * 0.52, spoke: -1 }));
-  for (let i = 0; i < 12; i++) innerSegs.push({ a: VO[i], b: VI[i], parent: spin, th: thS, off: thS * 0.52, spoke: i });
-  const innerLines = innerSegs.map((s) => {
-    const bar = beam(s.a, s.b, s.th, metalInner, 0, s.parent);
+  /* світлова лінія = тонкий брус + світлова смужка на його грані (+ сяйво на компʼютері) */
+  function lightLine(a, b, th, off, parent, extra) {
+    const bar = beam(a, b, th, metalInner, 0, parent);
     const lightMat = new THREE.MeshBasicMaterial({ color: LIGHT });
-    const strip = beam(s.a, s.b, s.th * 0.34, lightMat, s.off, s.parent);
+    const strip = beam(a, b, th * 0.34, lightMat, off, parent); strip.castShadow = false;
     let glow = null;
     if (!lo) {
-      const gm = new THREE.MeshBasicMaterial({ color: LIGHT, transparent: true, opacity: 0.14, blending: THREE.AdditiveBlending, depthWrite: false });
-      glow = beam(s.a, s.b, s.th * 1.9, gm, s.off, s.parent);
+      glow = beam(a, b, th * 1.9, new THREE.MeshBasicMaterial({ color: LIGHT, transparent: true, opacity: 0.14, blending: THREE.AdditiveBlending, depthWrite: false }), off, parent);
       glow.castShadow = false;
     }
-    strip.castShadow = false;
-    const mid = tmpA.addVectors(s.a, s.b).multiplyScalar(0.5);
-    return { bar, strip, glow, lightMat, k: mid.y * 2.0 + mid.x * 0.7 + mid.z * 0.4, y: Math.min(s.a.y, s.b.y), spoke: s.spoke, a: s.a, b: s.b };
-  });
-  innerLines.sort((a, b) => a.y - b.y);
-  const COUNTS = { joints: joints.length, inner: innerLines.length, outer: outerBeams.length };
+    const mid = tmpA.addVectors(a, b).multiplyScalar(0.5);
+    return Object.assign({ bar, strip, glow, lightMat, k: mid.y * 2.0 + mid.x * 0.7 + mid.z * 0.4, y: Math.min(a.y, b.y), a, b }, extra);
+  }
+  const innerEdges = C.E.map((e) => lightLine(VI[e[0]], VI[e[1]], thI, thI * 0.52, innerGrp, {})).sort((p1, p2) => p1.y - p2.y);
+  const spokes = VO.map((v, i) => lightLine(VO[i], VI[i], thS, thS * 0.52, spin, { idx: i })).sort((p1, p2) => p1.y - p2.y);
+  const COUNTS = { jointsOuter: jointsOuter.length, outer: outerBeams.length, jointsInner: jointsInner.length, inner: innerEdges.length, spokes: spokes.length };
 
   const legend = Array.from(sceneEl.querySelectorAll('.cr-phases li'));
   let legendPhase = -1;
 
   /* ---------- стан і цикл ---------- */
   let w = 1, h = 1, dist = 7;
-  let introMs = -350, last = 0, t = 0, angle = 0.4, frameNo = 0;
+  let introMs = -300, last = 0, t = 0, angle = 0.4, frameNo = 0;
   let pTarget = 0, pSmooth = 0, mx = 0, my = 0, tmx = 0, tmy = 0;
   let visible = false, running = false;
+  const heroEl = sceneEl.closest('section');
 
   function fit() {
     w = Math.max(1, sceneEl.clientWidth); h = Math.max(1, sceneEl.clientHeight);
@@ -123,9 +122,11 @@ function init() {
   }
   function progress() {
     if (dbgP != null) return dbgP;
-    const hero = sceneEl.closest('section');
-    const span = (hero ? hero.offsetHeight : window.innerHeight) * (lo ? 0.5 : 0.55);   // уся трансформація — поки фігура ще на екрані
-    return clamp01(window.scrollY / Math.max(1, span));
+    if (lgMQ.matches && heroEl) {                                          // компʼютер: секція закріплена, історія = її прокрутка
+      const r = heroEl.getBoundingClientRect(), span = r.height - window.innerHeight;
+      return span > 1 ? clamp01(-r.top / span) : clamp01(window.scrollY / Math.max(1, window.innerHeight * 0.75));
+    }
+    return clamp01(window.scrollY / Math.max(1, window.innerHeight * 0.75));   // телефон: без закріплення
   }
   /* поставити брус між a і b, намальований на частку d від a; орієнтація як у beam() */
   function placeBeam(m, a, b, d) {
@@ -141,20 +142,23 @@ function init() {
     m.scale.y = Math.max(0.001, d * len / m.userData.len0);
     m.position.copy(a).addScaledVector(dir, len * d / 2).addScaledVector(z, m.userData.off);
   }
+  function lightOf(L, f, tt) {
+    const wv = 0.5 + 0.5 * Math.sin(L.k - tt * (0.5 + 1.1 * f.pulseSpeed));
+    const br = f.light * (0.45 + 0.55 * (1 - f.wave + f.wave * wv));
+    L.lightMat.color.copy(LIGHT).multiplyScalar(0.2 + 1.35 * br);      // не вище ~1.5×, щоб лінії лишались синіми, а не білими
+    if (L.glow) L.glow.material.opacity = 0.03 + 0.16 * br;
+  }
   function apply(f, tt) {
-    const open = f.open;                                                  // зовнішній каркас розсувається зі скролом
-    joints.forEach((j, i) => { j.m.scale.setScalar(Math.max(0.001, f.joints[i])); if (j.outer) j.m.position.copy(j.v).multiplyScalar(open); });
+    const open = f.open;
+    jointsOuter.forEach((j, i) => { j.m.scale.setScalar(Math.max(0.001, f.jointsOuter[i])); j.m.position.copy(j.v).multiplyScalar(open); });
     outerBeams.forEach((b, i) => placeBeam(b.m, tmpS.copy(VO[b.i]).multiplyScalar(open), tmpT.copy(VO[b.j]).multiplyScalar(open), f.outer[i]));
-    innerGrp.rotation.y = f.swivel;                                       // внутрішня ґратка провертається
-    innerLines.forEach((L, i) => {
-      const d = f.inner[i];
-      let a = L.a, b = L.b;
-      if (L.spoke >= 0) { a = tmpS.copy(VO[L.spoke]).multiplyScalar(open); b = tmpT.copy(VI[L.spoke]).applyAxisAngle(UP, f.swivel); }
-      placeBeam(L.bar, a, b, d); placeBeam(L.strip, a, b, d); if (L.glow) placeBeam(L.glow, a, b, d);
-      const wv = 0.5 + 0.5 * Math.sin(L.k - tt * (0.5 + 1.1 * f.pulseSpeed));
-      const br = f.light * (0.45 + 0.55 * (1 - f.wave + f.wave * wv));
-      L.lightMat.color.copy(LIGHT).multiplyScalar(0.2 + 1.35 * br);     // не вище ~1.5×, щоб лінії лишались синіми, а не білими
-      if (L.glow) L.glow.material.opacity = 0.03 + 0.16 * br;
+    jointsInner.forEach((j, i) => j.m.scale.setScalar(Math.max(0.001, f.jointsInner[i])));
+    innerGrp.rotation.y = f.swivel;
+    innerEdges.forEach((L, i) => { const d = f.inner[i]; placeBeam(L.bar, L.a, L.b, d); placeBeam(L.strip, L.a, L.b, d); if (L.glow) placeBeam(L.glow, L.a, L.b, d); lightOf(L, f, tt); });
+    spokes.forEach((L, i) => {
+      const d = f.spokes[i];
+      const a = tmpS.copy(VO[L.idx]).multiplyScalar(open), b = tmpT.copy(VI[L.idx]).applyAxisAngle(UP, f.swivel);
+      placeBeam(L.bar, a, b, d); placeBeam(L.strip, a, b, d); if (L.glow) placeBeam(L.glow, a, b, d); lightOf(L, f, tt);
     });
     /* повільне обертання + поворот від скролу, ледь помітне плавання, паралакс від миші */
     spin.rotation.y = angle + f.spin + mx * 0.06;
@@ -170,8 +174,8 @@ function init() {
 
   fit();
   if (reduced) {
-    render(getFrame(dbgP != null ? dbgP : 0.35, 1, COUNTS));
-    new ResizeObserver(() => { fit(); render(getFrame(dbgP != null ? dbgP : 0.35, 1, COUNTS)); }).observe(sceneEl);
+    render(getFrame(dbgP != null ? dbgP : 0.95, 1, COUNTS));
+    new ResizeObserver(() => { fit(); render(getFrame(dbgP != null ? dbgP : 0.95, 1, COUNTS)); }).observe(sceneEl);
     return;
   }
 
@@ -180,11 +184,11 @@ function init() {
     const dt = Math.min(last ? now - last : 16, 50); last = now;      // покадрово, крок ≤ 50 мс (iOS присипляє цикл)
     t += dt / 1000; frameNo++;
     if (dbgIntro == null) introMs += dt;
-    const introT = dbgIntro != null ? dbgIntro : clamp01(introMs / 2400);
+    const introT = dbgIntro != null ? dbgIntro : clamp01(introMs / 1500);
     pTarget = progress();
-    pSmooth += (pTarget - pSmooth) * 0.14;
+    pSmooth += (pTarget - pSmooth) * 0.16;
     mx += (tmx - mx) * 0.08; my += (tmy - my) * 0.08;
-    angle += dt / 1000 * (0.11 + 0.08 * pSmooth);                       // обертання: повільне у спокої, трохи швидше зі скролом
+    angle += dt / 1000 * 0.1;                                            // повільне обертання у спокої
     if (still) { pSmooth = pTarget; render(getFrame(pSmooth, introT, COUNTS)); return; }
     if (!(lo && frameNo % 2)) render(getFrame(pSmooth, introT, COUNTS));
     if (visible && !document.hidden) schedule();
@@ -196,11 +200,11 @@ function init() {
   new ResizeObserver(() => { fit(); schedule(); }).observe(sceneEl);
   window.addEventListener('scroll', schedule, { passive: true });
   if (fine) {
-    const hero = sceneEl.closest('section') || sceneEl;
+    const hero = heroEl || sceneEl;
     hero.addEventListener('pointermove', (ev) => {
       const r = hero.getBoundingClientRect();
       tmx = clamp01((ev.clientX - r.left) / r.width) * 2 - 1;
-      tmy = clamp01((ev.clientY - r.top) / r.height) * 2 - 1;
+      tmy = clamp01((ev.clientY - Math.max(r.top, 0)) / Math.min(r.height, window.innerHeight)) * 2 - 1;
       schedule();
     });
     hero.addEventListener('pointerleave', () => { tmx = 0; tmy = 0; schedule(); });
@@ -215,20 +219,19 @@ function init() {
     for (let i = 0; i < 12; i++) for (let j = i + 1; j < 12; j++) if (Math.abs(V[i].distanceToSquared(V[j]) - 1) < 1e-6) E.push([i, j]);
     return { V, E };
   }
-  /* брус квадратного перерізу вздовж відрізка a→b; одна грань бруса дивиться назовні від центра фігури.
-     off зсуває брус уздовж цієї зовнішньої нормалі (так світлова смужка лягає на грань бруса). */
+  /* брус квадратного перерізу вздовж a→b; одна грань бруса дивиться назовні від центра фігури; off — зсув уздовж цієї нормалі */
   function beam(a, b, th, mat, off, parent) {
     const dir = tmpB.subVectors(b, a); const len = dir.length(); dir.normalize();
     const mid = tmpC.addVectors(a, b).multiplyScalar(0.5);
     const z = mid.clone().addScaledVector(dir, -mid.dot(dir));
-    if (z.lengthSq() < 1e-6) z.crossVectors(dir, Math.abs(dir.y) < 0.9 ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3(1, 0, 0));
+    if (z.lengthSq() < 1e-6) z.crossVectors(dir, Math.abs(dir.y) < 0.9 ? UP : RIGHT);
     z.normalize();
     const x = new THREE.Vector3().crossVectors(dir, z).normalize();
     const m = new THREE.Mesh(new THREE.BoxGeometry(th, len, th), mat);
     m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(x, dir.clone(), z));
     m.userData = { a: a.clone(), b: b.clone(), off, len0: len };
     m.position.copy(mid).addScaledVector(z, off);
-    m.castShadow = true;
+    m.castShadow = true; m.visible = false;
     parent.add(m);
     return m;
   }
@@ -252,10 +255,10 @@ function init() {
   function studioEnv(r) {
     const pm = new THREE.PMREMGenerator(r), s = new THREE.Scene(); s.background = new THREE.Color(0x000000);
     const panel = (pw, ph, col, pos, rot) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(pw, ph), new THREE.MeshBasicMaterial({ color: col, side: THREE.DoubleSide })); m.position.set(...pos); m.rotation.set(...rot); s.add(m); };
-    panel(12, 6, new THREE.Color(3.0, 3.2, 3.6), [0, 7, -1], [Math.PI / 2, 0, 0]);       // широкий верхній софтбокс — мʼякий блиск на металі
-    panel(8, 10, new THREE.Color(1.0, 1.4, 2.8), [-9, 3, 0], [0, Math.PI / 2, 0]);        // синій зліва
-    panel(8, 10, new THREE.Color(1.3, 1.25, 1.8), [9, 3, -1], [0, -Math.PI / 2, 0]);      // справа майже нейтральний, щоб метал не рожевів
-    panel(14, 8, new THREE.Color(0.9, 1.0, 1.2), [0, 3, 12], [0, Math.PI, 0]);            // фронтальне заповнення
+    panel(12, 6, new THREE.Color(3.0, 3.2, 3.6), [0, 7, -1], [Math.PI / 2, 0, 0]);
+    panel(8, 10, new THREE.Color(1.0, 1.4, 2.8), [-9, 3, 0], [0, Math.PI / 2, 0]);
+    panel(8, 10, new THREE.Color(1.3, 1.25, 1.8), [9, 3, -1], [0, -Math.PI / 2, 0]);
+    panel(14, 8, new THREE.Color(0.9, 1.0, 1.2), [0, 3, 12], [0, Math.PI, 0]);
     panel(14, 14, new THREE.Color(0.1, 0.12, 0.18), [0, -3, 0], [-Math.PI / 2, 0, 0]);
     const tex = pm.fromScene(s, 0.04).texture; pm.dispose(); return tex;
   }

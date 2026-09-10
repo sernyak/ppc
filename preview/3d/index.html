@@ -100,7 +100,8 @@
             }
             .js .reveal { opacity: 1; transform: none; }
         }
-        /* Перший екран: кристал */
+        /* Перший екран: радіант */
+        body { overflow-x: clip; }                 /* hidden ламає position: sticky */
         #cr-scene { position: relative; }
         #cr-canvas { display: block; width: 100%; height: 100%; }
         #cr-scene.cr-nogl { background: radial-gradient(60% 60% at 50% 45%, rgba(59,130,246,.22), rgba(11,15,25,0) 70%); }
@@ -110,6 +111,8 @@
         .cr-phases li.is-on { color: #E2E8F0; }
         .cr-phases li.is-on::before { background: #60A5FA; box-shadow: 0 0 8px #60A5FA; }
         @media (max-width: 767px) { .cr-phases { gap: 10px; font-size: 11px; } }
+        .cr-reduced #cr-hero { min-height: 0 !important; }
+        .cr-reduced .cr-pin { position: static !important; height: auto !important; }
     </style>
 </head>
 
@@ -139,9 +142,10 @@
         </div>
     </nav>
 
-    <!-- Hero: кристал збирає себе (точки → лінії → грані → ядро), далі все веде скрол -->
-    <section class="relative pt-32 md:pt-40 pb-16 md:pb-20 px-6">
-        <div class="max-w-6xl mx-auto grid lg:grid-cols-[minmax(0,11fr)_minmax(0,10fr)] gap-6 lg:gap-12 items-center animate-fade-in-up">
+    <!-- Hero: радіант. При відкритті збирається порожній каркас; головне веде скрол (на компʼютері секція закріплена на час історії) -->
+    <section id="cr-hero" class="relative px-6 lg:min-h-[230vh]">
+        <div class="cr-pin pt-32 md:pt-40 pb-16 md:pb-20 lg:sticky lg:top-0 lg:h-screen lg:pt-24 lg:pb-8 lg:flex lg:items-center">
+        <div class="max-w-6xl mx-auto w-full grid lg:grid-cols-[minmax(0,11fr)_minmax(0,10fr)] gap-6 lg:gap-12 items-center animate-fade-in-up">
             <div class="contents lg:block lg:space-y-8">
                 <div class="order-1 justify-self-start inline-flex items-center space-x-2 px-3 py-1 rounded-full glass-card border border-brand-accent/30 text-sm font-medium text-blue-400">
                     <span class="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></span>
@@ -171,9 +175,10 @@
             </div>
 
             <div id="cr-scene" class="order-3 relative w-full aspect-[31/28] lg:aspect-[31/30] max-h-[72vh]">
-                <canvas id="cr-canvas" role="img" aria-label="Металевий каркас збирає себе: вузли, внутрішня ґратка, зовнішні бруси — і всередині займається світло"></canvas>
+                <canvas id="cr-canvas" role="img" aria-label="Металевий каркас-радіант: зі скролом розкривається, будує всередині ґратку, замикається і засвічується"></canvas>
                 <ol class="cr-phases" aria-hidden="true"><li>проєктування</li><li>код</li><li>деплой</li><li>підтримка</li></ol>
             </div>
+        </div>
         </div>
     </section>
 
@@ -708,7 +713,7 @@
         })();
     </script>
 
-    <script type="module" src="/js/hero-crystal.js"></script>
+    <script type="module" src="/js/hero-crystal.js?v=7"></script>
 
 </body>
 </html>
