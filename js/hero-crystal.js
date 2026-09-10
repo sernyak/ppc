@@ -40,7 +40,9 @@ function init() {
 
   /* усе спільне — до першого використання */
   const R = 1.55, CY = R + 0.5;
-  const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), tmpC = new THREE.Vector3();
+  const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), tmpC = new THREE.Vector3(), tmpD = new THREE.Vector3();
+  const tmpS = new THREE.Vector3(), tmpT = new THREE.Vector3();          // кінці брусів, що рухаються зі скролом
+  const UP = new THREE.Vector3(0, 1, 0), RIGHT = new THREE.Vector3(1, 0, 0), mtx = new THREE.Matrix4();
   const LIGHT = new THREE.Color(0x47a0ff);           // синє світло ліній (акцент сайту, трохи холодніший)
 
   const scene = new THREE.Scene();
@@ -77,16 +79,16 @@ function init() {
   const thO = R * 0.062, thI = R * 0.036, thS = R * 0.03;
 
   const joints = [];
-  VO.forEach((v) => joints.push(joint(v, thO * 0.74, metalOuter, spin)));
-  VI.forEach((v) => joints.push(joint(v, thI * 0.8, metalInner, innerGrp)));
-  joints.sort((a, b) => a.position.y - b.position.y);
+  VO.forEach((v) => joints.push({ m: joint(v, thO * 0.74, metalOuter, spin), v, outer: true }));
+  VI.forEach((v) => joints.push({ m: joint(v, thI * 0.8, metalInner, innerGrp), v, outer: false }));
+  joints.sort((a, b) => a.v.y - b.v.y);
 
-  const outerBeams = C.E.map((e) => beam(VO[e[0]], VO[e[1]], thO, metalOuter, 0, spin));
-  outerBeams.sort((a, b) => Math.min(a.userData.a.y, a.userData.b.y) - Math.min(b.userData.a.y, b.userData.b.y));
+  const outerBeams = C.E.map((e) => ({ m: beam(VO[e[0]], VO[e[1]], thO, metalOuter, 0, spin), i: e[0], j: e[1], y: Math.min(VO[e[0]].y, VO[e[1]].y) }));
+  outerBeams.sort((a, b) => a.y - b.y);
 
   /* внутрішня ґратка: ребра меншої копії + спиці до зовнішніх вершин; кожна лінія — брус + світлова смужка (+ сяйво на компʼютері) */
-  const innerSegs = C.E.map((e) => ({ a: VI[e[0]], b: VI[e[1]], parent: innerGrp, th: thI, off: thI * 0.52 }));
-  for (let i = 0; i < 12; i++) innerSegs.push({ a: VO[i], b: VI[i], parent: spin, th: thS, off: thS * 0.52 });
+  const innerSegs = C.E.map((e) => ({ a: VI[e[0]], b: VI[e[1]], parent: innerGrp, th: thI, off: thI * 0.52, spoke: -1 }));
+  for (let i = 0; i < 12; i++) innerSegs.push({ a: VO[i], b: VI[i], parent: spin, th: thS, off: thS * 0.52, spoke: i });
   const innerLines = innerSegs.map((s) => {
     const bar = beam(s.a, s.b, s.th, metalInner, 0, s.parent);
     const lightMat = new THREE.MeshBasicMaterial({ color: LIGHT });
@@ -99,7 +101,7 @@ function init() {
     }
     strip.castShadow = false;
     const mid = tmpA.addVectors(s.a, s.b).multiplyScalar(0.5);
-    return { bar, strip, glow, lightMat, k: mid.y * 2.0 + mid.x * 0.7 + mid.z * 0.4, y: Math.min(s.a.y, s.b.y) };
+    return { bar, strip, glow, lightMat, k: mid.y * 2.0 + mid.x * 0.7 + mid.z * 0.4, y: Math.min(s.a.y, s.b.y), spoke: s.spoke, a: s.a, b: s.b };
   });
   innerLines.sort((a, b) => a.y - b.y);
   const COUNTS = { joints: joints.length, inner: innerLines.length, outer: outerBeams.length };
@@ -122,29 +124,40 @@ function init() {
   function progress() {
     if (dbgP != null) return dbgP;
     const hero = sceneEl.closest('section');
-    const span = (hero ? hero.offsetHeight : window.innerHeight) * (lo ? 0.6 : 0.8);
+    const span = (hero ? hero.offsetHeight : window.innerHeight) * (lo ? 0.5 : 0.55);   // уся трансформація — поки фігура ще на екрані
     return clamp01(window.scrollY / Math.max(1, span));
   }
-  function grow(mesh, d) {
-    mesh.visible = d > 0.001;
-    if (!mesh.visible) return;
-    mesh.scale.y = Math.max(d, 0.001);
-    mesh.position.lerpVectors(mesh.userData.a, mesh.userData.b, d / 2);
+  /* поставити брус між a і b, намальований на частку d від a; орієнтація як у beam() */
+  function placeBeam(m, a, b, d) {
+    m.visible = d > 0.001;
+    if (!m.visible) return;
+    const dir = tmpB.subVectors(b, a); const len = dir.length(); dir.normalize();
+    const mid = tmpC.addVectors(a, b).multiplyScalar(0.5);
+    const z = tmpA.copy(mid).addScaledVector(dir, -mid.dot(dir));
+    if (z.lengthSq() < 1e-6) z.crossVectors(dir, Math.abs(dir.y) < 0.9 ? UP : RIGHT);
+    z.normalize();
+    const x = tmpD.crossVectors(dir, z).normalize();
+    m.quaternion.setFromRotationMatrix(mtx.makeBasis(x, dir, z));
+    m.scale.y = Math.max(0.001, d * len / m.userData.len0);
+    m.position.copy(a).addScaledVector(dir, len * d / 2).addScaledVector(z, m.userData.off);
   }
   function apply(f, tt) {
-    joints.forEach((j, i) => j.scale.setScalar(Math.max(0.001, f.joints[i])));
-    outerBeams.forEach((b, i) => grow(b, f.outer[i]));
+    const open = f.open;                                                  // зовнішній каркас розсувається зі скролом
+    joints.forEach((j, i) => { j.m.scale.setScalar(Math.max(0.001, f.joints[i])); if (j.outer) j.m.position.copy(j.v).multiplyScalar(open); });
+    outerBeams.forEach((b, i) => placeBeam(b.m, tmpS.copy(VO[b.i]).multiplyScalar(open), tmpT.copy(VO[b.j]).multiplyScalar(open), f.outer[i]));
+    innerGrp.rotation.y = f.swivel;                                       // внутрішня ґратка провертається
     innerLines.forEach((L, i) => {
       const d = f.inner[i];
-      grow(L.bar, d); grow(L.strip, d); if (L.glow) grow(L.glow, d);
+      let a = L.a, b = L.b;
+      if (L.spoke >= 0) { a = tmpS.copy(VO[L.spoke]).multiplyScalar(open); b = tmpT.copy(VI[L.spoke]).applyAxisAngle(UP, f.swivel); }
+      placeBeam(L.bar, a, b, d); placeBeam(L.strip, a, b, d); if (L.glow) placeBeam(L.glow, a, b, d);
       const wv = 0.5 + 0.5 * Math.sin(L.k - tt * (0.5 + 1.1 * f.pulseSpeed));
-      const b = f.light * (0.45 + 0.55 * (1 - f.wave + f.wave * wv));
-      L.lightMat.color.copy(LIGHT).multiplyScalar(0.2 + 1.35 * b);      // не вище ~1.5×, щоб лінії лишались синіми, а не білими
-      if (L.glow) L.glow.material.opacity = 0.03 + 0.16 * b;
+      const br = f.light * (0.45 + 0.55 * (1 - f.wave + f.wave * wv));
+      L.lightMat.color.copy(LIGHT).multiplyScalar(0.2 + 1.35 * br);     // не вище ~1.5×, щоб лінії лишались синіми, а не білими
+      if (L.glow) L.glow.material.opacity = 0.03 + 0.16 * br;
     });
-    const s = 1 + f.breathe; innerGrp.scale.setScalar(s);
-    /* повільне обертання, ледь помітне плавання, паралакс від миші */
-    spin.rotation.y = angle + mx * 0.06;
+    /* повільне обертання + поворот від скролу, ледь помітне плавання, паралакс від миші */
+    spin.rotation.y = angle + f.spin + mx * 0.06;
     outer.rotation.x = 0.22 + my * 0.03;
     outer.position.y = CY + Math.sin(tt * 0.6) * 0.03;
     /* обліт камери */
@@ -171,7 +184,7 @@ function init() {
     pTarget = progress();
     pSmooth += (pTarget - pSmooth) * 0.14;
     mx += (tmx - mx) * 0.08; my += (tmy - my) * 0.08;
-    angle += dt / 1000 * (0.11 + 0.22 * pSmooth);                       // обертання: повільне у спокої, трохи швидше зі скролом
+    angle += dt / 1000 * (0.11 + 0.08 * pSmooth);                       // обертання: повільне у спокої, трохи швидше зі скролом
     if (still) { pSmooth = pTarget; render(getFrame(pSmooth, introT, COUNTS)); return; }
     if (!(lo && frameNo % 2)) render(getFrame(pSmooth, introT, COUNTS));
     if (visible && !document.hidden) schedule();
@@ -213,7 +226,7 @@ function init() {
     const x = new THREE.Vector3().crossVectors(dir, z).normalize();
     const m = new THREE.Mesh(new THREE.BoxGeometry(th, len, th), mat);
     m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(x, dir.clone(), z));
-    m.userData = { a: a.clone().addScaledVector(z, off), b: b.clone().addScaledVector(z, off) };
+    m.userData = { a: a.clone(), b: b.clone(), off, len0: len };
     m.position.copy(mid).addScaledVector(z, off);
     m.castShadow = true;
     parent.add(m);

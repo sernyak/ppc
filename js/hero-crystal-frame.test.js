@@ -6,35 +6,49 @@ const C = { joints: 24, inner: 36, outer: 24 };
 const near = (a, b, eps = 1e-9) => Math.abs(a - b) <= eps;
 const all = (arr, fn) => arr.every(fn);
 
-test('до вступу: нічого не зібрано, світла немає, етап «проєктування»', () => {
+test('до вступу: нічого не зібрано, світла немає, каркас закритий, етап «проєктування»', () => {
   const f = getFrame(0, 0, C);
   assert.ok(all(f.joints, (v) => v === 0) && all(f.inner, (v) => v === 0) && all(f.outer, (v) => v === 0));
   assert.equal(f.light, 0);
+  assert.equal(f.open, 1); assert.equal(f.swivel, 0); assert.equal(f.spin, 0);
   assert.equal(f.phase, 0);
 });
 
-test('після вступу у спокої: каркас зібраний, світло тліє, дихання нульове', () => {
+test('після вступу у спокої: каркас зібраний і закритий, світло тліє', () => {
   const f = getFrame(0, 1, C);
   assert.ok(all(f.joints, (v) => v === 1) && all(f.inner, (v) => v === 1) && all(f.outer, (v) => v === 1));
   assert.ok(near(f.light, CFG.restLight));
-  assert.ok(near(f.breathe, 0));
+  assert.equal(f.open, 1); assert.equal(f.swivel, 0); assert.equal(f.spin, 0);
   assert.equal(f.phase, 2);
 });
 
-test('кінець першого екрана: повне світло, камера обійшла, етап «підтримка»', () => {
+test('кінець першого екрана: каркас розкритий на максимум, ґратка провернута на чверть, повне світло', () => {
   const f = getFrame(1, 1, C);
   assert.equal(f.light, 1);
-  assert.ok(near(f.breathe, 0, 1e-6));
-  assert.ok(near(f.orbit, CFG.scroll.orbit));
+  assert.ok(near(f.open, 1 + CFG.scroll.openMax));
+  assert.ok(near(f.swivel, Math.PI / 2));
+  assert.ok(near(f.spin, CFG.scroll.spin) && near(f.orbit, CFG.scroll.orbit));
   assert.equal(f.phase, 3);
 });
 
-test('під час вступу скрол не розганяє світло (спершу збирання, потім робота)', () => {
+test('під час вступу скрол нічого не змінює (спершу збирання, потім робота)', () => {
   for (const it of [0.2, 0.5, 0.9, 0.999]) {
     const f = getFrame(1, it, C);
     assert.ok(f.light <= CFG.restLight + 1e-9, `introT=${it}`);
-    assert.ok(near(f.breathe, 0));
+    assert.equal(f.open, 1); assert.equal(f.swivel, 0); assert.equal(f.spin, 0);
   }
+});
+
+test('скрол міняє фігуру монотонно: розкриття, поворот ґратки і світло не убувають', () => {
+  let prev = getFrame(0, 1, C);
+  for (let p = 0.01; p <= 1.0001; p += 0.01) {
+    const f = getFrame(p, 1, C);
+    assert.ok(f.open >= prev.open - 1e-12 && f.swivel >= prev.swivel - 1e-12 && f.light >= prev.light - 1e-12, `@${p}`);
+    prev = f;
+  }
+  const mid = getFrame(0.5, 1, C);
+  assert.ok(mid.open > 1.15, 'на половині скролу каркас уже помітно розкритий');
+  assert.ok(mid.swivel > 0.5, 'на половині скролу ґратка вже помітно провернута');
 });
 
 test('порядок збирання: вузли → внутрішня ґратка → зовнішні бруси, і кожен елемент i не пізніше за i+1', () => {
@@ -54,7 +68,8 @@ test('усі величини в межах', () => {
   for (let it = 0; it <= 1.0001; it += 0.05) for (let p = 0; p <= 1.0001; p += 0.05) {
     const f = getFrame(p, it, C);
     for (const k of ['light', 'wave']) assert.ok(f[k] >= 0 && f[k] <= 1, `${k} @${p},${it}`);
-    assert.ok(f.breathe >= -1e-9 && f.breathe <= CFG.scroll.breatheMax + 1e-9);
+    assert.ok(f.open >= 1 && f.open <= 1 + CFG.scroll.openMax + 1e-9);
+    assert.ok(f.swivel >= 0 && f.swivel <= Math.PI / 2 + 1e-9);
     assert.ok([...f.joints, ...f.inner, ...f.outer].every((v) => v >= 0 && v <= 1));
     assert.ok([0, 1, 2, 3].includes(f.phase));
   }
