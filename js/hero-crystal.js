@@ -41,7 +41,7 @@ function init() {
   /* усе спільне — до першого використання */
   const R = 1.55, CY = R + 0.5;
   const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), tmpC = new THREE.Vector3();
-  const LIGHT = new THREE.Color(0x63b3ff);           // синє світло ліній (акцент сайту, трохи холодніший)
+  const LIGHT = new THREE.Color(0x47a0ff);           // синє світло ліній (акцент сайту, трохи холодніший)
 
   const scene = new THREE.Scene();
   scene.environment = studioEnv(renderer);
@@ -49,16 +49,16 @@ function init() {
   const target = new THREE.Vector3(0, CY - 0.05, 0);
 
   const key = new THREE.DirectionalLight(0xe8eeff, 1.5);
-  key.position.set(-4.5, 8, 5); key.castShadow = true;
+  key.position.set(-2.2, 9, 4.5); key.castShadow = true;                 // майже згори: тінь компактна, під фігурою
   key.shadow.mapSize.set(lo ? 1024 : 2048, lo ? 1024 : 2048);
   key.shadow.camera.left = -4; key.shadow.camera.right = 4; key.shadow.camera.top = 6; key.shadow.camera.bottom = -3;
-  key.shadow.camera.near = 1; key.shadow.camera.far = 30; key.shadow.bias = -0.0006; key.shadow.radius = 4;
+  key.shadow.camera.near = 1; key.shadow.camera.far = 30; key.shadow.bias = -0.0006; key.shadow.radius = 9;
   scene.add(key);
-  const fillA = new THREE.PointLight(0xa78bfa, 5, 16, 2); fillA.position.set(5, 3.5, -3); scene.add(fillA);
-  const fillB = new THREE.PointLight(0x60a5fa, 4, 16, 2); fillB.position.set(-5, 2.5, 4); scene.add(fillB);
+  const fillA = new THREE.PointLight(0xb9b0f0, 2.4, 16, 2); fillA.position.set(5, 3.5, -3); scene.add(fillA);
+  const fillB = new THREE.PointLight(0x60a5fa, 3, 16, 2); fillB.position.set(-5, 2.5, 4); scene.add(fillB);
   scene.add(new THREE.HemisphereLight(0x3a4a70, 0x05070d, 0.65));
 
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.ShadowMaterial({ color: 0x000000, opacity: 0.4 }));
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.ShadowMaterial({ color: 0x000000, opacity: 0.24 }));
   floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
 
   const outer = new THREE.Group(); outer.rotation.set(0.22, 0, 0.12); outer.position.set(0, CY, 0);
@@ -67,8 +67,8 @@ function init() {
 
   /* матеріали: матовий шліфований алюміній */
   const brushed = brushedTexture();
-  const metalOuter = new THREE.MeshStandardMaterial({ color: 0xb4bac2, metalness: 0.86, roughness: 0.46, roughnessMap: brushed, bumpMap: brushed, bumpScale: 0.006, envMapIntensity: 1.0 });
-  const metalInner = new THREE.MeshStandardMaterial({ color: 0x8f969f, metalness: 0.86, roughness: 0.5, roughnessMap: brushed, bumpMap: brushed, bumpScale: 0.004, envMapIntensity: 0.9 });
+  const metalOuter = new THREE.MeshStandardMaterial({ color: 0x9fa6ae, metalness: 0.86, roughness: 0.5, roughnessMap: brushed, bumpMap: brushed, bumpScale: 0.006, envMapIntensity: 0.95 });
+  const metalInner = new THREE.MeshStandardMaterial({ color: 0x848b94, metalness: 0.86, roughness: 0.54, roughnessMap: brushed, bumpMap: brushed, bumpScale: 0.004, envMapIntensity: 0.85 });
 
   /* кубооктаедр: 12 вершин, 24 ребра */
   const C = cubocta();
@@ -139,8 +139,8 @@ function init() {
       grow(L.bar, d); grow(L.strip, d); if (L.glow) grow(L.glow, d);
       const wv = 0.5 + 0.5 * Math.sin(L.k - tt * (0.5 + 1.1 * f.pulseSpeed));
       const b = f.light * (0.45 + 0.55 * (1 - f.wave + f.wave * wv));
-      L.lightMat.color.copy(LIGHT).multiplyScalar(0.25 + 2.1 * b);
-      if (L.glow) L.glow.material.opacity = 0.03 + 0.2 * b;
+      L.lightMat.color.copy(LIGHT).multiplyScalar(0.2 + 1.35 * b);      // не вище ~1.5×, щоб лінії лишались синіми, а не білими
+      if (L.glow) L.glow.material.opacity = 0.03 + 0.16 * b;
     });
     const s = 1 + f.breathe; innerGrp.scale.setScalar(s);
     /* повільне обертання, ледь помітне плавання, паралакс від миші */
@@ -241,7 +241,7 @@ function init() {
     const panel = (pw, ph, col, pos, rot) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(pw, ph), new THREE.MeshBasicMaterial({ color: col, side: THREE.DoubleSide })); m.position.set(...pos); m.rotation.set(...rot); s.add(m); };
     panel(12, 6, new THREE.Color(3.0, 3.2, 3.6), [0, 7, -1], [Math.PI / 2, 0, 0]);       // широкий верхній софтбокс — мʼякий блиск на металі
     panel(8, 10, new THREE.Color(1.0, 1.4, 2.8), [-9, 3, 0], [0, Math.PI / 2, 0]);        // синій зліва
-    panel(8, 10, new THREE.Color(1.7, 1.3, 2.6), [9, 3, -1], [0, -Math.PI / 2, 0]);       // фіолетовий справа
+    panel(8, 10, new THREE.Color(1.3, 1.25, 1.8), [9, 3, -1], [0, -Math.PI / 2, 0]);      // справа майже нейтральний, щоб метал не рожевів
     panel(14, 8, new THREE.Color(0.9, 1.0, 1.2), [0, 3, 12], [0, Math.PI, 0]);            // фронтальне заповнення
     panel(14, 14, new THREE.Color(0.1, 0.12, 0.18), [0, -3, 0], [-Math.PI / 2, 0, 0]);
     const tex = pm.fromScene(s, 0.04).texture; pm.dispose(); return tex;
