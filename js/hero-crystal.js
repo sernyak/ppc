@@ -39,6 +39,7 @@ function init() {
   /* ---------- сцена ---------- */
   const R = 1.6, CY = R + 0.45, DIM = 0x22355f;
   let glowTex = null;   // текстура сяйва (створюється один раз, у glow())
+  const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3();   // тимчасові вектори для tube() і apply()
   const scene = new THREE.Scene();
   scene.environment = studioEnv(renderer);
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 60);
@@ -126,7 +127,6 @@ function init() {
     const span = (hero ? hero.offsetHeight : window.innerHeight) * (lo ? 0.6 : 0.8);
     return clamp01(window.scrollY / Math.max(1, span));
   }
-  const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3();
   function apply(f, tt) {
     /* грані */
     for (const fc of faces) {
