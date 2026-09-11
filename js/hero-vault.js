@@ -153,18 +153,24 @@ function init() {
   const wallOrigin = wallC.clone(), figRay = new THREE.Ray();
   const wallMat = new THREE.ShaderMaterial({
     uniforms: {
-      uMap: { value: blankTexture() }, uTint: { value: new THREE.Color(0xbcd3ff) }, uOpacity: { value: 1.0 },
+      uMap: { value: blankTexture() }, uMapB: { value: blankTexture() }, uMix: { value: 0 },
+      uTint: { value: new THREE.Color(0xbcd3ff) }, uOpacity: { value: 1.0 },
       uOrigin: { value: wallOrigin }, uRadius: { value: 0 }, uSoft: { value: 2.0 },
       uSpot: { value: new THREE.Vector3(0, -50, 0) }, uSpotR: { value: 3.0 }, uSpotK: { value: fine && !lo ? 0.7 : 0 }, uTime: { value: 0 },
       uEdge: { value: band ? 0.3 : 0.2 },
     },
     vertexShader: `varying vec2 vUv; varying vec3 vW;
       void main(){ vUv = uv; vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }`,
-    fragmentShader: `uniform sampler2D uMap; uniform vec3 uTint; uniform float uOpacity; uniform vec3 uOrigin; uniform float uRadius; uniform float uSoft;
+    fragmentShader: `uniform sampler2D uMap; uniform sampler2D uMapB; uniform float uMix;
+      uniform vec3 uTint; uniform float uOpacity; uniform vec3 uOrigin; uniform float uRadius; uniform float uSoft;
       uniform vec3 uSpot; uniform float uSpotR; uniform float uSpotK; uniform float uTime; uniform float uEdge;
       varying vec2 vUv; varying vec3 vW;
       void main(){
-        vec4 t = texture2D(uMap, vUv);
+        /* два набори написів: поки видно один, другий домальовується, далі повільний перехід між ними.
+           Перехід іде смугою по стіні, а не одразу всюди, — так рядки змінюються по черзі, без спалаху. */
+        float band = smoothstep(-0.35, 0.35, uMix * 1.7 - 0.35 - (vUv.x * 0.55 + vUv.y * 0.45) * 0.7);
+        vec4 t = mix(texture2D(uMap, vUv), texture2D(uMapB, vUv), band);
+        float turn = 1.0 - 0.45 * (1.0 - abs(band * 2.0 - 1.0));      // на самому переході рядок ледь тьмянішає
         float d = distance(vW, uOrigin);
         float m = 1.0 - smoothstep(uRadius - uSoft, uRadius + uSoft * 0.25, d);
         float fall = 1.0 / (1.0 + d * d * 0.014);
@@ -172,7 +178,9 @@ function init() {
         float edge = smoothstep(0.0, uEdge, vUv.x) * smoothstep(1.0, 1.0 - uEdge, vUv.x) * smoothstep(0.0, 0.22, vUv.y) * smoothstep(1.0, 0.78, vUv.y);
         float spot = 1.0 + uSpotK * (1.0 - smoothstep(0.0, uSpotR, distance(vW, uSpot)));
         float breathe = 0.92 + 0.08 * sin(uTime * 0.45 + vW.z * 0.7 + vW.y * 0.9);
-        vec3 c = uTint * t.rgb * t.a * uOpacity * m * edge * (0.35 + 0.65 * fall) * spot * breathe;
+        /* одна повільна світла хвиля йде вздовж стіни — рядки на ній оживають */
+        float sweep = 1.0 + 0.5 * smoothstep(0.55, 1.0, sin(uTime * 0.16 - vUv.x * 3.4 - vUv.y * 1.1) * 0.5 + 0.5);
+        vec3 c = uTint * t.rgb * t.a * uOpacity * m * edge * (0.35 + 0.65 * fall) * spot * breathe * sweep * turn;
         gl_FragColor = vec4(c, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
@@ -185,9 +193,35 @@ function init() {
     blending: THREE.AdditiveBlending, premultipliedAlpha: true,
   });
   const wall = new THREE.Mesh(new THREE.PlaneGeometry(WW, H), wallMat); wall.position.copy(wallC); wall.rotation.y = wallRot; scene.add(wall);
-  /* текст формул малюємо, щойно є шрифт Inter (не довше ~1,2 с чекання) */
+  /* Дві полотнини з написами: одна на екрані, друга тим часом домальовується рядок за рядком
+     (по кілька рядків за кадр, щоб не було ривка), і далі вони плавно міняються місцями. */
+  const TW = lo ? 2048 : 4096, TH = lo ? 768 : 1536, TROWS = lo ? 22 : 30;
+  const sheets = [wallSheet(TW, TH), wallSheet(TW, TH)];
+  let front = 0, sheetSeed = 23, painter = null, mixT = 0, nextSwap = 0;
   const fontsReady = Promise.race([Promise.all([document.fonts.load('400 40px Inter'), document.fonts.load('600 40px Inter')]).catch(() => null), new Promise((r) => setTimeout(r, 1200))]);
-  fontsReady.then(() => { wallMat.uniforms.uMap.value = formulaTexture(lo ? 2048 : 4096, lo ? 768 : 1536, lo ? 22 : 30, 23); schedule(); });
+  fontsReady.then(() => {
+    paintAll(sheets[0], TROWS, sheetSeed);                 // перший набір — одразу цілком
+    wallMat.uniforms.uMap.value = sheets[0].tex; wallMat.uniforms.uMapB.value = sheets[0].tex;
+    nextSwap = t + SWAP_EVERY;
+    schedule();
+  });
+  const SWAP_EVERY = lo ? 11 : 8, SWAP_TIME = lo ? 3.4 : 2.6, ROWS_PER_FRAME = lo ? 1 : 2;
+  /* крок життя стіни: домалювати трохи наступного набору, а коли готовий — повільно перевести на нього */
+  function stepWall(dt) {
+    if (!wall.visible || !nextSwap) return;
+    if (painter) {
+      for (let i = 0; i < ROWS_PER_FRAME && painter; i++) if (!painter.next().done) continue; else painter = null;
+      if (!painter) { sheets[1 - front].tex.needsUpdate = true; wallMat.uniforms.uMapB.value = sheets[1 - front].tex; mixT = 0.0001; }
+      return;
+    }
+    if (mixT > 0) {                                        // перехід між наборами
+      mixT = Math.min(1, mixT + dt / SWAP_TIME);
+      wallMat.uniforms.uMix.value = mixT;
+      if (mixT >= 1) { front = 1 - front; wallMat.uniforms.uMap.value = sheets[front].tex; wallMat.uniforms.uMix.value = mixT = 0; nextSwap = t + SWAP_EVERY; }
+      return;
+    }
+    if (t >= nextSwap) painter = paintRows(sheets[1 - front], TROWS, (sheetSeed += 7));
+  }
 
   /* зерна світла, що летять від фігури на площину проєкції */
   const rnd = seeded(31);
@@ -336,6 +370,7 @@ function init() {
     pSmooth += (pTarget - pSmooth) * 0.16;
     mx += (tmx - mx) * 0.08; my += (tmy - my) * 0.08; yaw += (tyaw - yaw) * 0.1;
     spot.lerp(tspot, 0.12);
+    stepWall(dt / 1000);                                                 // стіна живе: домальовує наступний набір і переходить на нього
     angle += dt / 1000 * 0.1;                                            // повільне обертання у спокої
     if (still) { pSmooth = pTarget; render(...frames(pSmooth, introT)); return; }
     if (!(lo && frameNo % 2)) render(...frames(pSmooth, introT));
@@ -423,7 +458,32 @@ function init() {
   }
   /* ---------- текстура формул ---------- */
   function blankTexture() { const c = document.createElement('canvas'); c.width = c.height = 4; return new THREE.CanvasTexture(c); }
-  function formulaTexture(w, h, rows, seed) {
+  /* Кілька карток серед формул — коротка розповідь про мене, якщо хтось захоче вчитатись.
+     Вони стоять на тих самих місцях в обох наборах, тож при зміні написів не миготять і їх можна дочитати. */
+  /* Точка площини, куди дивиться камера крізь фігуру, — довкола неї і розкладаємо картки:
+     так вони завжди лягають поруч із силуетом, а не за кадром. off = [уздовж площини, по висоті]. */
+  const camBase = target.clone().add(new THREE.Vector3(d0 * Math.cos(el0) * Math.sin(az0), d0 * Math.sin(el0), d0 * Math.cos(el0) * Math.cos(az0)));
+  const shadow0 = wallC.clone();
+  new THREE.Ray(camBase, cPos.clone().sub(camBase).normalize()).intersectPlane(wallPlane, shadow0);
+  const aShadow = shadow0.clone().sub(wallC).dot(wallU);
+  const atOf = (du, dv) => [(aShadow + du) / WW + 0.5, 0.5 - (shadow0.y + dv - wallC.y) / H];
+  const SALES = (band ? [
+    { off: [0.2, 2.2], t: 'Що я роблю', l: ['Автоматизую те, що зʼїдає час:', 'заявки, розрахунки, звіти,', 'відповіді клієнтам.'] },
+    { off: [0.6, 4.4], t: 'З чого почати', l: ['Безкоштовний зразок', 'на ваших даних.', 'sernyak.a@gmail.com'] },
+  ] : [
+    { off: [-0.9, 2.5], t: 'Що я роблю', l: ['Автоматизую те, що зʼїдає час:', 'заявки, розрахунки, звіти,', 'відповіді клієнтам.'] },
+    { off: [4.4, 1.5], t: 'Як я рахую', l: ['Не «впровадження», а гроші:', 'скільки коштує година рутини', 'і коли система окупиться.'] },
+    { off: [-4.2, 4.0], t: 'Що ви отримуєте', l: ['Робочу систему у вашій CRM.', 'Код і доступи — ваші.', 'Підтримує той, хто будував.'] },
+    { off: [3.0, 4.6], t: 'З чого почати', l: ['Безкоштовний зразок на ваших', 'даних: беру ваш процес', 'і показую автоматизованим.', 'sernyak.a@gmail.com'] },
+  ]).map((card) => ({ ...card, at: atOf(card.off[0], card.off[1]) }));
+  function wallSheet(w, h) {
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    return { c, g: c.getContext('2d'), tex };
+  }
+  function paintAll(sheet, rows, seed) { const it = paintRows(sheet, rows, seed); while (!it.next().done); sheet.tex.needsUpdate = true; }
+  function* paintRows(sheet, rows, seed) {
     /* Не про мої проєкти, а про економіку того, хто читає: як рахується його прибуток, що коштує
        рутина, наскільки швидше йде заявка. Три голоси: модель · результат · процес. */
     const CORPUS = [
@@ -439,13 +499,26 @@ function init() {
       'дублікат ⇔ (сума, дата, контрагент)', 'черга: 0 · час очікування → 0',
     ];
     const CHARTS = ['bars', 'rise', 'drop', 'funnel', 'donut'];
-    const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d');
+    const { c, g } = sheet, w = c.width, h = c.height;
+    g.clearRect(0, 0, w, h);
     const r = seeded(seed), lh = h / rows, fs = Math.round(lh * 0.55);
+    /* Картки помітно більші за формули — інакше на екрані їх не прочитати. Розмір беремо з реального
+       виміру тексту, а рядки формул потім обходять ці прямокутники. */
+    const cfs = Math.round(fs * (lo ? 1.55 : 1.7)), cLead = cfs * 1.5, pad = cfs * 0.8;
+    const boxes = SALES.map((card) => {
+      g.font = `600 ${Math.round(cfs * 1.15)}px Inter, sans-serif`;
+      let tw = g.measureText(card.t).width;
+      g.font = `400 ${cfs}px Inter, sans-serif`;
+      for (const line of card.l) tw = Math.max(tw, g.measureText(line).width);
+      const bw = tw + pad * 2, bh = cLead * (card.l.length + 1.35) + pad;
+      return { card, cfs, cLead, pad, x: Math.min(w - bw, Math.max(0, card.at[0] * w - bw / 2)), y: Math.min(h - bh, card.at[1] * h), w: bw, h: bh };
+    });
+    const hit = (x, y) => boxes.find((b) => x > b.x - lh * 0.5 && x < b.x + b.w + lh * 0.5 && y > b.y - lh * 0.4 && y < b.y + b.h + lh * 0.4);
     g.textBaseline = 'middle';
     g.fillStyle = '#9dc2ff'; g.strokeStyle = '#9dc2ff'; g.lineJoin = 'round'; g.lineCap = 'round';
-    /* маленький графік у рядок — той самий колір і товщина, що й текст; повертає свою ширину */
+    /* маленький графік у рядок — той самий колір і товщина, що й текст */
     function chart(kind, x, cy) {
-      const ch = lh * 0.6, top = cy - ch / 2, cw = kind === 'donut' ? ch : ch * 2.1;
+      const ch = lh * 0.6, top = cy - ch / 2, cw = chartWidth(kind, lh);
       g.lineWidth = Math.max(1, ch * 0.075);
       if (kind === 'bars') {
         const n = 5, bw = cw / (n * 1.55);
@@ -466,26 +539,52 @@ function init() {
         g.globalAlpha /= 0.45;
         g.beginPath(); g.arc(cx, cyy, rad, -Math.PI / 2, -Math.PI / 2 + Math.PI * (0.9 + r() * 0.8)); g.stroke();
       }
-      return cw;
     }
     /* рядок за рядком, зліва направо, з проміжками — написи не лягають один на одного */
     for (let row = 0; row < rows; row++) {
+      const cy = (row + 0.5) * lh;
       let x = -r() * w * 0.3;                                   // рядки зсунуті один відносно одного
       while (x < w) {
         const strong = r() < 0.16;
         g.globalAlpha = strong ? 0.95 : 0.3 + r() * 0.32;
         if (r() < 0.17) {
-          x += chart(CHARTS[Math.floor(r() * CHARTS.length)], x, (row + 0.5) * lh);
+          const kind = CHARTS[Math.floor(r() * CHARTS.length)], cw = chartWidth(kind, lh);
+          const b = hit(x, cy) || hit(x + cw, cy);
+          if (b) { x = b.x + b.w + lh * 0.6; continue; }
+          chart(kind, x, cy); x += cw;
         } else {
           const line = CORPUS[Math.floor(r() * CORPUS.length)];
           g.font = `${strong ? 600 : 400} ${fs}px Inter, sans-serif`;
-          g.fillText(line, x, (row + 0.5) * lh);
-          x += g.measureText(line).width;
+          const lw = g.measureText(line).width;
+          const b = hit(x, cy) || hit(x + lw, cy);
+          if (b) { x = b.x + b.w + lh * 0.6; continue; }
+          g.fillText(line, x, cy);
+          x += lw;
         }
         x += fs * (1.4 + r() * 2.2);
       }
+      yield row;
     }
-    const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); return tex;
+    for (const b of boxes) { drawCard(g, b, lh, fs); yield 'card'; }
+  }
+  function chartWidth(kind, lh) { const ch = lh * 0.6; return kind === 'donut' ? ch : ch * 2.1; }
+  /* картка: тонка рамка, заголовок і кілька рядків — трохи яскравіші за формули довкола */
+  function drawCard(g, b) {
+    const { cfs, cLead, pad } = b;
+    g.save();
+    g.strokeStyle = '#9dc2ff'; g.fillStyle = '#9dc2ff'; g.lineWidth = Math.max(1.5, cfs * 0.045);
+    g.globalAlpha = 0.4;                                   // не рамка, а два кутики — стіна не має виглядати як інтерфейс
+    g.beginPath();
+    g.moveTo(b.x, b.y + pad * 1.1); g.lineTo(b.x, b.y); g.lineTo(b.x + b.w * 0.38, b.y);
+    g.moveTo(b.x + b.w, b.y + b.h - pad * 1.1); g.lineTo(b.x + b.w, b.y + b.h); g.lineTo(b.x + b.w * 0.62, b.y + b.h);
+    g.stroke();
+    g.globalAlpha = 1;
+    g.font = `600 ${Math.round(cfs * 1.15)}px Inter, sans-serif`;
+    g.fillText(b.card.t, b.x + pad, b.y + pad + cfs * 0.3);
+    g.globalAlpha = 0.78;
+    g.font = `400 ${cfs}px Inter, sans-serif`;
+    b.card.l.forEach((line, i) => g.fillText(line, b.x + pad, b.y + pad + cLead * (1.25 + i)));
+    g.restore();
   }
   function seeded(seed) { let s = seed * 7919 + 13; return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; }; }
 }
