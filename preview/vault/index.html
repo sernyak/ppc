@@ -104,9 +104,11 @@
         body { overflow-x: clip; }                 /* hidden ламає position: sticky */
         #vault-canvas { display: block; width: 100%; height: 100%; touch-action: pan-y; }
         #vault-scene.vault-nogl { background: radial-gradient(60% 60% at 50% 55%, rgba(59,130,246,.22), rgba(11,15,25,0) 70%); }
-        #vault-scene::before, #vault-scene::after { content: ""; position: absolute; left: 0; right: 0; height: 56px; pointer-events: none; }
-        #vault-scene::before { top: 0; background: linear-gradient(180deg, #0B0F19, rgba(11,15,25,0)); }
-        #vault-scene::after { bottom: 0; background: linear-gradient(0deg, #0B0F19, rgba(11,15,25,0)); }
+        /* абзац проявляється словами зі скролу — до першого кадру він видимий, щоб текст читався й без JS */
+        .vault-word { display: inline-block; transition: opacity .45s ease-out, transform .45s ease-out; }
+        .js .vault-lede-anim .vault-word { opacity: 0; transform: translateY(8px); }
+        .js .vault-lede-anim .vault-word.on { opacity: 1; transform: none; }
+        @media (prefers-reduced-motion: reduce) { .js .vault-lede-anim .vault-word { opacity: 1; transform: none; } }
         .vault-veil { background: linear-gradient(90deg, rgba(11,15,25,.9) 0%, rgba(11,15,25,.66) 30%, rgba(11,15,25,0) 56%), linear-gradient(180deg, rgba(11,15,25,0) 74%, #0B0F19 100%); }
         @media (min-width: 1024px) { #vault-scene::before, #vault-scene::after { display: none; } }
     </style>
@@ -145,16 +147,16 @@
         <div class="vault-veil hidden lg:block absolute inset-0 z-[1] pointer-events-none" aria-hidden="true"></div>
         <div class="max-w-6xl mx-auto w-full grid gap-6 lg:block">
             <div class="contents lg:block lg:relative lg:z-[2] lg:max-w-[600px] lg:space-y-8 lg:animate-fade-in-up">
-                <div class="order-1 justify-self-start inline-flex items-center space-x-2 px-3 py-1 rounded-full glass-card border border-brand-accent/30 text-sm font-medium text-blue-400">
+                <div class="order-1 justify-self-center lg:justify-self-start inline-flex items-center space-x-2 px-3 py-1 rounded-full glass-card border border-brand-accent/30 text-sm font-medium text-blue-400">
                     <span class="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></span>
                     <span>Безкоштовний зразок на ваших даних</span>
                 </div>
 
-                <h1 class="order-2 text-4xl md:text-6xl font-bold leading-tight tracking-tight">
+                <h1 class="order-2 text-center lg:text-left text-4xl md:text-6xl font-bold leading-tight tracking-tight">
                     Що я будую <span class="gradient-text">за допомогою ШІ</span>
                 </h1>
 
-                <p class="order-4 text-lg text-slate-400 leading-relaxed">
+                <p id="vault-lede" class="order-4 text-lg text-slate-400 leading-relaxed">
                     Мене звати <strong class="text-slate-200">Олександр Серняк</strong>, я технічний PPC-маркетолог із 2016 року.
                     Я не «роблю сайти» — я будую системи, які приймають гроші й доставляють результат без участі людини:
                     від форми оплати й розрахунків до звіту, який сам приходить клієнту на пошту,
@@ -162,7 +164,7 @@
                     Проєктування, код, деплой і підтримка — самостійно, з ШІ як інструментом розробки.
                 </p>
 
-                <div class="order-5 flex flex-wrap gap-4 pt-2">
+                <div class="order-5 flex flex-wrap justify-center lg:justify-start gap-4 pt-2">
                     <a href="#projects" class="px-7 py-3.5 bg-white text-brand-dark font-bold rounded-lg hover:bg-slate-200 transition-all cursor-pointer">
                         Подивитись проєкти
                     </a>
@@ -172,8 +174,11 @@
                 </div>
             </div>
 
-            <div id="vault-scene" class="order-3 relative w-full aspect-[5/6] max-h-[68vh] lg:absolute lg:inset-0 lg:aspect-auto lg:max-h-none lg:w-auto lg:z-0">
-                <canvas id="vault-canvas" role="img" aria-label="Металевий каркас-радіант: зі скролом розкривається, будує всередині ґратку, засвічується, а довкола нього в повітрі проступають формули його систем"></canvas>
+            <!-- місце під фігуру: сама сцена лежить фоном на весь екран, тут лише «вікно» в потоці тексту -->
+            <div class="order-3 w-full h-[37vh] max-h-[330px] lg:hidden" aria-hidden="true"></div>
+
+            <div id="vault-scene" class="absolute inset-0 w-auto z-0 pointer-events-none lg:pointer-events-auto">
+                <canvas id="vault-canvas" role="img" aria-label="Металевий каркас-радіант: зі скролом розкривається, будує всередині ґратку, засвічується і розсипає світло, з якого складається текст поруч"></canvas>
             </div>
         </div>
     </section>
