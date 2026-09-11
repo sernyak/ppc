@@ -5,16 +5,19 @@
  * світловими лініями; при відкритті збирається порожній каркас, далі скрол
  * веде його історію (каркас розсувається, малюється ґратка, спиці, чверть
  * оберту, каркас замикається, займається світло) — хореографія і код побудови
- * взяті звідти без змін (hero-crystal-frame.js). Фігура відкидає тінь на
- * сторінку.
+ * взяті звідти без змін (hero-crystal-frame.js). Своя тут лише поява при
+ * завантаженні: спершу з простору злітаються всі вузли, і аж потім між ними
+ * проростають бруси. Фігура відкидає тінь на сторінку.
  *
  * Своє тут — те, що довкола: історія фігури стиснута в першу частину скролу,
  * тож невелика прокрутка одразу запускає розкриття; фігура робить повний
  * оберт; формули його систем проєктуються збоку на невидиму площину — вона не
  * має ні кольору, ні країв, видно лише світло написів: вони проступають
- * рядками від фігури і розходяться до країв. З ядра фігури крізь раму назовні
- * летять вогники — вони трохи випереджають фронт написів, ніби самі й
- * створюють проєкцію; камера облітає фігуру. Розмір фігури не змінюється. На компʼютері hero липкий на час прокрутки; миша дає
+ * рядками від фігури і розходяться до країв. Спершу з ядра крізь раму летять
+ * вогники — вони випереджають написи, ніби самі й створюють проєкцію, — а
+ * написи наздоганяють пізніше й плавно набирають яскравість, щоб устигнути
+ * роздивитись, як збирається ґратка; камера облітає фігуру. Розмір фігури не
+ * змінюється. На компʼютері hero липкий на час прокрутки; миша дає
  * паралакс, рядки біля курсора яскравішають; на телефоні 30 к/с. Поза екраном
  * цикл спить, при «зменшити рух» — один нерухомий кадр.
  *
@@ -22,7 +25,7 @@
  */
 import * as THREE from 'three';
 import { getFrame as figureFrame, clamp01 } from './hero-crystal-frame.js';
-import { getFrame as sceneFrame, figureProgress } from './hero-vault-frame.js';
+import { getFrame as sceneFrame, figureProgress, introFrame } from './hero-vault-frame.js';
 
 const sceneEl = document.getElementById('vault-scene');
 const canvas = document.getElementById('vault-canvas');
@@ -51,9 +54,8 @@ function init() {
   renderer.setClearColor(0x0b0f19, 0);
 
   /* усе спільне — до першого використання */
-  /* розмір фігури — як на /preview/3d/: там R 1,55 при відстані 8,3, тобто кутовий радіус ≈ 0,187;
-     тут камера стоїть трохи далі (фігура зсунута праворуч від точки погляду), тож R перерахований під ту саму видиму величину */
-  const R = band ? 1.13 : 1.62;
+  /* фігура — як на /preview/3d/, лише в півтора раза менша (прохання власника) */
+  const R = band ? 0.75 : 1.08;
   const cPos = band ? new THREE.Vector3(0, R + 0.5, 0) : new THREE.Vector3(5.0, R + 0.7, 0.6);
   const cam0 = band ? new THREE.Vector3(0, cPos.y + 0.2, 7.4) : new THREE.Vector3(0.3, cPos.y + 0.2, 8.8);
   const target = band ? new THREE.Vector3(0, cPos.y + 0.05, 0) : new THREE.Vector3(3.1, cPos.y, 0);
@@ -188,13 +190,13 @@ function init() {
   gGeo.boundingSphere = new THREE.Sphere(cPos.clone(), 30);
   const grainMat = new THREE.ShaderMaterial({
     uniforms: { uTime: { value: 0 }, uOrigin: { value: cPos.clone() }, uStart: { value: R * 0.12 }, uSpread: { value: 0 }, uSize: { value: lo ? 5 : 8 }, uPR: { value: renderer.getPixelRatio() }, uColorA: { value: new THREE.Color(0x60a5fa) }, uColorB: { value: new THREE.Color(0xa78bfa) },
-      uWave: wallMat.uniforms.uOrigin, uRadius: wallMat.uniforms.uRadius, uSoft: wallMat.uniforms.uSoft },
+      uWave: wallMat.uniforms.uOrigin, uReach: { value: 0 }, uSoft: wallMat.uniforms.uSoft },
     vertexShader: `attribute vec3 aDir; attribute float aMax; attribute float aPhase; attribute float aSpeed;
-      uniform float uTime; uniform vec3 uOrigin; uniform vec3 uWave; uniform float uRadius; uniform float uSoft;
+      uniform float uTime; uniform vec3 uOrigin; uniform vec3 uWave; uniform float uReach; uniform float uSoft;
       uniform float uStart; uniform float uSpread; uniform float uSize; uniform float uPR; varying float vA; varying float vK;
       void main(){ float u = fract(aPhase + uTime * aSpeed); vec3 p = uOrigin + aDir * mix(uStart, aMax, u);   // з ядра фігури до своєї точки на площині
-        /* трохи випереджають фронт написів: спершу долітає вогник, слідом займається рядок */
-        float lit = 1.0 - smoothstep(uRadius + uSoft * 0.6, uRadius + uSoft * 2.4, distance(uOrigin + aDir * aMax, uWave));
+        /* мають власний, швидший фронт: вогники летять уже тоді, коли написів ще немає, і весь час випереджають їх */
+        float lit = 1.0 - smoothstep(uReach + uSoft * 0.6, uReach + uSoft * 2.4, distance(uOrigin + aDir * aMax, uWave));
         /* зʼявляються, вийшовши з ядра, і гаснуть, торкнувшись площини */
         vA = smoothstep(0.0, 0.16, u) * (1.0 - smoothstep(0.86, 1.0, u)) * lit * smoothstep(0.0, 0.12, uSpread); vK = aPhase;
         vec4 mv = modelViewMatrix * vec4(p, 1.0); gl_PointSize = min(uSize * uPR * (6.0 / -mv.z), 9.0 * uPR); gl_Position = projectionMatrix * mv; }`,
@@ -254,7 +256,7 @@ function init() {
   function apply(fF, fS, tt) {
     /* радіант — як на /preview/3d/ */
     const open = fF.open;
-    jointsOuter.forEach((j, i) => { j.m.scale.setScalar(Math.max(0.001, fF.jointsOuter[i])); j.m.position.copy(j.v).multiplyScalar(open); });
+    jointsOuter.forEach((j, i) => { j.m.scale.setScalar(Math.max(0.001, fF.jointsOuter[i])); j.m.position.copy(j.v).multiplyScalar(open * fF.drift[i]); });
     outerBeams.forEach((b, i) => placeBeam(b.m, tmpS.copy(VO[b.i]).multiplyScalar(open), tmpT.copy(VO[b.j]).multiplyScalar(open), fF.outer[i]));
     jointsInner.forEach((j, i) => j.m.scale.setScalar(Math.max(0.001, fF.jointsInner[i])));
     innerGrp.rotation.y = fF.swivel;
@@ -278,14 +280,20 @@ function init() {
     if (!figRay.intersectPlane(wallPlane, wallOrigin)) wallOrigin.copy(wallC);
     let far = 0;
     for (const c of wallCorners) far = Math.max(far, c.distanceTo(wallOrigin));
-    /* перші рядки займаються рівно на краю силуету фігури і далі хвиля росте до країв площини */
-    const base = camera.position.distanceTo(wallOrigin) * (R * open / camera.position.distanceTo(outer.position));
-    wallMat.uniforms.uRadius.value = base + fS.coverage * Math.max(far - base, 0.5);
+    wallMat.uniforms.uRadius.value = fS.coverage * far;
+    wallMat.uniforms.uOpacity.value = fS.fade;
     wallMat.uniforms.uTime.value = tt; wallMat.uniforms.uSpot.value.copy(spot);
-    wall.visible = fS.coverage > 0.001;
-    grainMat.uniforms.uTime.value = tt; grainMat.uniforms.uSpread.value = fS.grains; grains.visible = fS.grains > 0.001;
+    wall.visible = fS.fade > 0.002;
+    grainMat.uniforms.uTime.value = tt; grainMat.uniforms.uSpread.value = fS.grains;
+    grainMat.uniforms.uReach.value = fS.grains * far; grains.visible = fS.grains > 0.001;
   }
-  const frames = (p, introT) => [figureFrame(figureProgress(p), introT, COUNTS), sceneFrame(p, introT)];
+  /* фігура: усе зі спільного модуля орієнтира, крім появи при завантаженні — вона своя */
+  const frames = (p, introT) => {
+    const fF = figureFrame(figureProgress(p), introT, COUNTS);
+    const iv = introFrame(introT, COUNTS);
+    fF.jointsOuter = iv.joints; fF.outer = iv.edges; fF.drift = iv.drift;
+    return [fF, sceneFrame(p, introT)];
+  };
   function render(fF, fS) { apply(fF, fS, t); renderer.render(scene, camera); }
 
   fit();
@@ -303,7 +311,7 @@ function init() {
     const dt = Math.min(last ? now - last : 16, 50); last = now;      // покадрово, крок ≤ 50 мс (iOS присипляє цикл)
     t += dt / 1000; frameNo++;
     if (dbgIntro == null) introMs += dt;
-    const introT = dbgIntro != null ? dbgIntro : clamp01(introMs / 1500);
+    const introT = dbgIntro != null ? dbgIntro : clamp01(introMs / 1900);
     pTarget = progress();
     pSmooth += (pTarget - pSmooth) * 0.16;
     mx += (tmx - mx) * 0.08; my += (tmy - my) * 0.08; yaw += (tyaw - yaw) * 0.1;
