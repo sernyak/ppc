@@ -20,11 +20,12 @@ test('після вступу при p = 0 — лише фігура, нічог
 
 test('спершу зерна з ядра, написи — пізніше; наприкінці все повне, оберт — повний', () => {
   assert.equal(getFrame(CFG.grains[0], 1).grains, 0);
-  assert.ok(getFrame(0.12, 1).grains > 0.02, 'зерна летять уже на 12 % скролу');
+  assert.ok(getFrame(0.08, 1).grains === 0, 'поки формується ядро, зерен ще немає');
+  assert.ok(getFrame(0.22, 1).grains > 0.02, 'зерна вирушають раніше за написи');
   assert.ok(CFG.coverage[0] > CFG.grains[0] + 0.1, 'написи наздоганяють помітно пізніше за зерна');
   assert.equal(getFrame(CFG.coverage[0], 1).coverage, 0);
-  assert.equal(getFrame(0.12, 1).fade, 0, 'поки збирається ґратка, написів ще немає');
-  assert.ok(getFrame(0.4, 1).fade > 0.4, 'далі проєкція помітна');
+  assert.equal(getFrame(0.2, 1).fade, 0, 'поки збирається ґратка, написів ще немає');
+  assert.ok(getFrame(0.44, 1).fade > 0.4, 'далі проєкція помітна');
   const end = getFrame(1, 1);
   assert.equal(end.coverage, 1); assert.equal(end.grains, 1); assert.equal(end.fade, 1);
   near(end.spin, Math.PI * 2, 'spin'); near(end.orbit, CFG.orbit, 'orbit'); near(end.elev, CFG.elev, 'elev');

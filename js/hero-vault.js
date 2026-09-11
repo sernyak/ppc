@@ -55,7 +55,7 @@ function init() {
 
   /* усе спільне — до першого використання */
   /* фігура — як на /preview/3d/, лише в півтора раза менша (прохання власника) */
-  const R = band ? 0.75 : 1.08;
+  const R = band ? 0.56 : 0.81;
   const cPos = band ? new THREE.Vector3(0, R + 0.5, 0) : new THREE.Vector3(5.0, R + 0.7, 0.6);
   const cam0 = band ? new THREE.Vector3(0, cPos.y + 0.2, 7.4) : new THREE.Vector3(0.3, cPos.y + 0.2, 8.8);
   const target = band ? new THREE.Vector3(0, cPos.y + 0.05, 0) : new THREE.Vector3(3.1, cPos.y, 0);
@@ -66,6 +66,22 @@ function init() {
 
   const scene = new THREE.Scene();
   scene.environment = studioEnv(renderer);
+  /* обʼєм каркаса: дальні бруси розчиняються в тлі, а ближні бруси ЗОВНІШНЬОЇ рами напівпрозорі —
+     інакше при повільному обертанні передні грані глухо закривають задні й ядро, і фігура читається
+     як плаский силует. Підбір на льоту: ?xray=0…1 (1 — рама глуха), ?fog=число (більше — тумана менше) */
+  scene.fog = new THREE.Fog(0x0b0f19, 1, 30);
+  const xrayQ = q.has('xray') ? parseFloat(q.get('xray')) : null;
+  const fogQ = q.has('fog') ? parseFloat(q.get('fog')) : null;
+  const xray = { uCz: { value: 9 }, uCr: { value: R }, uFront: { value: xrayQ != null ? xrayQ : 0.6 } };
+  function seeThrough(mat) {
+    mat.transparent = true; mat.depthWrite = false;
+    mat.onBeforeCompile = (sh) => {
+      Object.assign(sh.uniforms, xray);
+      sh.fragmentShader = 'uniform float uCz; uniform float uCr; uniform float uFront;\n' + sh.fragmentShader
+        .replace('#include <premultiplied_alpha_fragment>',
+          'gl_FragColor.a *= mix(uFront, 1.0, smoothstep(uCz - uCr * 0.9, uCz + uCr * 0.15, vFogDepth));\n\t#include <premultiplied_alpha_fragment>');
+    };
+  }
   const camera = new THREE.PerspectiveCamera(band ? 44 : 34, 1, 0.1, 80);
   const d0 = cam0.distanceTo(target);
   const az0 = Math.atan2(cam0.x - target.x, cam0.z - target.z), el0 = Math.asin((cam0.y - target.y) / d0);
@@ -82,7 +98,7 @@ function init() {
   const fillB = new THREE.PointLight(0x60a5fa, 3, 16, 2); fillB.position.set(cPos.x - 5, 2.5, cPos.z + 4); scene.add(fillB);
   scene.add(new THREE.HemisphereLight(0x3a4a70, 0x05070d, 0.65));
 
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.ShadowMaterial({ color: 0x000000, opacity: 0.24 }));
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.ShadowMaterial({ color: 0x000000, opacity: 0.24, fog: false }));
   floor.rotation.x = -Math.PI / 2; floor.position.set(cPos.x, 0, cPos.z); floor.receiveShadow = true; scene.add(floor);
 
   /* ---------- радіант: побудова як на /preview/3d/ ---------- */
@@ -93,6 +109,7 @@ function init() {
   const brushed = brushedTexture();
   const metalOuter = new THREE.MeshStandardMaterial({ color: 0x9fa6ae, metalness: 0.86, roughness: 0.5, roughnessMap: brushed, bumpMap: brushed, bumpScale: 0.006, envMapIntensity: 0.95 });
   const metalInner = new THREE.MeshStandardMaterial({ color: 0x848b94, metalness: 0.86, roughness: 0.54, roughnessMap: brushed, bumpMap: brushed, bumpScale: 0.004, envMapIntensity: 0.85 });
+  seeThrough(metalOuter);   // ядро лишається щільним — воно має читатись, просвічує лише зовнішня рама
 
   const C = cubocta();
   const VO = C.V.map((v) => v.clone().multiplyScalar(R));
@@ -275,6 +292,9 @@ function init() {
     camPos.set(target.x + d0 * Math.cos(el) * Math.sin(az), target.y + d0 * Math.sin(el), target.z + d0 * Math.cos(el) * Math.cos(az));
     camera.position.copy(camPos); camera.lookAt(target);
     camera.updateMatrixWorld(); camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
+    const cz = camera.position.distanceTo(outer.position), rr = R * open;
+    xray.uCz.value = cz; xray.uCr.value = rr;
+    scene.fog.near = cz - rr * 1.1; scene.fog.far = cz + rr * (fogQ != null ? fogQ : 11.0);
     /* проєкція: хвиля росте з точки площини за фігурою; зерна летять на неї */
     figRay.origin.copy(camera.position); figRay.direction.copy(outer.position).sub(camera.position).normalize();
     if (!figRay.intersectPlane(wallPlane, wallOrigin)) wallOrigin.copy(wallC);
@@ -311,7 +331,7 @@ function init() {
     const dt = Math.min(last ? now - last : 16, 50); last = now;      // покадрово, крок ≤ 50 мс (iOS присипляє цикл)
     t += dt / 1000; frameNo++;
     if (dbgIntro == null) introMs += dt;
-    const introT = dbgIntro != null ? dbgIntro : clamp01(introMs / 1900);
+    const introT = dbgIntro != null ? dbgIntro : clamp01(introMs / 2400);
     pTarget = progress();
     pSmooth += (pTarget - pSmooth) * 0.16;
     mx += (tmx - mx) * 0.08; my += (tmy - my) * 0.08; yaw += (tyaw - yaw) * 0.1;
@@ -404,28 +424,65 @@ function init() {
   /* ---------- текстура формул ---------- */
   function blankTexture() { const c = document.createElement('canvas'); c.width = c.height = 4; return new THREE.CanvasTexture(c); }
   function formulaTexture(w, h, rows, seed) {
+    /* Не про мої проєкти, а про економіку того, хто читає: як рахується його прибуток, що коштує
+       рутина, наскільки швидше йде заявка. Три голоси: модель · результат · процес. */
     const CORPUS = [
-      'R(t) = Σ оплата(t) − повернення(t)', 'оплата → розрахунок → звіт → пошта', 'score(лід) ∈ [1, 10]',
-      'виписка PDF · XLSX · CSV → транзакції', 'дублікат ⇔ (сума, дата, контрагент)', 'переказ між рахунками: −x + x = 0',
-      '100 дзвінків × 5 хв ≈ $3,5 / міс', 'натальна карта → PDF → пошта', 'кожні 12 год: 4 спільноти → чернетки',
-      'стиль = 11 вимірів', 'виручка(бюджет, конверсія_k)', '∂ виручка / ∂ конверсія_k', 'webhook: підпис ✓ · повтор ✗',
-      'контекст діалогу → ескалація', 'календар → зображення → Instagram → статус', 'похибка округлення = 0',
-      '03:00 щодня · Cloud Scheduler', '120 оплат · Monobank Acquiring', 'транскрипція → резюме → CRM', 'p(результат | система) → 1',
-      '∫ дохід dt − витрати', 'λ = запити / хв', 'σ(настрій клієнта)', 'Δ(бюджет) → Δ(виручка)', 'PDF ← Puppeteer ← звіт',
+      'LTV / CAC = 3,8', 'ROAS = дохід / витрати на рекламу', 'маржа = чек × частота − CAC',
+      '∂ прибуток / ∂ бюджет каналу', 'точка окупності: 2,5 міс', 'сегмент × канал × маржа',
+      'прогноз попиту на 14 днів', 'p(оплата | джерело, час відповіді)', 'план / факт = 96 %',
+      'CAC ↓ 34 % за 6 тижнів', 'конверсія 2,1 % → 3,4 %', 'обробка заявки: 4 год → 3 хв',
+      'відмови на оплаті −41 %', 'повторні покупки 19 % → 31 %', 'вартість ліда $12,40',
+      'середній чек ↑ 22 %', '12 год рутини на тиждень → 0', 'ручна робота 68 % → 8 %',
+      '0 втрачених заявок', 'A/B: +18 % до кошика', 'заявка → CRM → дзвінок за 60 с',
+      'звіт щопонеділка о 08:00', 'оплата → документ → пошта', 'відповідь клієнту 24/7 · 30 с',
+      'щоденна звірка: 0 розбіжностей', 'клік → лід → оплата: одна нитка',
+      'дублікат ⇔ (сума, дата, контрагент)', 'черга: 0 · час очікування → 0',
     ];
+    const CHARTS = ['bars', 'rise', 'drop', 'funnel', 'donut'];
     const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d');
     const r = seeded(seed), lh = h / rows, fs = Math.round(lh * 0.55);
     g.textBaseline = 'middle';
-    g.fillStyle = '#9dc2ff';
+    g.fillStyle = '#9dc2ff'; g.strokeStyle = '#9dc2ff'; g.lineJoin = 'round'; g.lineCap = 'round';
+    /* маленький графік у рядок — той самий колір і товщина, що й текст; повертає свою ширину */
+    function chart(kind, x, cy) {
+      const ch = lh * 0.6, top = cy - ch / 2, cw = kind === 'donut' ? ch : ch * 2.1;
+      g.lineWidth = Math.max(1, ch * 0.075);
+      if (kind === 'bars') {
+        const n = 5, bw = cw / (n * 1.55);
+        for (let i = 0; i < n; i++) { const bh = ch * (0.22 + 0.78 * (i / (n - 1)) * (0.72 + r() * 0.5)); g.fillRect(x + i * bw * 1.55, top + ch - bh, bw, bh); }
+      } else if (kind === 'rise' || kind === 'drop') {
+        const n = 6; g.beginPath();
+        for (let i = 0; i < n; i++) {
+          const t = i / (n - 1), v = (kind === 'rise' ? t : 1 - t) * (0.72 + r() * 0.5);
+          const py = top + ch - Math.min(ch, ch * (0.12 + 0.8 * v));
+          i ? g.lineTo(x + t * cw, py) : g.moveTo(x, py);
+        }
+        g.stroke();
+      } else if (kind === 'funnel') {
+        for (let i = 0; i < 3; i++) { const fw = cw * (1 - i * 0.28), fh = ch * 0.24; g.fillRect(x + (cw - fw) / 2, top + i * ch * 0.38, fw, fh); }
+      } else {
+        const rad = ch * 0.42, cx = x + rad, cyy = top + ch / 2;
+        g.beginPath(); g.arc(cx, cyy, rad, 0, Math.PI * 2); g.globalAlpha *= 0.45; g.stroke();
+        g.globalAlpha /= 0.45;
+        g.beginPath(); g.arc(cx, cyy, rad, -Math.PI / 2, -Math.PI / 2 + Math.PI * (0.9 + r() * 0.8)); g.stroke();
+      }
+      return cw;
+    }
     /* рядок за рядком, зліва направо, з проміжками — написи не лягають один на одного */
     for (let row = 0; row < rows; row++) {
       let x = -r() * w * 0.3;                                   // рядки зсунуті один відносно одного
       while (x < w) {
-        const line = CORPUS[Math.floor(r() * CORPUS.length)], strong = r() < 0.16;
-        g.font = `${strong ? 600 : 400} ${fs}px Inter, sans-serif`;
+        const strong = r() < 0.16;
         g.globalAlpha = strong ? 0.95 : 0.3 + r() * 0.32;
-        g.fillText(line, x, (row + 0.5) * lh);
-        x += g.measureText(line).width + fs * (1.4 + r() * 2.2);
+        if (r() < 0.17) {
+          x += chart(CHARTS[Math.floor(r() * CHARTS.length)], x, (row + 0.5) * lh);
+        } else {
+          const line = CORPUS[Math.floor(r() * CORPUS.length)];
+          g.font = `${strong ? 600 : 400} ${fs}px Inter, sans-serif`;
+          g.fillText(line, x, (row + 0.5) * lh);
+          x += g.measureText(line).width;
+        }
+        x += fs * (1.4 + r() * 2.2);
       }
     }
     const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); return tex;
