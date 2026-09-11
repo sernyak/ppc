@@ -1,24 +1,24 @@
 /*
  * Перший екран /ai — «Сховище».
- * Радіант — та сама рама, що на /preview/3d/: кубооктаедр із брусів шліфованого
- * алюмінію, всередині менша копія й дванадцять спиць, на внутрішніх лініях сині
- * світлові смужки. Він висить у темряві над дзеркальною підлогою; праворуч за ним
- * одна похила стіна-екран, вкрита дрібними формулами його систем.
+ * Радіант — той самий, що на /preview/3d/: металевий каркас кубооктаедра з
+ * брусів шліфованого алюмінію, всередині вкладена ґратка зі спицями й синіми
+ * світловими лініями; при відкритті збирається порожній каркас, далі скрол
+ * веде його історію (каркас розсувається, малюється ґратка, спиці, чверть
+ * оберту, каркас замикається, займається світло) — хореографія і код побудови
+ * взяті звідти без змін (hero-crystal-frame.js). Фігура відкидає тінь на
+ * сторінку.
  *
- * При завантаженні — лише поява: рама зʼявляється й повільно обертається, смужки
- * ледь тліють. Головне дає скрол (на компʼютері hero «липкий» на час прокрутки):
- * смужки загоряються, проєкція розливається по стіні від кристала до її країв,
- * летять зерна світла й промені, кристал робить повний оберт і піднімається,
- * камера підʼїжджає й облітає його. Миша — паралакс, рядки біля курсора
- * яскравішають. На телефоні — 30 к/с, протягування пальцем повертає погляд.
- * Поза екраном цикл спить, при «зменшити рух» — один нерухомий кадр.
+ * Своє тут — те, що довкола: зі скролом фігура робить повний оберт, у повітрі
+ * від ближніх до дальніх проступають голограми формул його систем, від фігури
+ * розлітаються зерна світла, камера облітає її. Розмір фігури не змінюється.
+ * На компʼютері hero липкий на час прокрутки; миша дає паралакс; на телефоні
+ * 30 к/с. Поза екраном цикл спить, при «зменшити рух» — один нерухомий кадр.
  *
- * Для знімків: ?p=0.5 фіксує прогрес скролу, ?intro=1 — прогрес появи,
- * ?still=1 — один кадр без циклу.
+ * Для знімків: ?p=0.5 фіксує прогрес скролу, ?intro=1 — вступ, ?still=1 — один кадр.
  */
 import * as THREE from 'three';
-import { Reflector } from 'three/addons/objects/Reflector.js';
-import { getFrame, clamp01, CFG } from './hero-vault-frame.js';
+import { getFrame as figureFrame, clamp01 } from './hero-crystal-frame.js';
+import { getFrame as sceneFrame, holoWindow, CFG as SCFG } from './hero-vault-frame.js';
 
 const sceneEl = document.getElementById('vault-scene');
 const canvas = document.getElementById('vault-canvas');
@@ -32,124 +32,120 @@ function init() {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
   const band = matchMedia('(max-width: 1023px)').matches;      // сцена — смуга між заголовком і абзацом
-  const lo = band || !fine;                                     // легша якість: без дзеркала, тіней і сяйва навколо ліній
-  let glowTex = null;
-  const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), tmpC = new THREE.Vector3();
-  const UP = new THREE.Vector3(0, 1, 0), RIGHT = new THREE.Vector3(1, 0, 0);
-  const LIGHT = new THREE.Color(0x47a0ff);                      // синє світло смужок (акцент сайту, трохи холодніший)
+  const lo = matchMedia('(max-width: 767px)').matches || !fine; // телефон/планшет: без сяйва навколо ліній, 30 к/с
 
   let renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
   } catch (e) { sceneEl.classList.add('vault-nogl'); return; }
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lo ? 1.5 : 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
-  renderer.shadowMap.enabled = !lo;
+  renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.setClearColor(0x0b0f19, 1);
+  renderer.setClearColor(0x0b0f19, 0);
 
-  /* ---------- розміри ---------- */
-  const R = band ? 0.9 : 1.15;
-  const cPos = band ? new THREE.Vector3(0, 1.85, 0) : new THREE.Vector3(3.9, 1.95, 0.6);   // кристал висить над підлогою
-  const cam0 = band ? new THREE.Vector3(0, 2.1, 7.4) : new THREE.Vector3(0.3, 2.1, 8.8);
-  const target = band ? new THREE.Vector3(0, 2.05, 0) : new THREE.Vector3(2.5, 2.0, 0);
-  /* одна стіна-екран: центр, поворот (нормаль дивиться на кристал і камеру), розміри */
-  const H = 7.5;
-  const wallC = band ? new THREE.Vector3(2.8, H / 2, -2.2) : new THREE.Vector3(8.4, H / 2, -1.8);
-  const wallRot = band ? -Math.PI / 2 + 0.95 : -Math.PI / 2 + 0.62;
-  const WW = band ? 13 : 19;
-  const wallN = new THREE.Vector3(-Math.cos(wallRot + Math.PI / 2), 0, Math.sin(wallRot + Math.PI / 2)); // нормаль площини стіни
-  const wallU = new THREE.Vector3(Math.cos(wallRot), 0, -Math.sin(wallRot));                             // напрям уздовж стіни
-  const wallPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(wallN, wallC);
-  const wallPoint = (a, b) => wallC.clone().addScaledVector(wallU, a).add(new THREE.Vector3(0, b, 0));   // точка на стіні (уздовж, по висоті)
-  let maxDist = 0;
-  for (const a of [-WW / 2, WW / 2]) for (const b of [-H / 2, H / 2]) maxDist = Math.max(maxDist, wallPoint(a, b).distanceTo(cPos));
+  /* усе спільне — до першого використання */
+  const R = band ? 1.0 : 1.25;
+  const cPos = band ? new THREE.Vector3(0, R + 0.5, 0) : new THREE.Vector3(4.6, R + 0.7, 0.6);
+  const cam0 = band ? new THREE.Vector3(0, cPos.y + 0.2, 7.4) : new THREE.Vector3(0.3, cPos.y + 0.2, 8.8);
+  const target = band ? new THREE.Vector3(0, cPos.y + 0.05, 0) : new THREE.Vector3(2.7, cPos.y, 0);
+  const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), tmpC = new THREE.Vector3(), tmpD = new THREE.Vector3();
+  const tmpS = new THREE.Vector3(), tmpT = new THREE.Vector3();
+  const UP = new THREE.Vector3(0, 1, 0), RIGHT = new THREE.Vector3(1, 0, 0), mtx = new THREE.Matrix4();
+  const LIGHT = new THREE.Color(0x47a0ff);
 
   const scene = new THREE.Scene();
   scene.environment = studioEnv(renderer);
-  const camera = new THREE.PerspectiveCamera(band ? 44 : 34, 1, 0.1, 120);
+  const camera = new THREE.PerspectiveCamera(band ? 44 : 34, 1, 0.1, 80);
   const d0 = cam0.distanceTo(target);
   const az0 = Math.atan2(cam0.x - target.x, cam0.z - target.z), el0 = Math.asin((cam0.y - target.y) / d0);
 
-  /* світло — як на /preview/3d/ */
+  /* світло і тінь — як на /preview/3d/ */
   const key = new THREE.DirectionalLight(0xe8eeff, 1.5);
-  key.position.set(cPos.x - 2.2, 9, cPos.z + 4.5); key.target.position.copy(cPos); scene.add(key.target);
-  if (!lo) {
-    key.castShadow = true; key.shadow.mapSize.set(2048, 2048);
-    key.shadow.camera.left = -4; key.shadow.camera.right = 4; key.shadow.camera.top = 6; key.shadow.camera.bottom = -3;
-    key.shadow.camera.near = 1; key.shadow.camera.far = 30; key.shadow.bias = -0.0006; key.shadow.radius = 9;
-  }
+  key.position.set(cPos.x - 2.2, 9, cPos.z + 4.5); key.target.position.set(cPos.x, 0, cPos.z); scene.add(key.target);
+  key.castShadow = true;
+  key.shadow.mapSize.set(lo ? 1024 : 2048, lo ? 1024 : 2048);
+  key.shadow.camera.left = -4; key.shadow.camera.right = 4; key.shadow.camera.top = 6; key.shadow.camera.bottom = -3;
+  key.shadow.camera.near = 1; key.shadow.camera.far = 30; key.shadow.bias = -0.0006; key.shadow.radius = 9;
   scene.add(key);
   const fillA = new THREE.PointLight(0xb9b0f0, 2.4, 16, 2); fillA.position.set(cPos.x + 5, 3.5, cPos.z - 3); scene.add(fillA);
   const fillB = new THREE.PointLight(0x60a5fa, 3, 16, 2); fillB.position.set(cPos.x - 5, 2.5, cPos.z + 4); scene.add(fillB);
   scene.add(new THREE.HemisphereLight(0x3a4a70, 0x05070d, 0.65));
 
-  /* ---------- підлога ---------- */
-  let floor = null;
-  if (!lo) {
-    floor = mirrorFloor(80, [0.34, 0.37, 0.46], 1.0, 14, [cPos.x, cPos.z]);
-    floor.onBeforeRender = () => {};   // віддзеркалення оновлюємо вручну до основного кадру (див. render)
-    scene.add(floor);
-    const shadowCatcher = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.ShadowMaterial({ color: 0x000000, opacity: 0.24 }));
-    shadowCatcher.rotation.x = -Math.PI / 2; shadowCatcher.position.set(cPos.x, 0.004, cPos.z); shadowCatcher.receiveShadow = true; scene.add(shadowCatcher);
-  } else {
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.MeshStandardMaterial({ color: 0x080b14, roughness: 0.95, metalness: 0, envMapIntensity: 0.12 }));
-    m.rotation.x = -Math.PI / 2; scene.add(m);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.ShadowMaterial({ color: 0x000000, opacity: 0.24 }));
+  floor.rotation.x = -Math.PI / 2; floor.position.set(cPos.x, 0, cPos.z); floor.receiveShadow = true; scene.add(floor);
+
+  /* ---------- радіант: побудова як на /preview/3d/ ---------- */
+  const outer = new THREE.Group(); outer.rotation.set(0.22, 0, 0.12); outer.position.copy(cPos);
+  const spin = new THREE.Group(); outer.add(spin); scene.add(outer);
+  const innerGrp = new THREE.Group(); spin.add(innerGrp);              // внутрішня ґратка (провертається окремо)
+
+  const brushed = brushedTexture();
+  const metalOuter = new THREE.MeshStandardMaterial({ color: 0x9fa6ae, metalness: 0.86, roughness: 0.5, roughnessMap: brushed, bumpMap: brushed, bumpScale: 0.006, envMapIntensity: 0.95 });
+  const metalInner = new THREE.MeshStandardMaterial({ color: 0x848b94, metalness: 0.86, roughness: 0.54, roughnessMap: brushed, bumpMap: brushed, bumpScale: 0.004, envMapIntensity: 0.85 });
+
+  const C = cubocta();
+  const VO = C.V.map((v) => v.clone().multiplyScalar(R));
+  const VI = C.V.map((v) => v.clone().multiplyScalar(R * 0.52));
+  const thO = R * 0.062, thI = R * 0.036, thS = R * 0.03;
+
+  const jointsOuter = VO.map((v) => ({ m: joint(v, thO * 0.74, metalOuter, spin), v })).sort((a, b) => a.v.y - b.v.y);
+  const jointsInner = VI.map((v) => ({ m: joint(v, thI * 0.8, metalInner, innerGrp), v })).sort((a, b) => a.v.y - b.v.y);
+  const outerBeams = C.E.map((e) => ({ m: beam(VO[e[0]], VO[e[1]], thO, metalOuter, 0, spin), i: e[0], j: e[1], y: Math.min(VO[e[0]].y, VO[e[1]].y) })).sort((a, b) => a.y - b.y);
+
+  /* світлова лінія = тонкий брус + світлова смужка на його грані (+ сяйво на компʼютері) */
+  function lightLine(a, b, th, off, parent, extra) {
+    const bar = beam(a, b, th, metalInner, 0, parent);
+    const lightMat = new THREE.MeshBasicMaterial({ color: LIGHT });
+    const strip = beam(a, b, th * 0.34, lightMat, off, parent); strip.castShadow = false;
+    let glow = null;
+    if (!lo) {
+      glow = beam(a, b, th * 1.9, new THREE.MeshBasicMaterial({ color: LIGHT, transparent: true, opacity: 0.14, blending: THREE.AdditiveBlending, depthWrite: false }), off, parent);
+      glow.castShadow = false;
+    }
+    const mid = tmpA.addVectors(a, b).multiplyScalar(0.5);
+    return Object.assign({ bar, strip, glow, lightMat, k: mid.y * 2.0 + mid.x * 0.7 + mid.z * 0.4, y: Math.min(a.y, b.y), a, b }, extra);
   }
-  const disc = sprite(0x3b82f6, R * (band ? 2.6 : 4.2), 0); disc.position.set(cPos.x, 0.02, cPos.z); scene.add(disc);
+  const innerEdges = C.E.map((e) => lightLine(VI[e[0]], VI[e[1]], thI, thI * 0.52, innerGrp, {})).sort((p1, p2) => p1.y - p2.y);
+  const spokes = VO.map((v, i) => lightLine(VO[i], VI[i], thS, thS * 0.52, spin, { idx: i })).sort((p1, p2) => p1.y - p2.y);
+  const COUNTS = { jointsOuter: jointsOuter.length, outer: outerBeams.length, jointsInner: jointsInner.length, inner: innerEdges.length, spokes: spokes.length };
 
-  /* ---------- стіна-екран із формулами ---------- */
-  const wallMat = new THREE.ShaderMaterial({
-    uniforms: {
-      uMap: { value: blankTexture() }, uTint: { value: new THREE.Color(0xbcd3ff) }, uOpacity: { value: 1.0 },
-      uOrigin: { value: cPos.clone() }, uRadius: { value: 0 }, uSoft: { value: 2.4 },
-      uSpot: { value: new THREE.Vector3(0, -50, 0) }, uSpotR: { value: 3.0 }, uSpotK: { value: fine && !lo ? 0.7 : 0 }, uTime: { value: 0 },
-    },
-    vertexShader: `varying vec2 vUv; varying vec3 vW;
-      void main(){ vUv = uv; vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }`,
-    fragmentShader: `uniform sampler2D uMap; uniform vec3 uTint; uniform float uOpacity; uniform vec3 uOrigin; uniform float uRadius; uniform float uSoft;
-      uniform vec3 uSpot; uniform float uSpotR; uniform float uSpotK; uniform float uTime; varying vec2 vUv; varying vec3 vW;
-      void main(){
-        vec4 t = texture2D(uMap, vUv);
-        float d = distance(vW, uOrigin);
-        float m = 1.0 - smoothstep(uRadius - uSoft, uRadius + uSoft * 0.25, d);
-        float fall = 1.0 / (1.0 + d * d * 0.014);
-        float spot = 1.0 + uSpotK * (1.0 - smoothstep(0.0, uSpotR, distance(vW, uSpot)));
-        float breathe = 0.92 + 0.08 * sin(uTime * 0.45 + vW.z * 0.7 + vW.y * 0.9);
-        vec3 c = uTint * t.rgb * t.a * uOpacity * m * (0.35 + 0.65 * fall) * spot * breathe;
-        gl_FragColor = vec4(c, 1.0);
-        #include <tonemapping_fragment>
-        #include <colorspace_fragment>
-      }`,
-    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
-  });
-  const wall = new THREE.Mesh(new THREE.PlaneGeometry(WW, H), wallMat); wall.position.copy(wallC); wall.rotation.y = wallRot; scene.add(wall);
-  const backing = new THREE.Mesh(new THREE.PlaneGeometry(WW, H), new THREE.MeshStandardMaterial({ color: 0x0a0e18, roughness: 0.9, metalness: 0 }));
-  backing.position.copy(wallC).addScaledVector(wallN, -0.02); backing.rotation.y = wallRot; scene.add(backing);
-
-  /* текст формул малюємо, щойно є шрифт Inter (не довше ~1,2 с чекання) */
-  const fontsReady = Promise.race([Promise.all([document.fonts.load('400 40px Inter'), document.fonts.load('600 40px Inter')]).catch(() => null), new Promise((r) => setTimeout(r, 1200))]);
-  fontsReady.then(() => { wallMat.uniforms.uMap.value = formulaTexture(lo ? 2048 : 4096, lo ? 768 : 1536, 30, lo ? 4 : 6, 23); schedule(); });
-
-  /* промені від кристала до стіни */
-  const rnd = seeded(9);
-  const beamPts = [];
-  for (let i = 0; i < (lo ? 14 : 22); i++) {
-    const p = wallPoint((rnd() - 0.5) * (WW - 2), (rnd() - 0.5) * (H - 1.6));
-    beamPts.push(cPos.x, cPos.y, cPos.z, p.x, p.y, p.z);
+  /* ---------- голограми формул у повітрі довкола фігури ---------- */
+  const rnd = seeded(31);
+  const CORPUS = [
+    'R(t) = Σ оплата(t) − повернення(t)', 'оплата → розрахунок → звіт → пошта', 'score(лід) ∈ [1, 10]',
+    'виписка → транзакції', 'дублікат ⇔ (сума, дата, контрагент)', 'переказ: −x + x = 0', '100 дзвінків × 5 хв ≈ $3,5 / міс',
+    'натальна карта → PDF → пошта', 'кожні 12 год → чернетки', 'стиль = 11 вимірів', 'виручка(бюджет, конверсія_k)',
+    '∂ виручка / ∂ конверсія_k', 'webhook: підпис ✓ · повтор ✗', 'контекст діалогу → ескалація', 'календар → Instagram → статус',
+    'похибка округлення = 0', '03:00 щодня · Cloud Scheduler', '120 оплат · Monobank', 'транскрипція → резюме → CRM',
+    'p(результат | система) → 1', '∫ дохід dt − витрати', 'λ = запити / хв', 'σ(настрій клієнта)', 'Δ(бюджет) → Δ(виручка)',
+    'PDF ← Puppeteer ← звіт', 'без участі людини', 'бот: контекст ∧ ліміт ∧ ескалація', 'звіт → пошта: t < 60 с',
+  ];
+  const holos = [];
+  const HN = band ? 16 : 36;
+  for (let i = 0, tries = 0; holos.length < HN && tries < HN * 30; tries++) {
+    /* обʼєм праворуч, вище й позаду фігури (не перед нею, щоб не наїжджати на текст); сама фігура — порожня */
+    const p = band
+      ? new THREE.Vector3((rnd() * 2 - 1) * 2.2, 0.5 + rnd() * 3.0, cPos.z - 0.2 - rnd() * 4.5)
+      : new THREE.Vector3(cPos.x - 0.6 + rnd() * 6.0, 0.5 + rnd() * 4.8, cPos.z + 0.3 - rnd() * 5.5);
+    if (Math.hypot(p.x - cPos.x, p.y - cPos.y) < R * 2.1 && p.z > cPos.z - 1.5) continue;   // не поверх фігури
+    if (p.distanceTo(cPos) < R * 1.6) continue;
+    const strong = rnd() < 0.22;
+    const m = textPlane(CORPUS[Math.floor(rnd() * CORPUS.length)], (strong ? 0.24 : 0.16) * (0.85 + rnd() * 0.4) * (band ? 0.85 : 1), strong ? 600 : 400, strong ? '#cfe0ff' : '#9dbdff');
+    m.position.copy(p); m.visible = false; scene.add(m);
+    holos.push({ m, y0: p.y, d: p.distanceTo(cPos), ph: rnd() * 6.28, base: strong ? 0.95 : 0.7 });
+    i++;
   }
-  const beamMat = new THREE.LineBasicMaterial({ color: 0x6f9cff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
-  const beams = new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(beamPts, 3)), beamMat); scene.add(beams);
+  holos.sort((a, b) => a.d - b.d);   // ближні до фігури проступають першими
 
-  /* зерна світла, що повільно летять від кристала до стіни */
-  const N = lo ? 700 : 1600;
+  /* зерна світла, що розлітаються від фігури в повітря */
+  const N = lo ? 400 : 900;
   const gDir = [], gMax = [], gPhase = [], gSpeed = [], gPos = new Float32Array(N * 3);
   for (let i = 0; i < N; i++) {
-    const p = wallPoint((rnd() - 0.5) * (WW - 1), (rnd() - 0.5) * (H - 1));
-    const dir = p.clone().sub(cPos); const dist = dir.length(); dir.normalize();
-    gDir.push(dir.x, dir.y, dir.z); gMax.push(dist); gPhase.push(rnd()); gSpeed.push(0.035 + rnd() * 0.055);
+    const dir = new THREE.Vector3(rnd() * 1.3 - (band ? 0.65 : 0.3), rnd() * 1.4 - 0.4, rnd() * 1.6 - 1.0).normalize();
+    gDir.push(dir.x, dir.y, dir.z); gMax.push(2.5 + rnd() * 4.5); gPhase.push(rnd()); gSpeed.push(0.035 + rnd() * 0.055);
   }
   const gGeo = new THREE.BufferGeometry();
   gGeo.setAttribute('position', new THREE.BufferAttribute(gPos, 3));
@@ -157,58 +153,28 @@ function init() {
   gGeo.setAttribute('aMax', new THREE.Float32BufferAttribute(gMax, 1));
   gGeo.setAttribute('aPhase', new THREE.Float32BufferAttribute(gPhase, 1));
   gGeo.setAttribute('aSpeed', new THREE.Float32BufferAttribute(gSpeed, 1));
-  gGeo.boundingSphere = new THREE.Sphere(cPos.clone(), 30);
+  gGeo.boundingSphere = new THREE.Sphere(cPos.clone(), 12);
   const grainMat = new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uOrigin: { value: cPos.clone() }, uSpread: { value: 0 }, uSize: { value: lo ? 4.5 : 9 }, uPR: { value: renderer.getPixelRatio() }, uColorA: { value: new THREE.Color(0x60a5fa) }, uColorB: { value: new THREE.Color(0xa78bfa) } },
+    uniforms: { uTime: { value: 0 }, uOrigin: { value: cPos.clone() }, uSpread: { value: 0 }, uSize: { value: lo ? 4 : 7 }, uPR: { value: renderer.getPixelRatio() }, uColorA: { value: new THREE.Color(0x60a5fa) }, uColorB: { value: new THREE.Color(0xa78bfa) } },
     vertexShader: `attribute vec3 aDir; attribute float aMax; attribute float aPhase; attribute float aSpeed;
       uniform float uTime; uniform vec3 uOrigin; uniform float uSpread; uniform float uSize; uniform float uPR; varying float vA; varying float vK;
       void main(){ float u = fract(aPhase + uTime * aSpeed); vec3 p = uOrigin + aDir * (u * aMax * uSpread);
         vA = (1.0 - u * u) * smoothstep(0.0, 0.08, u) * smoothstep(0.0, 0.05, uSpread); vK = aPhase;
-        vec4 mv = modelViewMatrix * vec4(p, 1.0); gl_PointSize = min(uSize * uPR * (6.0 / -mv.z), 10.0 * uPR); gl_Position = projectionMatrix * mv; }`,
+        vec4 mv = modelViewMatrix * vec4(p, 1.0); gl_PointSize = min(uSize * uPR * (6.0 / -mv.z), 9.0 * uPR); gl_Position = projectionMatrix * mv; }`,
     fragmentShader: `uniform vec3 uColorA; uniform vec3 uColorB; varying float vA; varying float vK;
       void main(){ vec2 c = gl_PointCoord - 0.5; float a = smoothstep(0.5, 0.08, length(c)); vec3 col = mix(uColorA, uColorB, vK);
-        gl_FragColor = vec4(col * a * vA * 0.55, 1.0);
+        gl_FragColor = vec4(col * a * vA * 0.5, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment> }`,
     transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
   });
-  const grains = new THREE.Points(gGeo, grainMat); scene.add(grains);
-
-  /* ---------- радіант: рама з брусів, як на /preview/3d/ ---------- */
-  const outer = new THREE.Group(); outer.rotation.set(0.22, 0, 0.12); outer.position.copy(cPos);
-  const spin = new THREE.Group(); outer.add(spin); scene.add(outer);
-  const brushed = brushedTexture();
-  const metalOuter = new THREE.MeshStandardMaterial({ color: 0x9fa6ae, metalness: 0.86, roughness: 0.5, roughnessMap: brushed, bumpMap: brushed, bumpScale: 0.006, envMapIntensity: 0.95, transparent: true });
-  const metalInner = new THREE.MeshStandardMaterial({ color: 0x848b94, metalness: 0.86, roughness: 0.54, roughnessMap: brushed, bumpMap: brushed, bumpScale: 0.004, envMapIntensity: 0.85, transparent: true });
-  const C = cubocta();
-  const VO = C.V.map((v) => v.clone().multiplyScalar(R));
-  const VI = C.V.map((v) => v.clone().multiplyScalar(R * 0.52));
-  const thO = R * 0.062, thI = R * 0.036, thS = R * 0.03;
-  VO.forEach((v) => joint(v, thO * 0.74, metalOuter, spin));
-  VI.forEach((v) => joint(v, thI * 0.8, metalInner, spin));
-  C.E.forEach((e) => beam(VO[e[0]], VO[e[1]], thO, metalOuter, 0, spin));
-  /* світлова лінія = тонкий брус + світлова смужка на його грані (+ сяйво на компʼютері) */
-  const lines = [];
-  function lightLine(a, b, th) {
-    beam(a, b, th, metalInner, 0, spin);
-    const lightMat = new THREE.MeshBasicMaterial({ color: LIGHT });
-    const strip = beam(a, b, th * 0.34, lightMat, th * 0.52, spin); strip.castShadow = false;
-    let glow = null;
-    if (!lo) { glow = beam(a, b, th * 1.9, new THREE.MeshBasicMaterial({ color: LIGHT, transparent: true, opacity: 0.14, blending: THREE.AdditiveBlending, depthWrite: false }), th * 0.52, spin); glow.castShadow = false; }
-    const mid = tmpA.addVectors(a, b).multiplyScalar(0.5);
-    lines.push({ lightMat, glow, k: mid.y * 2.0 + mid.x * 0.7 + mid.z * 0.4 });
-  }
-  C.E.forEach((e) => lightLine(VI[e[0]], VI[e[1]], thI));
-  VO.forEach((v, i) => lightLine(VO[i], VI[i], thS));
-  const coreLight = new THREE.PointLight(0x9db8ff, 0, R * 6, 2); spin.add(coreLight);   // невидиме джерело: підсвічує підлогу й стіну при активації
+  const grains = new THREE.Points(gGeo, grainMat); grains.visible = false; scene.add(grains);
 
   /* ---------- стан і цикл ---------- */
   let w = 1, h = 1;
-  let introMs = -250, last = 0, t = 0, frameNo = 0, lastInput = 0;
+  let introMs = -300, last = 0, t = 0, angle = 0.4, frameNo = 0, lastInput = 0;
   let pTarget = 0, pSmooth = 0, mx = 0, my = 0, tmx = 0, tmy = 0, yaw = 0, tyaw = 0;
   let visible = false, running = false;
-  const spot = new THREE.Vector3(0, -50, 0), tspot = new THREE.Vector3(0, -50, 0);
-  const raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2();
   const track = document.getElementById('vault-track');
 
   function fit() {
@@ -219,47 +185,73 @@ function init() {
   }
   function progress() {
     if (dbgP != null) return dbgP;
-    /* компʼютер: hero липкий на час прокрутки доріжки; телефон: сцена розкривається за ~0,6 екрана скролу */
-    const span = !band && track ? Math.max(1, track.offsetHeight - window.innerHeight) : window.innerHeight * 0.6;
+    /* компʼютер: hero липкий на час прокрутки доріжки; телефон: історію веде положення сторінки */
+    const span = !band && track ? Math.max(1, track.offsetHeight - window.innerHeight) : window.innerHeight * 0.75;
     return clamp01(window.scrollY / span);
   }
+  /* поставити брус між a і b, намальований на частку d від a; орієнтація як у beam() */
+  function placeBeam(m, a, b, d) {
+    m.visible = d > 0.001;
+    if (!m.visible) return;
+    const dir = tmpB.subVectors(b, a); const len = dir.length(); dir.normalize();
+    const mid = tmpC.addVectors(a, b).multiplyScalar(0.5);
+    const z = tmpA.copy(mid).addScaledVector(dir, -mid.dot(dir));
+    if (z.lengthSq() < 1e-6) z.crossVectors(dir, Math.abs(dir.y) < 0.9 ? UP : RIGHT);
+    z.normalize();
+    const x = tmpD.crossVectors(dir, z).normalize();
+    m.quaternion.setFromRotationMatrix(mtx.makeBasis(x, dir, z));
+    m.scale.y = Math.max(0.001, d * len / m.userData.len0);
+    m.position.copy(a).addScaledVector(dir, len * d / 2).addScaledVector(z, m.userData.off);
+  }
+  function lightOf(L, f, tt) {
+    const wv = 0.5 + 0.5 * Math.sin(L.k - tt * (0.5 + 1.1 * f.pulseSpeed));
+    const br = f.light * (0.45 + 0.55 * (1 - f.wave + f.wave * wv));
+    L.lightMat.color.copy(LIGHT).multiplyScalar(0.2 + 1.35 * br);      // не вище ~1.5×, щоб лінії лишались синіми, а не білими
+    if (L.glow) L.glow.material.opacity = 0.03 + 0.16 * br;
+  }
   const camPos = new THREE.Vector3();
-  function apply(f, tt) {
-    /* радіант: поява, оберт, підйом, світло смужок */
-    outer.scale.setScalar((0.72 + 0.28 * f.appear) * f.scale);
-    outer.position.set(cPos.x, cPos.y + f.rise + Math.sin(tt * 0.6) * 0.03, cPos.z);
+  function apply(fF, fS, tt) {
+    /* радіант — як на /preview/3d/ */
+    const open = fF.open;
+    jointsOuter.forEach((j, i) => { j.m.scale.setScalar(Math.max(0.001, fF.jointsOuter[i])); j.m.position.copy(j.v).multiplyScalar(open); });
+    outerBeams.forEach((b, i) => placeBeam(b.m, tmpS.copy(VO[b.i]).multiplyScalar(open), tmpT.copy(VO[b.j]).multiplyScalar(open), fF.outer[i]));
+    jointsInner.forEach((j, i) => j.m.scale.setScalar(Math.max(0.001, fF.jointsInner[i])));
+    innerGrp.rotation.y = fF.swivel;
+    innerEdges.forEach((L, i) => { const d = fF.inner[i]; placeBeam(L.bar, L.a, L.b, d); placeBeam(L.strip, L.a, L.b, d); if (L.glow) placeBeam(L.glow, L.a, L.b, d); lightOf(L, fF, tt); });
+    spokes.forEach((L, i) => {
+      const d = fF.spokes[i];
+      const a = tmpS.copy(VO[L.idx]).multiplyScalar(open), b = tmpT.copy(VI[L.idx]).applyAxisAngle(UP, fF.swivel);
+      placeBeam(L.bar, a, b, d); placeBeam(L.strip, a, b, d); if (L.glow) placeBeam(L.glow, a, b, d); lightOf(L, fF, tt);
+    });
+    /* повільне обертання у спокої + повний оберт від скролу, ледь помітне плавання, паралакс від миші; розмір не змінюється */
+    spin.rotation.y = angle + fS.spin + mx * 0.06;
     outer.rotation.x = 0.22 + my * 0.03;
-    spin.rotation.y = 0.4 + f.spin + tt * 0.08 + mx * 0.06;
-    metalOuter.opacity = metalInner.opacity = 0.1 + 0.9 * f.appear;
-    for (const L of lines) {
-      const wv = 0.5 + 0.5 * Math.sin(L.k - tt * 0.6);
-      const br = f.strips * (0.65 + 0.35 * wv);
-      L.lightMat.color.copy(LIGHT).multiplyScalar(0.2 + 1.35 * br);      // не вище ~1.5×, щоб лінії лишались синіми, а не білими
-      if (L.glow) L.glow.material.opacity = 0.03 + 0.16 * br;
-    }
-    coreLight.intensity = 2.2 * f.glow;
-    /* стіна, промені, зерна, світло на підлозі */
-    wallMat.uniforms.uRadius.value = f.coverage * maxDist; wallMat.uniforms.uTime.value = tt; wallMat.uniforms.uSpot.value.copy(spot);
-    beamMat.opacity = 0.18 * f.beams; beams.visible = f.beams > 0.001;
-    grainMat.uniforms.uTime.value = tt; grainMat.uniforms.uSpread.value = f.grains; grains.visible = f.grains > 0.001;
-    disc.material.opacity = 0.18 * f.glow;
-    /* камера: обліт, підʼїзд, паралакс від миші або поворот від пальця */
-    const az = az0 + f.orbit + mx * 0.12 + yaw, el = el0 + f.elev + my * 0.05, dist = d0 * (1 - f.dolly);
-    camPos.set(target.x + dist * Math.cos(el) * Math.sin(az), target.y + f.rise * 0.6 + dist * Math.sin(el), target.z + dist * Math.cos(el) * Math.cos(az));
-    camera.position.copy(camPos); camera.lookAt(target.x, target.y + f.rise * 0.6, target.z);
+    outer.position.y = cPos.y + Math.sin(tt * 0.6) * 0.03;
+    /* камера: обліт без підʼїзду, паралакс від миші або поворот від пальця */
+    const az = az0 + fS.orbit + mx * 0.14 + yaw, el = el0 + fS.elev + my * 0.07;
+    camPos.set(target.x + d0 * Math.cos(el) * Math.sin(az), target.y + d0 * Math.sin(el), target.z + d0 * Math.cos(el) * Math.cos(az));
+    camera.position.copy(camPos); camera.lookAt(target); camera.updateMatrixWorld();
+    /* голограми: проступають від ближніх до дальніх, дивляться на глядача, ледь плавають і мерехтять при появі */
+    holos.forEach((H, i) => {
+      const wv = holoWindow(i, holos.length, fS.holo, SCFG.holoLen);
+      H.m.visible = wv > 0.001;
+      if (!H.m.visible) return;
+      const flick = wv < 0.35 ? 0.5 + 0.5 * Math.abs(Math.sin(tt * 37 + H.ph)) : 1;
+      H.m.material.opacity = H.base * wv * flick * (0.92 + 0.08 * Math.sin(tt * 0.7 + H.ph));
+      H.m.scale.setScalar(0.7 + 0.3 * wv);
+      H.m.position.y = H.y0 + Math.sin(tt * 0.5 + H.ph) * 0.06;
+      H.m.quaternion.copy(camera.quaternion);
+    });
+    grainMat.uniforms.uTime.value = tt; grainMat.uniforms.uSpread.value = fS.grains; grains.visible = fS.grains > 0.001;
   }
-  function render(f) {
-    apply(f, t);
-    if (floor) { floor.updateMatrixWorld(); camera.updateMatrixWorld(); Reflector.prototype.onBeforeRender.call(floor, renderer, scene, camera); }
-    renderer.render(scene, camera);
-  }
+  function render(fF, fS) { apply(fF, fS, t); renderer.render(scene, camera); }
 
   fit();
   if (reduced) {
-    const f = () => getFrame(dbgP != null ? dbgP : 0.6, 1);
-    render(f());
-    fontsReady.then(() => render(f()));
-    new ResizeObserver(() => { fit(); render(f()); }).observe(sceneEl);
+    const pp = dbgP != null ? dbgP : 0.95;
+    const one = () => render(figureFrame(pp, 1, COUNTS), sceneFrame(pp, 1));
+    one();
+    new ResizeObserver(() => { fit(); one(); }).observe(sceneEl);
     return;
   }
 
@@ -268,14 +260,13 @@ function init() {
     const dt = Math.min(last ? now - last : 16, 50); last = now;      // покадрово, крок ≤ 50 мс (iOS присипляє цикл)
     t += dt / 1000; frameNo++;
     if (dbgIntro == null) introMs += dt;
-    const introT = dbgIntro != null ? dbgIntro : clamp01(introMs / CFG.introMs);
+    const introT = dbgIntro != null ? dbgIntro : clamp01(introMs / 1500);
     pTarget = progress();
-    pSmooth += (pTarget - pSmooth) * 0.12;
+    pSmooth += (pTarget - pSmooth) * 0.16;
     mx += (tmx - mx) * 0.08; my += (tmy - my) * 0.08; yaw += (tyaw - yaw) * 0.1;
-    spot.lerp(tspot, 0.12);
-    if (still) { pSmooth = pTarget; render(getFrame(pSmooth, introT)); return; }
-    const idle = now - lastInput > 1500 && introT >= 1;
-    if (!((lo || idle) && frameNo % 2)) render(getFrame(pSmooth, introT));   // 30 к/с у спокої і на телефоні, 60 під час руху
+    angle += dt / 1000 * 0.1;                                            // повільне обертання у спокої
+    if (still) { pSmooth = pTarget; render(figureFrame(pSmooth, introT, COUNTS), sceneFrame(pSmooth, introT)); return; }
+    if (!(lo && frameNo % 2)) render(figureFrame(pSmooth, introT, COUNTS), sceneFrame(pSmooth, introT));
     if (visible && !document.hidden) schedule();
   }
   function schedule() { if (!running) { running = true; requestAnimationFrame(tick); } }
@@ -290,14 +281,9 @@ function init() {
       const r = hero.getBoundingClientRect();
       tmx = clamp01((ev.clientX - r.left) / r.width) * 2 - 1;
       tmy = clamp01((ev.clientY - Math.max(r.top, 0)) / Math.min(r.height, window.innerHeight)) * 2 - 1;
-      /* точка на стіні під курсором — рядки поруч яскравішають */
-      const cr = canvas.getBoundingClientRect();
-      ndc.set(((ev.clientX - cr.left) / cr.width) * 2 - 1, -((ev.clientY - cr.top) / cr.height) * 2 + 1);
-      raycaster.setFromCamera(ndc, camera);
-      if (!raycaster.ray.intersectPlane(wallPlane, tspot)) tspot.set(0, -50, 0);
       lastInput = performance.now(); schedule();
     });
-    hero.addEventListener('pointerleave', () => { tmx = 0; tmy = 0; tspot.set(0, -50, 0); schedule(); });
+    hero.addEventListener('pointerleave', () => { tmx = 0; tmy = 0; schedule(); });
   } else {
     let dragX = null;
     canvas.addEventListener('pointerdown', (ev) => { dragX = ev.clientX; });
@@ -307,7 +293,7 @@ function init() {
   }
   schedule();
 
-  /* ---------- геометрія рами (як на /preview/3d/) ---------- */
+  /* ---------- геометрія (як на /preview/3d/) ---------- */
   function cubocta() {
     const P = [[1, 1, 0], [1, -1, 0], [-1, 1, 0], [-1, -1, 0], [1, 0, 1], [1, 0, -1], [-1, 0, 1], [-1, 0, -1], [0, 1, 1], [0, 1, -1], [0, -1, 1], [0, -1, -1]];
     const V = P.map((p) => new THREE.Vector3(p[0], p[1], p[2]).multiplyScalar(Math.SQRT1_2));
@@ -325,14 +311,15 @@ function init() {
     const x = new THREE.Vector3().crossVectors(dir, z).normalize();
     const m = new THREE.Mesh(new THREE.BoxGeometry(th, len, th), mat);
     m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(x, dir.clone(), z));
+    m.userData = { a: a.clone(), b: b.clone(), off, len0: len };
     m.position.copy(mid).addScaledVector(z, off);
-    m.castShadow = true;
+    m.castShadow = true; m.visible = false;
     parent.add(m);
     return m;
   }
   function joint(v, r, mat, parent) {
     const m = new THREE.Mesh(new THREE.SphereGeometry(r, 18, 12), mat);
-    m.position.copy(v); m.castShadow = true; parent.add(m); return m;
+    m.position.copy(v); m.castShadow = true; m.scale.setScalar(0.001); parent.add(m); return m;
   }
   function brushedTexture() {
     const c = document.createElement('canvas'); c.width = c.height = 256;
@@ -357,56 +344,15 @@ function init() {
     panel(14, 14, new THREE.Color(0.1, 0.12, 0.18), [0, -3, 0], [-Math.PI / 2, 0, 0]);
     const tex = pm.fromScene(s, 0.04).texture; pm.dispose(); return tex;
   }
-  /* ---------- зала ---------- */
-  function mirrorFloor(size, tint, near, far, center) {
-    const shader = {
-      name: 'MirrorFade',
-      uniforms: { color: { value: null }, tDiffuse: { value: null }, textureMatrix: { value: null }, uTint: { value: new THREE.Vector3(...tint) }, uNear: { value: near }, uFar: { value: far }, uCenter: { value: new THREE.Vector2(...center) } },
-      vertexShader: `uniform mat4 textureMatrix; varying vec4 vUv; varying vec3 vW;
-        void main(){ vUv = textureMatrix * vec4(position,1.0); vec4 wp = modelMatrix*vec4(position,1.0); vW = wp.xyz; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
-      fragmentShader: `uniform sampler2D tDiffuse; uniform vec3 uTint; uniform float uNear; uniform float uFar; uniform vec2 uCenter; varying vec4 vUv; varying vec3 vW;
-        void main(){ vec4 base = texture2DProj(tDiffuse, vUv); float d = length(vW.xz - uCenter); float f = 1.0 - smoothstep(uNear, uFar, d);
-          gl_FragColor = vec4(base.rgb * uTint * f, 1.0);
-          #include <tonemapping_fragment>
-          #include <colorspace_fragment> }`,
-    };
-    const m = new Reflector(new THREE.PlaneGeometry(size, size), { clipBias: 0.002, textureWidth: 512, textureHeight: 512, shader });
-    m.rotation.x = -Math.PI / 2; return m;
-  }
-  function blankTexture() { const c = document.createElement('canvas'); c.width = c.height = 4; return new THREE.CanvasTexture(c); }
-  function formulaTexture(w, h, rows, cols, seed) {
-    const CORPUS = [
-      'R(t) = Σ оплата(t) − повернення(t)', 'оплата → розрахунок → звіт → пошта', 'score(лід) ∈ [1, 10]',
-      'виписка PDF · XLSX · CSV → транзакції', 'дублікат ⇔ (сума, дата, контрагент)', 'переказ між рахунками: −x + x = 0',
-      '100 дзвінків × 5 хв ≈ $3,5 / міс', 'натальна карта → PDF → пошта', 'кожні 12 год: 4 спільноти → чернетки',
-      'стиль = 11 вимірів', 'виручка(бюджет, конверсія_k)', '∂ виручка / ∂ конверсія_k', 'webhook: підпис ✓ · повтор ✗',
-      'контекст діалогу → ескалація', 'календар → зображення → Instagram → статус', 'похибка округлення = 0',
-      '03:00 щодня · Cloud Scheduler', '120 оплат · Monobank Acquiring', 'транскрипція → резюме → CRM', 'p(результат | система) → 1',
-      '∫ дохід dt − витрати', 'λ = запити / хв', 'σ(настрій клієнта)', 'Δ(бюджет) → Δ(виручка)', 'PDF ← Puppeteer ← звіт',
-    ];
-    const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d');
-    const r = seeded(seed), lh = h / rows, fs = Math.round(lh * 0.55);
-    g.textBaseline = 'middle';
-    for (let row = 0; row < rows; row++) for (let k = 0; k < cols; k++) {
-      const line = CORPUS[Math.floor(r() * CORPUS.length)], strong = r() < 0.18;
-      g.font = `${strong ? 600 : 400} ${fs}px Inter, sans-serif`;
-      g.globalAlpha = strong ? 1 : 0.5 * (0.5 + r() * 0.5);
-      g.fillStyle = '#9dc2ff';
-      g.fillText(line, (k / cols) * w + r() * (w / cols) * 0.35, (row + 0.5) * lh);
-    }
-    const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); return tex;
-  }
-  function glow() {
-    if (glowTex) return glowTex;
-    const c = document.createElement('canvas'); c.width = c.height = 128;
-    const g = c.getContext('2d'), gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
-    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.3, 'rgba(255,255,255,.6)'); gr.addColorStop(0.7, 'rgba(255,255,255,.1)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
-    g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
-    glowTex = new THREE.CanvasTexture(c); return glowTex;
-  }
-  function sprite(color, size, opacity) {
-    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: glow(), color, transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false }));
-    s.scale.set(size, size, 1); return s;
+  /* ---------- голограми ---------- */
+  function textPlane(text, size, weight, color) {
+    const c = document.createElement('canvas'); const g = c.getContext('2d');
+    const fs = 64; g.font = `${weight} ${fs}px Inter, sans-serif`;
+    const tw = Math.ceil(g.measureText(text).width) + 40, th = 96;
+    c.width = tw; c.height = th; g.font = `${weight} ${fs}px Inter, sans-serif`; g.textBaseline = 'middle';
+    g.fillStyle = color; g.fillText(text, 20, th / 2);
+    const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    return new THREE.Mesh(new THREE.PlaneGeometry(size * tw / th, size), new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
   }
   function seeded(seed) { let s = seed * 7919 + 13; return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; }; }
 }
