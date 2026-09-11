@@ -55,10 +55,10 @@ function init() {
 
   /* усе спільне — до першого використання */
   /* фігура — як на /preview/3d/, лише в півтора раза менша (прохання власника) */
-  const R = band ? 0.56 : 0.81;
-  const cPos = band ? new THREE.Vector3(0, R + 0.5, 0) : new THREE.Vector3(5.0, R + 0.7, 0.6);
-  const cam0 = band ? new THREE.Vector3(0, cPos.y + 0.2, 7.4) : new THREE.Vector3(0.3, cPos.y + 0.2, 8.8);
-  const target = band ? new THREE.Vector3(0, cPos.y + 0.05, 0) : new THREE.Vector3(3.1, cPos.y, 0);
+  const R = band ? 0.78 : 0.97;
+  const cPos = band ? new THREE.Vector3(-0.45, R + 0.45, 0) : new THREE.Vector3(5.0, R + 0.7, 0.6);
+  const cam0 = band ? new THREE.Vector3(0, cPos.y + 0.25, 7.0) : new THREE.Vector3(0.3, cPos.y + 0.2, 8.8);
+  const target = band ? new THREE.Vector3(0.35, cPos.y + 0.05, 0) : new THREE.Vector3(3.1, cPos.y, 0);
   const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), tmpC = new THREE.Vector3(), tmpD = new THREE.Vector3();
   const tmpS = new THREE.Vector3(), tmpT = new THREE.Vector3();
   const UP = new THREE.Vector3(0, 1, 0), RIGHT = new THREE.Vector3(1, 0, 0), mtx = new THREE.Matrix4();
@@ -138,10 +138,10 @@ function init() {
   const COUNTS = { jointsOuter: jointsOuter.length, outer: outerBeams.length, jointsInner: jointsInner.length, inner: innerEdges.length, spokes: spokes.length };
 
   /* ---------- проєкція формул: невидима похила площина збоку за фігурою ---------- */
-  const H = 7.5;
-  const wallC = band ? new THREE.Vector3(2.8, H / 2, -2.2) : new THREE.Vector3(9.3, H / 2, -1.8);
-  const wallRot = band ? -Math.PI / 2 + 0.95 : -Math.PI / 2 + 0.62;
-  const WW = band ? 13 : 19;
+  const H = band ? 5.0 : 7.5;
+  const wallC = band ? new THREE.Vector3(1.35, 2.35, -1.1) : new THREE.Vector3(9.3, H / 2, -1.8);
+  const wallRot = band ? -Math.PI / 2 + 0.5 : -Math.PI / 2 + 0.62;
+  const WW = band ? 5.6 : 19;
   const wallN = new THREE.Vector3(-Math.cos(wallRot + Math.PI / 2), 0, Math.sin(wallRot + Math.PI / 2)); // нормаль площини
   const wallU = new THREE.Vector3(Math.cos(wallRot), 0, -Math.sin(wallRot));                             // напрям уздовж площини
   const wallPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(wallN, wallC);
@@ -157,7 +157,7 @@ function init() {
       uTint: { value: new THREE.Color(0xbcd3ff) }, uOpacity: { value: 1.0 },
       uOrigin: { value: wallOrigin }, uRadius: { value: 0 }, uSoft: { value: 2.0 },
       uSpot: { value: new THREE.Vector3(0, -50, 0) }, uSpotR: { value: 3.0 }, uSpotK: { value: fine && !lo ? 0.7 : 0 }, uTime: { value: 0 },
-      uEdge: { value: band ? 0.3 : 0.2 },
+      uEdge: { value: band ? 0.22 : 0.2 },
     },
     vertexShader: `varying vec2 vUv; varying vec3 vW;
       void main(){ vUv = uv; vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }`,
@@ -172,7 +172,10 @@ function init() {
         vec4 cellData = texture2D(uGrid, (ci + 0.5) / uCell);
         float gi = floor(cellData.r * 255.0 + 0.5);
         vec2 gp = vec2(mod(gi, uAt.x), floor(gi / uAt.x));
-        vec4 t = texture2D(uAtlas, (gp + f) / uAt); t.a *= cellData.g * 1.35;
+        /* знак ширший за слот: у B лежить його середина в частках знака, в A — скільки слотів він займає,
+           тож шрифт лишається пропорційним, а міняти можна й далі кожен знак окремо */
+        float lx = cellData.b + (f.x - 0.5) / max(1.0, cellData.a * 255.0);
+        vec4 t = texture2D(uAtlas, (gp + vec2(lx, f.y)) / uAt); t.a *= cellData.g * 1.35;
         float d = distance(vW, uOrigin);
         float m = 1.0 - smoothstep(uRadius - uSoft, uRadius + uSoft * 0.25, d);
         float fall = 1.0 / (1.0 + d * d * 0.014);
@@ -210,14 +213,11 @@ function init() {
      У кожному рядку час від часу пробігає «голова» — яскравий знак, що переписує рядок за собою:
      комірка на мить перебирає випадкові символи і сідає на новий. Рядки йдуть не в такт, тож у кадрі
      одночасно оновлюються лише кілька — стіна живе, але не рябить. */
-  const COLS = lo ? 100 : 176, ROWS = lo ? 22 : 30;
+  const COLS = lo ? 300 : 700, ROWS = lo ? 26 : 30;
   const gridData = new Uint8Array(COLS * ROWS * 4);
   const gridTex = new THREE.DataTexture(gridData, COLS, ROWS, THREE.RGBAFormat);
   gridTex.needsUpdate = true;
-  const cellTarget = new Uint8Array(COLS * ROWS);      // на чому комірка має зупинитись
-  const cellShown = new Uint8Array(COLS * ROWS);       // що показано зараз
-  const cellRoll = new Float32Array(COLS * ROWS);      // скільки ще перебирати символи
-  const cellGlow = new Float32Array(COLS * ROWS);      // свіжість: щойно змінене світиться яскравіше
+  const rowChars = Array.from({ length: ROWS }, () => []);   // знаки рядка: {tg — цільовий, gi — показаний, k — слотів, x0, roll, glow}
   const headX = new Float32Array(ROWS), headSpeed = new Float32Array(ROWS), headWait = new Float32Array(ROWS);
   const rowRnd = seeded(97);
   for (let y = 0; y < ROWS; y++) { headX[y] = -4; headSpeed[y] = COLS / (2.6 + rowRnd() * 2.2); headWait[y] = rowRnd() * 9; }
@@ -230,61 +230,74 @@ function init() {
     wallMat.uniforms.uGrid.value = gridTex;
     wallMat.uniforms.uCell.value.set(COLS, ROWS);
     for (let y = 0; y < ROWS; y++) writeRow(y, 11 + y * 3);        // перший текст — уже на місці
-    for (let i = 0; i < cellTarget.length; i++) { cellShown[i] = cellTarget[i]; gridData[i * 4] = cellShown[i]; gridData[i * 4 + 1] = 150; }
-    gridTex.needsUpdate = true;
+    paintGrid();
     schedule();
   });
-  /* розкласти рядок сітки: слова з проміжками, подекуди — маленький графік із двох комірок */
+  /* розкласти рядок: слова з проміжками, подекуди маленький графік; кожен знак займає стільки слотів,
+     скільки має природної ширини в Inter — звідси пропорційний шрифт при посимвольній механіці */
   function writeRow(y, seed) {
-    const r = seeded(seed), base = y * COLS;
-    for (let x = 0; x < COLS; x++) cellTarget[base + x] = 0;
+    const r = seeded(seed), out = [], space = Math.max(1, Math.round(glyphs.slotsOf(' ') * 1.1));
     let x = -Math.floor(r() * COLS * 0.25);
     while (x < COLS) {
-      if (r() < 0.16 && glyphs) {
-        const k = glyphs.charts[Math.floor(r() * glyphs.charts.length)];
-        if (x >= 0 && x + 1 < COLS) { cellTarget[base + x] = k; cellTarget[base + x + 1] = k + 1; }
-        x += 2;
+      if (r() < 0.15) {
+        const c = glyphs.charts[Math.floor(r() * glyphs.charts.length)];
+        if (x >= 0 && x + c.k <= COLS) out.push({ tg: c.gi, gi: c.gi, k: c.k, x0: x, roll: 0, glow: 0 });
+        x += c.k;
       } else {
         const line = CORPUS[Math.floor(r() * CORPUS.length)];
-        for (let i = 0; i < line.length; i++) {
-          const c = x + i;
-          if (c >= 0 && c < COLS) cellTarget[base + c] = glyphs ? (glyphs.index[line[i]] || 0) : 0;
+        for (const ch of line) {
+          const k = glyphs.slotsOf(ch), gi = glyphs.index[ch] || 0;
+          if (x >= 0 && x + k <= COLS && gi) out.push({ tg: gi, gi, k, x0: x, roll: 0, glow: 0 });
+          x += k;
         }
-        x += line.length;
       }
-      x += 2 + Math.floor(r() * 7);
+      x += space * (2 + Math.floor(r() * 4));
     }
+    rowChars[y] = out;
+  }
+  /* перекласти знаки рядків у сітку слотів для відеокарти */
+  function paintGrid() {
+    gridData.fill(0);
+    for (let y = 0; y < ROWS; y++) {
+      const base = y * COLS * 4;
+      for (const ch of rowChars[y]) {
+        const bright = Math.min(255, 105 + ch.glow * 150);
+        for (let j = 0; j < ch.k; j++) {
+          const i = base + (ch.x0 + j) * 4;
+          if (ch.x0 + j < 0 || ch.x0 + j >= COLS) continue;
+          gridData[i] = ch.gi;
+          gridData[i + 1] = bright;
+          gridData[i + 2] = Math.round((j + 0.5) / ch.k * 255);
+          gridData[i + 3] = ch.k;
+        }
+      }
+    }
+    gridTex.needsUpdate = true;
   }
   let gridSeed = 400, rollTick = 0;
   function stepGrid(dt) {
     if (!glyphs || !wall.visible) return;
     rollTick += dt;
-    const roll = rollTick > 0.055;                                  // символи перебираються ~18 разів на секунду
+    const roll = rollTick > 0.055;                                  // знаки перебираються ~18 разів на секунду
     if (roll) rollTick = 0;
     for (let y = 0; y < ROWS; y++) {
+      const from = headX[y];
       if (headWait[y] > 0) { headWait[y] -= dt; if (headWait[y] <= 0) { writeRow(y, (gridSeed += 13)); headX[y] = -3; } }
       else {
-        const from = headX[y];
         headX[y] += headSpeed[y] * dt;
         if (from > COLS + 2) { headWait[y] = 5 + rowRnd() * 11; headX[y] = COLS + 3; }   // рядок постояв — і знову
-        else for (let x = Math.max(0, Math.ceil(from)); x < Math.min(COLS, headX[y]); x++) {
-          const i = y * COLS + x;
-          cellRoll[i] = 0.18 + rowRnd() * 0.22; cellGlow[i] = 1;
-        }
+        else for (const ch of rowChars[y]) if (ch.x0 >= from && ch.x0 < headX[y]) { ch.roll = 0.18 + rowRnd() * 0.22; ch.glow = 1; }
       }
-      for (let x = 0; x < COLS; x++) {
-        const i = y * COLS + x;
-        if (cellRoll[i] > 0) {
-          cellRoll[i] -= dt;
-          if (cellRoll[i] <= 0) cellShown[i] = cellTarget[i];
-          else if (roll) cellShown[i] = 1 + Math.floor(rowRnd() * (glyphs.letters - 1));
+      for (const ch of rowChars[y]) {
+        if (ch.roll > 0) {
+          ch.roll -= dt;
+          if (ch.roll <= 0) ch.gi = ch.tg;
+          else if (roll) ch.gi = 1 + Math.floor(rowRnd() * (glyphs.letters - 1));
         }
-        if (cellGlow[i] > 0) cellGlow[i] = Math.max(0, cellGlow[i] - dt * 0.9);
-        gridData[i * 4] = cellShown[i];
-        gridData[i * 4 + 1] = cellShown[i] ? Math.min(255, 105 + cellGlow[i] * 150) : 0;
+        if (ch.glow > 0) ch.glow = Math.max(0, ch.glow - dt * 0.9);
       }
     }
-    gridTex.needsUpdate = true;
+    paintGrid();
   }
 
   /* зерна світла, що летять від фігури на площину проєкції */
@@ -529,30 +542,36 @@ function init() {
     const set = [' '];
     for (const line of CORPUS) for (const ch of line) if (!set.includes(ch)) set.push(ch);
     const kinds = ['bars', 'rise', 'drop', 'funnel', 'donut'];
-    const cols = 16, total = set.length + kinds.length * 2, rows = Math.ceil(total / cols);
+    const cols = 16, total = set.length + kinds.length, rows = Math.ceil(total / cols);
     const c = document.createElement('canvas'); c.width = cols * cell; c.height = rows * cell;
     const g = c.getContext('2d');
     g.fillStyle = '#ffffff'; g.strokeStyle = '#ffffff'; g.lineJoin = 'round'; g.lineCap = 'round';
-    g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.font = `500 ${Math.round(cell * 0.74)}px Inter, sans-serif`;
+    g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+    const fsm = Math.round(cell * 0.74);
+    g.font = `500 ${fsm}px Inter, sans-serif`;
+    /* скільки слотів під знак: його природна ширина в Inter, переведена в слоти стіни */
+    const slotW = WW / COLS, fsWorld = (H / ROWS) * 0.74;
+    const ratio = {}, slots = {};
+    for (const ch of set) { const w = g.measureText(ch).width / fsm; ratio[ch] = w; slots[ch] = Math.max(1, Math.round(w * fsWorld / slotW)); }
     const at = (i) => [(i % cols) * cell, Math.floor(i / cols) * cell];
-    set.forEach((ch, i) => { const [x, y] = at(i); if (ch !== ' ') g.fillText(ch, x + cell * 0.5, y + cell * 0.54); });
+    /* знак малюємо розтягнутим на всю комірку атласа — на стіні він стиснеться назад до своїх k слотів */
+    set.forEach((ch, i) => {
+      if (ch === ' ') return;
+      const [x, y] = at(i), w = ratio[ch] * fsm;
+      g.save(); g.translate(x + cell * 0.04, y + cell * 0.76); g.scale((cell * 0.92) / w, 1);
+      g.fillText(ch, 0, 0); g.restore();
+    });
     const r = seeded(5), charts = [];
     kinds.forEach((kind, k) => {
-      const first = set.length + k * 2;
-      charts.push(first);
-      for (const half of [0, 1]) {                      // ліва і права половини одного графіка
-        const [x, y] = at(first + half);
-        g.save(); g.beginPath(); g.rect(x, y, cell, cell); g.clip();
-        drawGlyphChart(g, kind, x - half * cell, y, cell * 2, cell, r);
-        g.restore();
-      }
+      const gi = set.length + k, [x, y] = at(gi);
+      drawGlyphChart(g, kind, x, y, cell, cell, r);          // у квадраті: на стіні розтягнеться до 2:1
+      charts.push({ gi, k: Math.max(2, Math.round((H / ROWS) * 2 / slotW)) });
     });
     const tex = new THREE.CanvasTexture(c);
     tex.flipY = false; tex.colorSpace = THREE.SRGBColorSpace;
     tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
     const index = {}; set.forEach((ch, i) => { index[ch] = i; });
-    return { tex, cols, rows, index, letters: set.length, charts };
+    return { tex, cols, rows, index, letters: set.length, charts, slotsOf: (ch) => slots[ch] || slots[' '] };
   }
   /* графік у прямокутнику w×h — той самий словник, що був у написах: стовпчики, тренд, воронка, кільце */
   function drawGlyphChart(g, kind, x, y, w, h, r) {
