@@ -104,11 +104,9 @@
         body { overflow-x: clip; }                 /* hidden ламає position: sticky */
         #vault-canvas { display: block; width: 100%; height: 100%; touch-action: pan-y; }
         #vault-scene.vault-nogl { background: radial-gradient(60% 60% at 50% 55%, rgba(59,130,246,.22), rgba(11,15,25,0) 70%); }
-        /* абзац проявляється словами зі скролу — до першого кадру він видимий, щоб текст читався й без JS */
-        .vault-word { display: inline-block; transition: opacity .45s ease-out, transform .45s ease-out; }
-        .js .vault-lede-anim .vault-word { opacity: 0; transform: translateY(8px); }
-        .js .vault-lede-anim .vault-word.on { opacity: 1; transform: none; }
-        @media (prefers-reduced-motion: reduce) { .js .vault-lede-anim .vault-word { opacity: 1; transform: none; } }
+        /* на телефоні абзац показує сцена — голограмою; сам текст лишається в розмітці, але невидимий,
+           тримає своє місце і читається пошуком та читалками. Без JS він просто видимий. */
+        .vault-lede-holo { opacity: 0; }
         .vault-veil { background: linear-gradient(90deg, rgba(11,15,25,.9) 0%, rgba(11,15,25,.66) 30%, rgba(11,15,25,0) 56%), linear-gradient(180deg, rgba(11,15,25,0) 74%, #0B0F19 100%); }
         @media (min-width: 1024px) { #vault-scene::before, #vault-scene::after { display: none; } }
     </style>

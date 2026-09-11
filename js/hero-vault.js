@@ -140,10 +140,10 @@ function init() {
   const COUNTS = { jointsOuter: jointsOuter.length, outer: outerBeams.length, jointsInner: jointsInner.length, inner: innerEdges.length, spokes: spokes.length };
 
   /* ---------- проєкція формул: невидима похила площина збоку за фігурою ---------- */
-  const H = band ? 5.0 : 7.5;
-  const wallC = band ? new THREE.Vector3(2.35, 2.3, -1.4) : new THREE.Vector3(9.3, H / 2, -1.8);
-  const wallRot = band ? -Math.PI / 2 + 1.25 : -Math.PI / 2 + 0.62;   // телефон: майже фронтально, інакше після відходу камери рядки злипаються
-  const WW = band ? 4.8 : 19;
+  const H = band ? 1.6 : 7.5;
+  const wallC = band ? new THREE.Vector3(0, 1.0, 0) : new THREE.Vector3(9.3, H / 2, -1.8);   // ставиться точно під абзац у fitLede()
+  const wallRot = band ? 0 : -Math.PI / 2 + 0.62;   // телефон: площина дивиться прямо на глядача
+  let WW = band ? 1.9 : 19;
   const wallN = new THREE.Vector3(-Math.cos(wallRot + Math.PI / 2), 0, Math.sin(wallRot + Math.PI / 2)); // нормаль площини
   const wallU = new THREE.Vector3(Math.cos(wallRot), 0, -Math.sin(wallRot));                             // напрям уздовж площини
   const wallPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(wallN, wallC);
@@ -156,14 +156,15 @@ function init() {
   const wallMat = new THREE.ShaderMaterial({
     uniforms: {
       uAtlas: { value: blankTexture() }, uGrid: { value: blankData() }, uCell: { value: new THREE.Vector2(1, 1) }, uAt: { value: new THREE.Vector2(1, 1) },
+      uPlain: { value: blankTexture() }, uUsePlain: { value: band ? 1 : 0 },
       uTint: { value: new THREE.Color(0xbcd3ff) }, uOpacity: { value: 1.0 },
-      uOrigin: { value: wallOrigin }, uRadius: { value: 0 }, uSoft: { value: 2.0 },
+      uOrigin: { value: wallOrigin }, uRadius: { value: 0 }, uSoft: { value: band ? 0.5 : 2.0 },
       uSpot: { value: new THREE.Vector3(0, -50, 0) }, uSpotR: { value: 3.0 }, uSpotK: { value: fine && !lo ? 0.7 : 0 }, uTime: { value: 0 },
-      uEdge: { value: band ? 0.22 : 0.2 },
+      uEdge: { value: band ? 0.025 : 0.2 },
     },
     vertexShader: `varying vec2 vUv; varying vec3 vW;
       void main(){ vUv = uv; vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }`,
-    fragmentShader: `uniform sampler2D uAtlas; uniform sampler2D uGrid; uniform vec2 uCell; uniform vec2 uAt; uniform vec3 uTint; uniform float uOpacity; uniform vec3 uOrigin; uniform float uRadius; uniform float uSoft;
+    fragmentShader: `uniform sampler2D uAtlas; uniform sampler2D uGrid; uniform vec2 uCell; uniform vec2 uAt; uniform sampler2D uPlain; uniform float uUsePlain; uniform vec3 uTint; uniform float uOpacity; uniform vec3 uOrigin; uniform float uRadius; uniform float uSoft;
       uniform vec3 uSpot; uniform float uSpotR; uniform float uSpotK; uniform float uTime; uniform float uEdge;
       varying vec2 vUv; varying vec3 vW;
       void main(){
@@ -178,11 +179,12 @@ function init() {
            тож шрифт лишається пропорційним, а міняти можна й далі кожен знак окремо */
         float lx = cellData.b + (f.x - 0.5) / max(1.0, cellData.a * 255.0);
         vec4 t = texture2D(uAtlas, (gp + vec2(lx, f.y)) / uAt); t.a *= cellData.g * 1.35;
+        if (uUsePlain > 0.5) t = texture2D(uPlain, vUv);          // телефон: готовий напис замість сітки знаків
         float d = distance(vW, uOrigin);
         float m = 1.0 - smoothstep(uRadius - uSoft, uRadius + uSoft * 0.25, d);
         float fall = 1.0 / (1.0 + d * d * 0.014);
         /* площина не має країв: написи мʼяко згасають до її меж */
-        float edge = smoothstep(0.0, uEdge, vUv.x) * smoothstep(1.0, 1.0 - uEdge, vUv.x) * smoothstep(0.0, 0.22, vUv.y) * smoothstep(1.0, 0.78, vUv.y);
+        float edge = smoothstep(0.0, uEdge, vUv.x) * smoothstep(1.0, 1.0 - uEdge, vUv.x) * smoothstep(0.0, uEdge, vUv.y) * smoothstep(1.0, 1.0 - uEdge, vUv.y);
         float spot = 1.0 + uSpotK * (1.0 - smoothstep(0.0, uSpotR, distance(vW, uSpot)));
         float breathe = 0.92 + 0.08 * sin(uTime * 0.45 + vW.z * 0.7 + vW.y * 0.9);
         vec3 c = uTint * t.rgb * t.a * uOpacity * m * edge * (0.35 + 0.65 * fall) * spot * breathe;
@@ -198,7 +200,12 @@ function init() {
     blending: THREE.AdditiveBlending, premultipliedAlpha: true,
   });
   const wall = new THREE.Mesh(new THREE.PlaneGeometry(WW, H), wallMat); wall.position.copy(wallC); wall.rotation.y = wallRot;
-  if (!band) scene.add(wall);   // на телефоні стіни немає: світло сипле вниз і з нього складається абзац сторінки
+  if (band) {
+    /* голограма лежить нижче тіньової підлоги — та писала б глибину і відсікала її; малюємо без перевірки
+       глибини й найпершою, щоб зерна лишались поверх */
+    wallMat.depthTest = false; wall.renderOrder = -1;
+  }
+  scene.add(wall);
   /* Не про мої проєкти, а про економіку того, хто читає: як рахується його прибуток, що коштує
      рутина, наскільки швидше йде заявка. Три голоси: модель · результат · процес. */
   const CORPUS = [
@@ -353,35 +360,87 @@ function init() {
   const raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2();
   const track = document.getElementById('vault-track');
   const lede = band ? document.getElementById('vault-lede') : null;
-  let words = [], wordsOn = 0;
-  if (lede && !reduced) {
-    const walker = document.createTreeWalker(lede, NodeFilter.SHOW_TEXT), nodes = [];
-    while (walker.nextNode()) nodes.push(walker.currentNode);
-    for (const n of nodes) {
-      const frag = document.createDocumentFragment();
-      for (const part of n.nodeValue.split(/(\s+)/)) {
-        if (!part) continue;
-        if (/^\s+$/.test(part)) frag.appendChild(document.createTextNode(part));
-        else { const sp = document.createElement('span'); sp.className = 'vault-word'; sp.textContent = part; frag.appendChild(sp); }
+  /* Текст абзацу малюємо голограмою на площині під фігурою — саме його «виводять» зерна.
+     Сам абзац лишається в розмітці (пошук і читалки його бачать), але стає прозорим носієм місця,
+     а площина стає рівно туди, де він лежить. */
+  let ledeTokens = null;
+  if (lede) {
+    ledeTokens = [];
+    (function walk(node, bold) {
+      for (const n of node.childNodes) {
+        if (n.nodeType === 3) for (const w of n.nodeValue.split(/\s+/)) { if (w) ledeTokens.push({ w, bold }); }
+        else if (n.nodeType === 1) walk(n, bold || n.tagName === 'STRONG');
       }
-      n.parentNode.replaceChild(frag, n);
+    })(lede, false);
+    lede.classList.add('vault-lede-holo');
+  }
+  function ledeTexture(w, h, fs) {
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const g = c.getContext('2d');
+    g.textBaseline = 'middle'; g.fillStyle = '#cfe0ff';
+    const pad = fs * 0.2, lh = fs * 1.42, maxW = w - pad * 2;
+    let x = pad, y = fs * 0.9;
+    for (const t of ledeTokens) {
+      g.font = `${t.bold ? 700 : 400} ${fs}px Inter, sans-serif`;
+      const tw = g.measureText(t.w).width, sp = g.measureText(' ').width;
+      if (/^[,.;:!?»)\]]/.test(t.w)) x -= sp;                 // розділовий знак ліпиться до слова
+      if (x > pad && x + tw > maxW) { x = pad; y += lh; }
+      g.globalAlpha = t.bold ? 1 : 0.82;
+      g.fillText(t.w, x, y);
+      x += tw + sp;
     }
-    words = Array.from(lede.querySelectorAll('.vault-word'));
-    lede.classList.add('vault-lede-anim');
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    return { tex, lines: Math.ceil((y + lh) / h * 1) };
   }
-  const LEDE = [0.02, 0.6], LEDE_MIN = 4;                  // перші слова видно одразу, щоб під фігурою не зяяла порожнеча
-  function stepLede(p) {
-    if (!words.length) return;
-    const want = Math.max(LEDE_MIN, Math.round(clamp01((p - LEDE[0]) / (LEDE[1] - LEDE[0])) * words.length));
-    while (wordsOn < want) words[wordsOn++].classList.add('on');
-    while (wordsOn > want) words[--wordsOn].classList.remove('on');
+  /* поставити площину рівно на місце абзацу і перемалювати текст під її поточний розмір */
+  const ledeCorner = new THREE.Vector3(), ndcToWorld = new THREE.Vector3();
+  function fitLede() {
+    if (!lede) return;
+    const r = lede.getBoundingClientRect(), b = sceneEl.getBoundingClientRect();
+    if (!r.width || !b.width) return;
+    /* Голограма стоїть обличчям до камери й лягає рівно на прямокутник абзацу. Вертикальна площина
+       при погляді згори проєктувалась би трапецією — нижні рядки розповзались за краї екрана. */
+    const cx = ((r.left + r.width / 2 - b.left) / b.width) * 2 - 1;
+    const cy = -(((r.top + r.height / 2 - b.top) / b.height) * 2 - 1);
+    ndcToWorld.set(cx, cy, 0.5).unproject(camera).sub(camera.position).normalize();
+    const D = 6.2, TILT = 0.16;                     // легкий нахил лишає відчуття обʼєму, майже без спотворення
+    wall.position.copy(camera.position).addScaledVector(ndcToWorld, D);
+    wall.quaternion.copy(camera.quaternion); wall.rotateX(-TILT);
+    const vh = 2 * D * Math.tan(camera.fov * Math.PI / 360);
+    const ww = vh * camera.aspect * (r.width / b.width), hh = vh * (r.height / b.height) / Math.cos(TILT);
+    if (ww < 0.05 || hh < 0.05) return;
+    WW = ww;
+    wall.geometry.dispose();
+    wall.geometry = new THREE.PlaneGeometry(ww, hh);
+    wall.updateMatrixWorld();
+    const fsCss = parseFloat(getComputedStyle(lede).fontSize) || 18;
+    const px = Math.min(1600, Math.round(r.width * 2));
+    const old = wallMat.uniforms.uPlain.value;
+    wallMat.uniforms.uPlain.value = ledeTexture(px, Math.round(px * hh / ww), Math.round(fsCss * px / r.width)).tex;
+    if (old && old.dispose) old.dispose();
+    const onPlane = (u, v, out) => wall.localToWorld(out.set(u * ww / 2, v * hh / 2, 0));
+    onPlane(0, 1.12, wallOrigin);                   // хвиля світла заходить згори, з боку фігури
+    wallCorners.length = 0;
+    for (const sx of [-1, 1]) for (const sy of [-1, 1]) wallCorners.push(onPlane(sx, sy, new THREE.Vector3()));
+    const a = gGeo.attributes.aTo;
+    for (let i = 0; i < N; i++) {                   // зерна летять саме на цю площину
+      onPlane((rnd2() - 0.5) * 1.92, (rnd2() - 0.5) * 1.92, ledeCorner);
+      a.setXYZ(i, ledeCorner.x, ledeCorner.y, ledeCorner.z);
+    }
+    a.needsUpdate = true;
   }
+  const rnd2 = seeded(77);
 
   function fit() {
     w = Math.max(1, sceneEl.clientWidth); h = Math.max(1, sceneEl.clientHeight);
     renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.updateProjectionMatrix();
     grainMat.uniforms.uPR.value = renderer.getPixelRatio();
+    /* площину під абзац рахуємо з базового положення камери — інакше unproject дає не ті координати */
+    camera.position.set(target.x + d0 * Math.cos(el0) * Math.sin(az0), target.y + d0 * Math.sin(el0), target.z + d0 * Math.cos(el0) * Math.cos(az0));
+    camera.lookAt(target); camera.updateMatrixWorld();
+    fitLede();
   }
   function progress() {
     if (dbgP != null) return dbgP;
@@ -430,7 +489,8 @@ function init() {
     if (band) outer.scale.setScalar(1 - SHRINK * fS.pull);
     grainMat.uniforms.uOrigin.value.copy(outer.position);          // зерна вилітають із фігури, де б вона не була
     /* камера: обліт без підʼїзду, паралакс від миші або поворот від пальця */
-    const az = az0 + fS.orbit + mx * 0.14 + yaw, el = el0 + fS.elev + my * 0.07;
+    /* телефон: камера стоїть нерухомо — голограма тексту прибита до місця абзацу, обліт зсунув би її з кадру */
+    const az = az0 + (band ? 0 : fS.orbit + mx * 0.14 + yaw), el = el0 + (band ? 0 : fS.elev + my * 0.07);
     const dist = band ? d0 * (1 + PULL_BACK * fS.pull) : d0;
     look.copy(target); if (band) look.x += PULL_SIDE * fS.pull;
     camPos.set(look.x + dist * Math.cos(el) * Math.sin(az), look.y + dist * Math.sin(el), look.z + dist * Math.cos(el) * Math.cos(az));
@@ -440,14 +500,16 @@ function init() {
     xray.uCz.value = cz; xray.uCr.value = rr;
     scene.fog.near = cz - rr * 1.1; scene.fog.far = cz + rr * (fogQ != null ? fogQ : 11.0);
     /* проєкція: хвиля росте з точки площини за фігурою; зерна летять на неї */
-    figRay.origin.copy(camera.position); figRay.direction.copy(outer.position).sub(camera.position).normalize();
-    if (!figRay.intersectPlane(wallPlane, wallOrigin)) wallOrigin.copy(wallC);
+    if (!band) {
+      figRay.origin.copy(camera.position); figRay.direction.copy(outer.position).sub(camera.position).normalize();
+      if (!figRay.intersectPlane(wallPlane, wallOrigin)) wallOrigin.copy(wallC);
+    }
     let far = 0;
     for (const c of wallCorners) far = Math.max(far, c.distanceTo(wallOrigin));
     wallMat.uniforms.uRadius.value = fS.coverage * far;
     wallMat.uniforms.uOpacity.value = fS.fade;
     wallMat.uniforms.uTime.value = tt; wallMat.uniforms.uSpot.value.copy(spot);
-    wall.visible = !band && fS.fade > 0.002;
+    wall.visible = fS.fade > 0.002;
     grainMat.uniforms.uTime.value = tt; grainMat.uniforms.uSpread.value = fS.grains;
     grainMat.uniforms.uReach.value = fS.grains * far; grains.visible = fS.grains > 0.001;
   }
@@ -480,8 +542,7 @@ function init() {
     pSmooth += (pTarget - pSmooth) * 0.16;
     mx += (tmx - mx) * 0.08; my += (tmy - my) * 0.08; yaw += (tyaw - yaw) * 0.1;
     spot.lerp(tspot, 0.12);
-    stepGrid(Math.min(dt / 1000, 0.05));
-    stepLede(pSmooth);                                 // жива стіна: знаки перебираються й міняються
+    stepGrid(Math.min(dt / 1000, 0.05));                                 // жива стіна: знаки перебираються й міняються
     angle += dt / 1000 * 0.1;                                            // повільне обертання у спокої
     if (still) { pSmooth = pTarget; render(...frames(pSmooth, introT)); return; }
     if (!(lo && frameNo % 2)) render(...frames(pSmooth, introT));
