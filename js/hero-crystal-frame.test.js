@@ -45,7 +45,7 @@ test('історія скролу йде по порядку: розкриття
   for (let p = 0; p <= 1.0001; p += 0.005) {
     const f = getFrame(p, 1, C);
     maxOpen = Math.max(maxOpen, f.open);
-    if (opened == null && f.open > 1.3) opened = p;
+    if (opened == null && f.open > 1 + CFG.scroll.openMax * 0.75) opened = p;
     if (innerDone == null && full(f.inner)) innerDone = p;
     if (spokesStart == null && f.spokes[0] > 0) spokesStart = p;
     if (swivelStart == null && f.swivel > 0.01) swivelStart = p;
@@ -56,7 +56,8 @@ test('історія скролу йде по порядку: розкриття
   assert.ok(opened < innerDone && innerDone <= spokesStart + 0.02, 'ґратка домальована, коли починають спиці');
   assert.ok(spokesStart <= swivelStart, 'спиці раніше за поворот');
   assert.ok(closedBack != null && lightStart > swivelStart, 'світло після початку повороту');
-  assert.ok(getFrame(0.5, 1, C).open > 1.2, 'на половині скролу каркас ще помітно розкритий');
+  assert.ok(getFrame(0.5, 1, C).open > 1 + CFG.scroll.openMax * 0.5, 'на половині скролу каркас ще розкритий');
+  assert.ok(CFG.scroll.openMax <= 0.1, 'розкриття ледь помітне: фігура не має рости від скролу');
 });
 
 test('елемент i у кожній групі не пізніше за i+1', () => {

@@ -14,7 +14,7 @@
  * Для знімків: ?p=0.5 фіксує прогрес скролу, ?intro=1 — вступ, ?still=1 — один кадр.
  */
 import * as THREE from './vendor/three.module.min.js';
-import { getFrame, clamp01 } from './hero-crystal-frame.js?v=7';
+import { getFrame, clamp01 } from './hero-crystal-frame.js?v=8';
 
 const sceneEl = document.getElementById('cr-scene');
 const canvas = document.getElementById('cr-canvas');
@@ -118,7 +118,7 @@ function init() {
     w = Math.max(1, sceneEl.clientWidth); h = Math.max(1, sceneEl.clientHeight);
     renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.updateProjectionMatrix();
-    dist = 6.9 * Math.max(1, 1.02 / camera.aspect);
+    dist = 8.3 * Math.max(1, 1.02 / camera.aspect);                    // фігура ≈ на пʼяту частину менша, ніж була (6.9)
   }
   function progress() {
     if (dbgP != null) return dbgP;

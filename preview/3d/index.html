@@ -719,7 +719,7 @@
         (function () {
             if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('cr-reduced');
             var started = false;
-            function start() { if (started) return; started = true; import('/js/hero-crystal.js?v=7'); }
+            function start() { if (started) return; started = true; import('/js/hero-crystal.js?v=8'); }
             if (document.readyState === 'complete') start();
             else window.addEventListener('load', start, { once: true });
             setTimeout(start, 2500);   /* страховка: якщо load затримується (шрифти, CDN), сцена все одно стартує */
