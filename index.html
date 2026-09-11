@@ -495,12 +495,12 @@
     ]
   };
   var NARROW = {
-    w:360, h:300, cx:180, topY:72, topR:100, botY:204, botR:26, k:0.30,
-    basinY:224, plate:{ y:250, w:250, h:48, big:19 }, fs:10, N:60, ribs:8, dot:1.5, story:0.55,
+    w:360, h:300, cx:180, topY:82, topR:98, botY:206, botR:26, k:0.30,
+    basinY:226, plate:{ y:250, w:250, h:46, big:19 }, fs:10, N:60, ribs:8, dot:1.5, story:0.55, legendY:18,
     top:{ t:'Ad spend', s:'$60,000 / mo' },
     stages:[
-      { u:0.34, side: 1, c:'#60A5FA', t:'', s:'' },                       /* кільце без підпису */
-      { u:0.68, side:-1, c:'#22C55E', t:'400,000+ conversions', s:'' }
+      { u:0.34, side: 1, c:'#60A5FA', t:'', s:'' },
+      { u:0.68, side:-1, c:'#22C55E', t:'', s:'' }
     ]
   };
   var cfg = WIDE, scale = 1, dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -573,17 +573,17 @@
     g.arcTo(x, y + h, x, y, r);         g.arcTo(x, y, x + w, y, r);
     g.closePath();
   }
-  function chip(g, cx, cy, title, sub, color, fs, maxX, alpha){
+  function chipW(g, title, sub, fs){
+    g.font = '600 ' + fs + 'px ' + FONT; var w1 = g.measureText(title).width;
+    g.font = '500 ' + (fs - 1) + 'px ' + MONO; var w2 = sub ? g.measureText(sub).width : 0;
+    return 11 + 7 + 9 + Math.max(w1, w2) + 11;
+  }
+  function chip(g, cx, cy, title, sub, color, fs, maxX, alpha, leftEdge){
     if (alpha <= 0.01 || !title) return;
     g.save(); g.globalAlpha = alpha;
-    g.font = '600 ' + fs + 'px ' + FONT;
-    var w1 = g.measureText(title).width;
-    g.font = '500 ' + (fs - 1) + 'px ' + MONO;
-    var w2 = sub ? g.measureText(sub).width : 0;
-    var pad = 11, dot = 7, gap = 9;
-    var w = pad + dot + gap + Math.max(w1, w2) + pad;
+    var w = chipW(g, title, sub, fs), pad = 11, dot = 7, gap = 9;
     var h = sub ? fs * 2 + 20 : fs + 20;
-    var x = cx - w / 2, y = cy - h / 2;
+    var x = leftEdge ? cx : cx - w / 2, y = cy - h / 2;
     if (x < 4) x = 4;
     if (x + w > maxX - 4) x = maxX - 4 - w;
     g.fillStyle = 'rgba(19,26,42,.94)'; rr(g, x, y, w, h, 9); g.fill();
@@ -610,9 +610,9 @@
   function draw(){
     var o = cfg, p = progress();
     var e = clamp01(intro), ei = 1 - Math.pow(1 - e, 3);          // плавний вступ
-    var kk = o.k * (1 + 0.60 * p) + my * 0.05;                     // нахил: скрол + миша
+    var kk = o.k * (1 + 0.60 * p) + my * (o === WIDE ? 0.05 : 0.09);                     // нахил: скрол + миша
     if (kk > 0.62) kk = 0.62; if (kk < 0.16) kk = 0.16;
-    var shear = mx * (o === WIDE ? 24 : 10);                       // «поворот» за курсором
+    var shear = mx * (o === WIDE ? 24 : 22);                       // «поворот» за курсором
     var cx = o.cx + shear;
 
     var g = ctx;
@@ -751,14 +751,16 @@
     g.shadowColor = 'rgba(74,222,128,.9)'; g.shadowBlur = 40 * plateFlash;
     g.stroke(); g.shadowBlur = 0;
     g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillStyle = '#94A3B8'; g.font = '500 ' + (o.fs - 1) + 'px ' + MONO;
-    g.fillText('REVENUE GENERATED', o.cx, pl.y + 20);
+    var hasFoot = pl.h > 78, lab = o.fs - 1, blockH = lab + 7 + pl.big + (hasFoot ? 7 + o.fs : 0);
+    var ty = pl.y + (pl.h - blockH) / 2;                              /* блок тексту — рівно по центру плашки */
+    g.fillStyle = '#94A3B8'; g.font = '500 ' + lab + 'px ' + MONO;
+    g.fillText('REVENUE GENERATED', o.cx, ty + lab / 2);
     var val = Math.round(1000000 * ei);
     g.fillStyle = '#fff'; g.font = '700 ' + pl.big + 'px ' + FONT;
-    g.fillText('$' + val.toLocaleString('en-US') + (ei > 0.995 ? '+' : ''), o.cx, pl.y + 20 + pl.big * 0.92);
-    if (pl.h > 78){
+    g.fillText('$' + val.toLocaleString('en-US') + (ei > 0.995 ? '+' : ''), o.cx, ty + lab + 7 + pl.big / 2 + 1);
+    if (hasFoot){
       g.fillStyle = '#22C55E'; g.font = '600 ' + o.fs + 'px ' + FONT;
-      g.fillText('1,500+ campaigns · tracked end-to-end', o.cx, pl.y + pl.h - 17);
+      g.fillText('1,500+ campaigns · tracked end-to-end', o.cx, ty + lab + 7 + pl.big + 7 + o.fs / 2);
     }
 
     /* фантом: сума, яку воронка наробила просто зараз. Зʼявляється з першим
@@ -778,9 +780,17 @@
       g.shadowBlur = 0; g.restore();
     }
 
-    /* верхній чип — не вилазить за край, коли воронка розвертається */
-    var topChipY = Math.max(o.fs + 15, o.topY - o.topR * kk - (o === WIDE ? 30 : 22));
-    chip(g, o.cx, topChipY, o.top.t, o.top.s, '#60A5FA', o.fs, o.w, ei);
+    if (o === WIDE){
+      /* верхній чип — не вилазить за край, коли воронка розвертається */
+      var topChipY = Math.max(o.fs + 15, o.topY - o.topR * kk - 30);
+      chip(g, o.cx, topChipY, o.top.t, o.top.s, '#60A5FA', o.fs, o.w, ei);
+    } else {
+      /* телефон: обидва підписи одним рядком над воронкою — нічого не лягає на неї */
+      var t1 = 'Ad spend · $60,000 / mo', t2 = '400,000+ conversions';
+      var w1 = chipW(g, t1, '', o.fs), w2 = chipW(g, t2, '', o.fs), x0 = o.cx - (w1 + 8 + w2) / 2;
+      chip(g, x0, o.legendY, t1, '', '#60A5FA', o.fs, o.w, ei, true);
+      chip(g, x0 + w1 + 8, o.legendY, t2, '', '#22C55E', o.fs, o.w, ei, true);
+    }
     g.globalAlpha = 1;
   }
 
@@ -844,6 +854,33 @@
     window.addEventListener('scroll', function(){
       if (!moved){ moved = true; sceneEl.classList.add('moved'); }
     }, { passive:true });
+    /* нахил телефона керує сценою так само, як миша на компʼютері */
+    var base = null;
+    function onTilt(ev){
+      if (ev.gamma == null || ev.beta == null) return;
+      if (base === null) base = ev.beta;                                  /* як тримали в момент старту — це «рівно» */
+      var gx = ev.gamma, by = ev.beta - base;
+      if (window.orientation === 90 || window.orientation === -90){ var tmp = gx; gx = by; by = tmp; }
+      tmx = Math.max(-1, Math.min(1, gx / 22));
+      tmy = Math.max(-1, Math.min(1, by / 22));
+      if (!moved){ moved = true; sceneEl.classList.add('moved'); }
+    }
+    function armTilt(){
+      if (typeof DeviceOrientationEvent === 'undefined') return;
+      if (typeof DeviceOrientationEvent.requestPermission === 'function'){
+        /* iOS: дозвіл можна спитати лише з дотику — беремо перший дотик до першого екрана */
+        var ask = function(){
+          DeviceOrientationEvent.requestPermission().then(function(st){
+            if (st === 'granted') window.addEventListener('deviceorientation', onTilt, { passive:true });
+          }, function(){});
+          (heroEl || sceneEl).removeEventListener('touchend', ask);
+        };
+        (heroEl || sceneEl).addEventListener('touchend', ask, { passive:true });
+      } else {
+        window.addEventListener('deviceorientation', onTilt, { passive:true });
+      }
+    }
+    if ('ontouchstart' in window) armTilt();
     if (window.IntersectionObserver){
       new IntersectionObserver(function(es){ if (es[0].isIntersecting) start(); else stop(); },
                                { rootMargin:'80px' }).observe(sceneEl);
