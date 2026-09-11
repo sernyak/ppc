@@ -8,17 +8,20 @@
  * взяті звідти без змін (hero-crystal-frame.js). Фігура відкидає тінь на
  * сторінку.
  *
- * Своє тут — те, що довкола: зі скролом фігура робить повний оберт, у повітрі
- * від ближніх до дальніх проступають голограми формул його систем, від фігури
- * розлітаються зерна світла, камера облітає її. Розмір фігури не змінюється.
- * На компʼютері hero липкий на час прокрутки; миша дає паралакс; на телефоні
- * 30 к/с. Поза екраном цикл спить, при «зменшити рух» — один нерухомий кадр.
+ * Своє тут — те, що довкола: історія фігури стиснута в першу частину скролу,
+ * тож невелика прокрутка одразу запускає розкриття; фігура робить повний
+ * оберт; формули його систем проєктуються збоку на невидиму площину — вона не
+ * має ні кольору, ні країв, видно лише світло написів, що розходяться від
+ * фігури; на площину летять зерна світла; камера облітає фігуру. Розмір
+ * фігури не змінюється. На компʼютері hero липкий на час прокрутки; миша дає
+ * паралакс, рядки біля курсора яскравішають; на телефоні 30 к/с. Поза екраном
+ * цикл спить, при «зменшити рух» — один нерухомий кадр.
  *
  * Для знімків: ?p=0.5 фіксує прогрес скролу, ?intro=1 — вступ, ?still=1 — один кадр.
  */
 import * as THREE from 'three';
 import { getFrame as figureFrame, clamp01 } from './hero-crystal-frame.js';
-import { getFrame as sceneFrame, holoWindow, CFG as SCFG } from './hero-vault-frame.js';
+import { getFrame as sceneFrame, figureProgress } from './hero-vault-frame.js';
 
 const sceneEl = document.getElementById('vault-scene');
 const canvas = document.getElementById('vault-canvas');
@@ -112,40 +115,60 @@ function init() {
   const spokes = VO.map((v, i) => lightLine(VO[i], VI[i], thS, thS * 0.52, spin, { idx: i })).sort((p1, p2) => p1.y - p2.y);
   const COUNTS = { jointsOuter: jointsOuter.length, outer: outerBeams.length, jointsInner: jointsInner.length, inner: innerEdges.length, spokes: spokes.length };
 
-  /* ---------- голограми формул у повітрі довкола фігури ---------- */
-  const rnd = seeded(31);
-  const CORPUS = [
-    'R(t) = Σ оплата(t) − повернення(t)', 'оплата → розрахунок → звіт → пошта', 'score(лід) ∈ [1, 10]',
-    'виписка → транзакції', 'дублікат ⇔ (сума, дата, контрагент)', 'переказ: −x + x = 0', '100 дзвінків × 5 хв ≈ $3,5 / міс',
-    'натальна карта → PDF → пошта', 'кожні 12 год → чернетки', 'стиль = 11 вимірів', 'виручка(бюджет, конверсія_k)',
-    '∂ виручка / ∂ конверсія_k', 'webhook: підпис ✓ · повтор ✗', 'контекст діалогу → ескалація', 'календар → Instagram → статус',
-    'похибка округлення = 0', '03:00 щодня · Cloud Scheduler', '120 оплат · Monobank', 'транскрипція → резюме → CRM',
-    'p(результат | система) → 1', '∫ дохід dt − витрати', 'λ = запити / хв', 'σ(настрій клієнта)', 'Δ(бюджет) → Δ(виручка)',
-    'PDF ← Puppeteer ← звіт', 'без участі людини', 'бот: контекст ∧ ліміт ∧ ескалація', 'звіт → пошта: t < 60 с',
-  ];
-  const holos = [];
-  const HN = band ? 16 : 36;
-  for (let i = 0, tries = 0; holos.length < HN && tries < HN * 30; tries++) {
-    /* обʼєм праворуч, вище й позаду фігури (не перед нею, щоб не наїжджати на текст); сама фігура — порожня */
-    const p = band
-      ? new THREE.Vector3((rnd() * 2 - 1) * 2.2, 0.5 + rnd() * 3.0, cPos.z - 0.2 - rnd() * 4.5)
-      : new THREE.Vector3(cPos.x - 0.6 + rnd() * 6.0, 0.5 + rnd() * 4.8, cPos.z + 0.3 - rnd() * 5.5);
-    if (Math.hypot(p.x - cPos.x, p.y - cPos.y) < R * 2.1 && p.z > cPos.z - 1.5) continue;   // не поверх фігури
-    if (p.distanceTo(cPos) < R * 1.6) continue;
-    const strong = rnd() < 0.22;
-    const m = textPlane(CORPUS[Math.floor(rnd() * CORPUS.length)], (strong ? 0.24 : 0.16) * (0.85 + rnd() * 0.4) * (band ? 0.85 : 1), strong ? 600 : 400, strong ? '#cfe0ff' : '#9dbdff');
-    m.position.copy(p); m.visible = false; scene.add(m);
-    holos.push({ m, y0: p.y, d: p.distanceTo(cPos), ph: rnd() * 6.28, base: strong ? 0.95 : 0.7 });
-    i++;
-  }
-  holos.sort((a, b) => a.d - b.d);   // ближні до фігури проступають першими
+  /* ---------- проєкція формул: невидима похила площина збоку за фігурою ---------- */
+  const H = 7.5;
+  const wallC = band ? new THREE.Vector3(2.8, H / 2, -2.2) : new THREE.Vector3(9.3, H / 2, -1.8);
+  const wallRot = band ? -Math.PI / 2 + 0.95 : -Math.PI / 2 + 0.62;
+  const WW = band ? 13 : 19;
+  const wallN = new THREE.Vector3(-Math.cos(wallRot + Math.PI / 2), 0, Math.sin(wallRot + Math.PI / 2)); // нормаль площини
+  const wallU = new THREE.Vector3(Math.cos(wallRot), 0, -Math.sin(wallRot));                             // напрям уздовж площини
+  const wallPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(wallN, wallC);
+  const wallPoint = (a, b) => wallC.clone().addScaledVector(wallU, a).add(new THREE.Vector3(0, b, 0));   // точка на площині (уздовж, по висоті)
+  let maxDist = 0;
+  for (const a of [-WW / 2, WW / 2]) for (const b of [-H / 2, H / 2]) maxDist = Math.max(maxDist, wallPoint(a, b).distanceTo(cPos));
+  const minDist = Math.abs(wallPlane.distanceToPoint(cPos)) * 0.9;   // хвиля покриття стартує одразу біля площини, а не з центру фігури
+  const wallMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uMap: { value: blankTexture() }, uTint: { value: new THREE.Color(0xbcd3ff) }, uOpacity: { value: 1.0 },
+      uOrigin: { value: cPos.clone() }, uRadius: { value: 0 }, uSoft: { value: 2.4 },
+      uSpot: { value: new THREE.Vector3(0, -50, 0) }, uSpotR: { value: 3.0 }, uSpotK: { value: fine && !lo ? 0.7 : 0 }, uTime: { value: 0 },
+      uEdge: { value: band ? 0.3 : 0.2 },
+    },
+    vertexShader: `varying vec2 vUv; varying vec3 vW;
+      void main(){ vUv = uv; vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }`,
+    fragmentShader: `uniform sampler2D uMap; uniform vec3 uTint; uniform float uOpacity; uniform vec3 uOrigin; uniform float uRadius; uniform float uSoft;
+      uniform vec3 uSpot; uniform float uSpotR; uniform float uSpotK; uniform float uTime; uniform float uEdge; varying vec2 vUv; varying vec3 vW;
+      void main(){
+        vec4 t = texture2D(uMap, vUv);
+        float d = distance(vW, uOrigin);
+        float m = 1.0 - smoothstep(uRadius - uSoft, uRadius + uSoft * 0.25, d);
+        float fall = 1.0 / (1.0 + d * d * 0.014);
+        /* площина не має країв: написи мʼяко згасають до її меж */
+        float edge = smoothstep(0.0, uEdge, vUv.x) * smoothstep(1.0, 1.0 - uEdge, vUv.x) * smoothstep(0.0, 0.22, vUv.y) * smoothstep(1.0, 0.78, vUv.y);
+        float spot = 1.0 + uSpotK * (1.0 - smoothstep(0.0, uSpotR, distance(vW, uSpot)));
+        float breathe = 0.92 + 0.08 * sin(uTime * 0.45 + vW.z * 0.7 + vW.y * 0.9);
+        vec3 c = uTint * t.rgb * t.a * uOpacity * m * edge * (0.35 + 0.65 * fall) * spot * breathe;
+        gl_FragColor = vec4(c, 1.0);
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
+      }`,
+    transparent: true, depthWrite: false, side: THREE.DoubleSide,
+    /* полотно прозоре: додаємо лише колір і не чіпаємо альфу, інакше площина стає чорним прямокутником поверх тла */
+    blending: THREE.CustomBlending, blendEquation: THREE.AddEquation, blendSrc: THREE.OneFactor, blendDst: THREE.OneFactor, blendSrcAlpha: THREE.ZeroFactor, blendDstAlpha: THREE.OneFactor,
+  });
+  const wall = new THREE.Mesh(new THREE.PlaneGeometry(WW, H), wallMat); wall.position.copy(wallC); wall.rotation.y = wallRot; scene.add(wall);
+  /* текст формул малюємо, щойно є шрифт Inter (не довше ~1,2 с чекання) */
+  const fontsReady = Promise.race([Promise.all([document.fonts.load('400 40px Inter'), document.fonts.load('600 40px Inter')]).catch(() => null), new Promise((r) => setTimeout(r, 1200))]);
+  fontsReady.then(() => { wallMat.uniforms.uMap.value = formulaTexture(lo ? 2048 : 4096, lo ? 768 : 1536, 30, lo ? 4 : 6, 23); schedule(); });
 
-  /* зерна світла, що розлітаються від фігури в повітря */
-  const N = lo ? 400 : 900;
+  /* зерна світла, що летять від фігури на площину проєкції */
+  const rnd = seeded(31);
+  const N = lo ? 700 : 1600;
   const gDir = [], gMax = [], gPhase = [], gSpeed = [], gPos = new Float32Array(N * 3);
   for (let i = 0; i < N; i++) {
-    const dir = new THREE.Vector3(rnd() * 1.3 - (band ? 0.65 : 0.3), rnd() * 1.4 - 0.4, rnd() * 1.6 - 1.0).normalize();
-    gDir.push(dir.x, dir.y, dir.z); gMax.push(2.5 + rnd() * 4.5); gPhase.push(rnd()); gSpeed.push(0.035 + rnd() * 0.055);
+    const p = wallPoint((rnd() - 0.5) * (WW - 3), (rnd() - 0.5) * (H - 2));
+    const dir = p.clone().sub(cPos); const dist = dir.length(); dir.normalize();
+    gDir.push(dir.x, dir.y, dir.z); gMax.push(dist); gPhase.push(rnd()); gSpeed.push(0.035 + rnd() * 0.055);
   }
   const gGeo = new THREE.BufferGeometry();
   gGeo.setAttribute('position', new THREE.BufferAttribute(gPos, 3));
@@ -153,12 +176,12 @@ function init() {
   gGeo.setAttribute('aMax', new THREE.Float32BufferAttribute(gMax, 1));
   gGeo.setAttribute('aPhase', new THREE.Float32BufferAttribute(gPhase, 1));
   gGeo.setAttribute('aSpeed', new THREE.Float32BufferAttribute(gSpeed, 1));
-  gGeo.boundingSphere = new THREE.Sphere(cPos.clone(), 12);
+  gGeo.boundingSphere = new THREE.Sphere(cPos.clone(), 30);
   const grainMat = new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uOrigin: { value: cPos.clone() }, uSpread: { value: 0 }, uSize: { value: lo ? 4 : 7 }, uPR: { value: renderer.getPixelRatio() }, uColorA: { value: new THREE.Color(0x60a5fa) }, uColorB: { value: new THREE.Color(0xa78bfa) } },
+    uniforms: { uTime: { value: 0 }, uOrigin: { value: cPos.clone() }, uStart: { value: R * 1.15 }, uSpread: { value: 0 }, uSize: { value: lo ? 4 : 7 }, uPR: { value: renderer.getPixelRatio() }, uColorA: { value: new THREE.Color(0x60a5fa) }, uColorB: { value: new THREE.Color(0xa78bfa) } },
     vertexShader: `attribute vec3 aDir; attribute float aMax; attribute float aPhase; attribute float aSpeed;
-      uniform float uTime; uniform vec3 uOrigin; uniform float uSpread; uniform float uSize; uniform float uPR; varying float vA; varying float vK;
-      void main(){ float u = fract(aPhase + uTime * aSpeed); vec3 p = uOrigin + aDir * (u * aMax * uSpread);
+      uniform float uTime; uniform vec3 uOrigin; uniform float uStart; uniform float uSpread; uniform float uSize; uniform float uPR; varying float vA; varying float vK;
+      void main(){ float u = fract(aPhase + uTime * aSpeed); vec3 p = uOrigin + aDir * (uStart + u * max(aMax - uStart, 0.0) * uSpread);   // з краю рами, не з її центру
         vA = (1.0 - u * u) * smoothstep(0.0, 0.08, u) * smoothstep(0.0, 0.05, uSpread); vK = aPhase;
         vec4 mv = modelViewMatrix * vec4(p, 1.0); gl_PointSize = min(uSize * uPR * (6.0 / -mv.z), 9.0 * uPR); gl_Position = projectionMatrix * mv; }`,
     fragmentShader: `uniform vec3 uColorA; uniform vec3 uColorB; varying float vA; varying float vK;
@@ -166,7 +189,8 @@ function init() {
         gl_FragColor = vec4(col * a * vA * 0.5, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment> }`,
-    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
+    transparent: true, depthWrite: false,
+    blending: THREE.CustomBlending, blendEquation: THREE.AddEquation, blendSrc: THREE.OneFactor, blendDst: THREE.OneFactor, blendSrcAlpha: THREE.ZeroFactor, blendDstAlpha: THREE.OneFactor,
   });
   const grains = new THREE.Points(gGeo, grainMat); grains.visible = false; scene.add(grains);
 
@@ -175,6 +199,8 @@ function init() {
   let introMs = -300, last = 0, t = 0, angle = 0.4, frameNo = 0, lastInput = 0;
   let pTarget = 0, pSmooth = 0, mx = 0, my = 0, tmx = 0, tmy = 0, yaw = 0, tyaw = 0;
   let visible = false, running = false;
+  const spot = new THREE.Vector3(0, -50, 0), tspot = new THREE.Vector3(0, -50, 0);
+  const raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2();
   const track = document.getElementById('vault-track');
 
   function fit() {
@@ -186,7 +212,7 @@ function init() {
   function progress() {
     if (dbgP != null) return dbgP;
     /* компʼютер: hero липкий на час прокрутки доріжки; телефон: історію веде положення сторінки */
-    const span = !band && track ? Math.max(1, track.offsetHeight - window.innerHeight) : window.innerHeight * 0.75;
+    const span = !band && track ? Math.max(1, track.offsetHeight - window.innerHeight) : window.innerHeight * 0.5;
     return clamp01(window.scrollY / span);
   }
   /* поставити брус між a і b, намальований на частку d від a; орієнтація як у beam() */
@@ -230,27 +256,21 @@ function init() {
     /* камера: обліт без підʼїзду, паралакс від миші або поворот від пальця */
     const az = az0 + fS.orbit + mx * 0.14 + yaw, el = el0 + fS.elev + my * 0.07;
     camPos.set(target.x + d0 * Math.cos(el) * Math.sin(az), target.y + d0 * Math.sin(el), target.z + d0 * Math.cos(el) * Math.cos(az));
-    camera.position.copy(camPos); camera.lookAt(target); camera.updateMatrixWorld();
-    /* голограми: проступають від ближніх до дальніх, дивляться на глядача, ледь плавають і мерехтять при появі */
-    holos.forEach((H, i) => {
-      const wv = holoWindow(i, holos.length, fS.holo, SCFG.holoLen);
-      H.m.visible = wv > 0.001;
-      if (!H.m.visible) return;
-      const flick = wv < 0.35 ? 0.5 + 0.5 * Math.abs(Math.sin(tt * 37 + H.ph)) : 1;
-      H.m.material.opacity = H.base * wv * flick * (0.92 + 0.08 * Math.sin(tt * 0.7 + H.ph));
-      H.m.scale.setScalar(0.7 + 0.3 * wv);
-      H.m.position.y = H.y0 + Math.sin(tt * 0.5 + H.ph) * 0.06;
-      H.m.quaternion.copy(camera.quaternion);
-    });
+    camera.position.copy(camPos); camera.lookAt(target);
+    /* проєкція: розходиться по площині від фігури; зерна летять на неї */
+    wallMat.uniforms.uRadius.value = minDist + fS.coverage * (maxDist - minDist); wallMat.uniforms.uTime.value = tt; wallMat.uniforms.uSpot.value.copy(spot);
+    wall.visible = fS.coverage > 0.001;
     grainMat.uniforms.uTime.value = tt; grainMat.uniforms.uSpread.value = fS.grains; grains.visible = fS.grains > 0.001;
   }
+  const frames = (p, introT) => [figureFrame(figureProgress(p), introT, COUNTS), sceneFrame(p, introT)];
   function render(fF, fS) { apply(fF, fS, t); renderer.render(scene, camera); }
 
   fit();
   if (reduced) {
     const pp = dbgP != null ? dbgP : 0.95;
-    const one = () => render(figureFrame(pp, 1, COUNTS), sceneFrame(pp, 1));
+    const one = () => render(...frames(pp, 1));
     one();
+    fontsReady.then(one);
     new ResizeObserver(() => { fit(); one(); }).observe(sceneEl);
     return;
   }
@@ -264,9 +284,10 @@ function init() {
     pTarget = progress();
     pSmooth += (pTarget - pSmooth) * 0.16;
     mx += (tmx - mx) * 0.08; my += (tmy - my) * 0.08; yaw += (tyaw - yaw) * 0.1;
+    spot.lerp(tspot, 0.12);
     angle += dt / 1000 * 0.1;                                            // повільне обертання у спокої
-    if (still) { pSmooth = pTarget; render(figureFrame(pSmooth, introT, COUNTS), sceneFrame(pSmooth, introT)); return; }
-    if (!(lo && frameNo % 2)) render(figureFrame(pSmooth, introT, COUNTS), sceneFrame(pSmooth, introT));
+    if (still) { pSmooth = pTarget; render(...frames(pSmooth, introT)); return; }
+    if (!(lo && frameNo % 2)) render(...frames(pSmooth, introT));
     if (visible && !document.hidden) schedule();
   }
   function schedule() { if (!running) { running = true; requestAnimationFrame(tick); } }
@@ -281,9 +302,14 @@ function init() {
       const r = hero.getBoundingClientRect();
       tmx = clamp01((ev.clientX - r.left) / r.width) * 2 - 1;
       tmy = clamp01((ev.clientY - Math.max(r.top, 0)) / Math.min(r.height, window.innerHeight)) * 2 - 1;
+      /* точка на площині проєкції під курсором — рядки поруч яскравішають */
+      const cr = canvas.getBoundingClientRect();
+      ndc.set(((ev.clientX - cr.left) / cr.width) * 2 - 1, -((ev.clientY - cr.top) / cr.height) * 2 + 1);
+      raycaster.setFromCamera(ndc, camera);
+      if (!raycaster.ray.intersectPlane(wallPlane, tspot)) tspot.set(0, -50, 0);
       lastInput = performance.now(); schedule();
     });
-    hero.addEventListener('pointerleave', () => { tmx = 0; tmy = 0; schedule(); });
+    hero.addEventListener('pointerleave', () => { tmx = 0; tmy = 0; tspot.set(0, -50, 0); schedule(); });
   } else {
     let dragX = null;
     canvas.addEventListener('pointerdown', (ev) => { dragX = ev.clientX; });
@@ -344,15 +370,29 @@ function init() {
     panel(14, 14, new THREE.Color(0.1, 0.12, 0.18), [0, -3, 0], [-Math.PI / 2, 0, 0]);
     const tex = pm.fromScene(s, 0.04).texture; pm.dispose(); return tex;
   }
-  /* ---------- голограми ---------- */
-  function textPlane(text, size, weight, color) {
-    const c = document.createElement('canvas'); const g = c.getContext('2d');
-    const fs = 64; g.font = `${weight} ${fs}px Inter, sans-serif`;
-    const tw = Math.ceil(g.measureText(text).width) + 40, th = 96;
-    c.width = tw; c.height = th; g.font = `${weight} ${fs}px Inter, sans-serif`; g.textBaseline = 'middle';
-    g.fillStyle = color; g.fillText(text, 20, th / 2);
-    const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-    return new THREE.Mesh(new THREE.PlaneGeometry(size * tw / th, size), new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+  /* ---------- текстура формул ---------- */
+  function blankTexture() { const c = document.createElement('canvas'); c.width = c.height = 4; return new THREE.CanvasTexture(c); }
+  function formulaTexture(w, h, rows, cols, seed) {
+    const CORPUS = [
+      'R(t) = Σ оплата(t) − повернення(t)', 'оплата → розрахунок → звіт → пошта', 'score(лід) ∈ [1, 10]',
+      'виписка PDF · XLSX · CSV → транзакції', 'дублікат ⇔ (сума, дата, контрагент)', 'переказ між рахунками: −x + x = 0',
+      '100 дзвінків × 5 хв ≈ $3,5 / міс', 'натальна карта → PDF → пошта', 'кожні 12 год: 4 спільноти → чернетки',
+      'стиль = 11 вимірів', 'виручка(бюджет, конверсія_k)', '∂ виручка / ∂ конверсія_k', 'webhook: підпис ✓ · повтор ✗',
+      'контекст діалогу → ескалація', 'календар → зображення → Instagram → статус', 'похибка округлення = 0',
+      '03:00 щодня · Cloud Scheduler', '120 оплат · Monobank Acquiring', 'транскрипція → резюме → CRM', 'p(результат | система) → 1',
+      '∫ дохід dt − витрати', 'λ = запити / хв', 'σ(настрій клієнта)', 'Δ(бюджет) → Δ(виручка)', 'PDF ← Puppeteer ← звіт',
+    ];
+    const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d');
+    const r = seeded(seed), lh = h / rows, fs = Math.round(lh * 0.55);
+    g.textBaseline = 'middle';
+    for (let row = 0; row < rows; row++) for (let k = 0; k < cols; k++) {
+      const line = CORPUS[Math.floor(r() * CORPUS.length)], strong = r() < 0.18;
+      g.font = `${strong ? 600 : 400} ${fs}px Inter, sans-serif`;
+      g.globalAlpha = strong ? 1 : 0.5 * (0.5 + r() * 0.5);
+      g.fillStyle = '#9dc2ff';
+      g.fillText(line, (k / cols) * w + r() * (w / cols) * 0.35, (row + 0.5) * lh);
+    }
+    const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); return tex;
   }
   function seeded(seed) { let s = seed * 7919 + 13; return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; }; }
 }
