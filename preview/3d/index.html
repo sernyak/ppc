@@ -713,7 +713,18 @@
         })();
     </script>
 
-    <script type="module" src="/js/hero-crystal.js?v=7"></script>
+    <script>
+        /* Сцена першого екрана вантажиться після того, як сторінка вже показана,
+           щоб бібліотека 3D не відтягувала появу тексту на повільному звʼязку. */
+        (function () {
+            if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('cr-reduced');
+            var started = false;
+            function start() { if (started) return; started = true; import('/js/hero-crystal.js?v=7'); }
+            if (document.readyState === 'complete') start();
+            else window.addEventListener('load', start, { once: true });
+            setTimeout(start, 2500);   /* страховка: якщо load затримується (шрифти, CDN), сцена все одно стартує */
+        })();
+    </script>
 
 </body>
 </html>
