@@ -69,7 +69,7 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
         /* висота сцени зарезервована наперед — інакше макет стрибає до старту скрипта */
-        #fx-scene { aspect-ratio: 360 / 346; }
+        #fx-scene { aspect-ratio: 360 / 300; }
         @media (min-width: 1024px) { #fx-scene { aspect-ratio: 600 / 660; } }
         /* планшет: сцена в одній колонці, але не на всю її ширину */
         @media (max-width: 1023px) { #fx-scene { max-width: 520px; margin-left: auto; margin-right: auto; } }
@@ -108,27 +108,27 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="relative pt-32 lg:pt-40 pb-20 px-6 min-h-[90vh] flex items-center">
-        <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-6 lg:gap-12 items-center animate-fade-in-up">
+    <section class="relative pt-24 lg:pt-40 pb-14 lg:pb-20 px-6 min-h-[90vh] flex items-center">
+        <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-5 lg:gap-12 items-center animate-fade-in-up">
             <div class="contents lg:block lg:space-y-8">
                 <div class="order-1 justify-self-start inline-flex items-center space-x-2 px-3 py-1 rounded-full glass-card border border-brand-accent/30 text-sm font-medium text-blue-400">
                     <span class="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></span>
                     <span>Available for new projects</span>
                 </div>
                 
-                <h1 class="order-2 text-5xl lg:text-7xl font-bold leading-tight tracking-tight">
+                <h1 class="order-2 text-[40px] leading-[1.08] sm:text-5xl sm:leading-tight lg:text-7xl font-bold tracking-tight">
                     Building <span class="gradient-text">Predictable Revenue Engines</span>
                 </h1>
                 
-                <p class="order-4 text-lg text-slate-400 leading-relaxed max-w-xl">
+                <p class="order-4 text-base sm:text-lg text-slate-400 leading-relaxed max-w-xl">
                     I'm Oleksandr Serniak, a <strong>PPC Technical Marketer</strong>. In PPC marketing since 2016, I build data-driven marketing engines that deliver measurable results. I've generated over $1M+ in client revenue and achieved 400,000+ conversions.
                 </p>
 
-                <div class="order-5 flex flex-wrap gap-4 pt-4">
-                    <a href="https://t.me/ai_ppc" target="_blank" class="px-8 py-4 bg-white text-brand-dark font-bold rounded-lg hover:bg-slate-200 transition-all">
+                <div class="order-5 flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 pt-2 sm:pt-4">
+                    <a href="https://t.me/ai_ppc" target="_blank" class="px-8 py-4 bg-white text-brand-dark font-bold rounded-lg hover:bg-slate-200 transition-all text-center">
                         Discuss Your Project
                     </a>
-                    <a href="#ai-projects" class="px-8 py-4 glass-card text-white font-medium rounded-lg hover:bg-white/5 transition-all">
+                    <a href="#ai-projects" class="px-8 py-4 glass-card text-white font-medium rounded-lg hover:bg-white/5 transition-all text-center">
                         View AI Analytics Tech ↓
                     </a>
                 </div>
@@ -167,9 +167,9 @@
     </section>
 
     <!-- The Unfair Advantage (AI & Tech) Section -->
-    <section id="ai-projects" class="py-24 px-6 relative">
+    <section id="ai-projects" class="py-14 md:py-24 px-6 relative">
         <div class="max-w-6xl mx-auto">
-            <div class="text-center mb-16">
+            <div class="text-center mb-10 md:mb-16">
                 <h2 class="text-sm font-semibold text-brand-accent tracking-widest uppercase mb-3">The Unfair Advantage</h2>
                 <h3 class="text-3xl md:text-4xl font-bold">Why hire a "PPC Technical Marketer"?</h3>
                 <p class="mt-4 text-slate-400 max-w-2xl mx-auto">
@@ -242,9 +242,9 @@
     </section>
 
     <!-- How I Can Help You -->
-    <section id="expertise" class="py-24 px-6 bg-brand-card/30">
+    <section id="expertise" class="py-14 md:py-24 px-6 bg-brand-card/30">
         <div class="max-w-6xl mx-auto">
-            <div class="text-center mb-16">
+            <div class="text-center mb-10 md:mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold">How I Can Help You</h2>
                 <p class="mt-4 text-slate-400 max-w-2xl mx-auto">
                     Full-funnel strategies to scale your business. No prices, just solutions.
@@ -308,7 +308,7 @@
     </section>
 
     <!-- Testimonials -->
-    <section id="testimonials" class="py-24 px-6 border-y border-white/5 bg-brand-card/20">
+    <section id="testimonials" class="py-14 md:py-24 px-6 border-y border-white/5 bg-brand-card/20">
         <div class="max-w-6xl mx-auto">
             <h2 class="text-3xl font-bold mb-12 text-center">What My Clients Say</h2>
             <div class="grid md:grid-cols-3 gap-6">
@@ -356,7 +356,7 @@
     </section>
 
     <!-- Case Studies -->
-    <section id="case-studies" class="py-24 px-6 relative">
+    <section id="case-studies" class="py-14 md:py-24 px-6 relative">
         <div class="max-w-6xl mx-auto">
             <h2 class="text-3xl font-bold mb-12 text-center">Real Results in Action</h2>
             <div class="grid md:grid-cols-2 gap-8">
@@ -383,9 +383,9 @@
     </section>
 
     <!-- Process -->
-    <section id="process" class="py-24 px-6 border-y border-white/5 bg-brand-card/20">
+    <section id="process" class="py-14 md:py-24 px-6 border-y border-white/5 bg-brand-card/20">
         <div class="max-w-6xl mx-auto">
-            <div class="text-center mb-16">
+            <div class="text-center mb-10 md:mb-16">
                 <h2 class="text-3xl font-bold">Your Path to Results</h2>
                 <p class="mt-4 text-slate-400">My work is a transparent process, not a "black box".</p>
             </div>
@@ -416,7 +416,7 @@
     </section>
 
     <!-- About Me -->
-    <section id="about" class="py-24 px-6 relative">
+    <section id="about" class="py-14 md:py-24 px-6 relative">
         <div class="max-w-6xl mx-auto">
             <div class="glass-card rounded-3xl p-8 md:p-12 border border-white/10 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden">
                 <!-- Background glow -->
@@ -440,7 +440,7 @@
     </section>
 
     <!-- Call to Action -->
-    <section class="py-24 px-6 relative overflow-hidden">
+    <section class="py-14 md:py-24 px-6 relative overflow-hidden">
         <div class="absolute inset-0 bg-brand-accent/5"></div>
         <div class="max-w-4xl mx-auto text-center relative z-10 glass-card p-12 rounded-3xl border border-brand-accent/20">
             <h2 class="text-3xl md:text-5xl font-bold mb-6">Ready to scale your business?</h2>
@@ -448,7 +448,7 @@
                 Currently taking on select part-time projects and consulting roles. Let's discuss your marketing funnel and see where we can unlock hidden revenue.
             </p>
             <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
-                <a href="https://t.me/ai_ppc" target="_blank" class="px-8 py-4 bg-brand-accent text-white font-bold rounded-lg hover:bg-blue-500 transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] w-full sm:w-auto">
+                <a href="https://t.me/ai_ppc" target="_blank" class="whitespace-nowrap px-8 py-4 bg-brand-accent text-white font-bold rounded-lg hover:bg-blue-500 transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] w-full sm:w-auto">
                     Message me on Telegram
                 </a>
                 <a href="mailto:sernyak.a@gmail.com" class="px-8 py-4 glass-card text-white font-medium rounded-lg hover:bg-white/5 transition-all w-full sm:w-auto">
@@ -495,8 +495,8 @@
     ]
   };
   var NARROW = {
-    w:360, h:346, cx:180, topY:80, topR:106, botY:222, botR:27, k:0.30,
-    basinY:244, plate:{ y:274, w:266, h:60, big:22 }, fs:10, N:64, ribs:8, dot:1.5, story:0.55,
+    w:360, h:300, cx:180, topY:72, topR:100, botY:204, botR:26, k:0.30,
+    basinY:224, plate:{ y:250, w:250, h:48, big:19 }, fs:10, N:60, ribs:8, dot:1.5, story:0.55,
     top:{ t:'Ad spend', s:'$60,000 / mo' },
     stages:[
       { u:0.34, side: 1, c:'#60A5FA', t:'', s:'' },                       /* кільце без підпису */
