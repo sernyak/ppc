@@ -12,10 +12,9 @@
  * тож невелика прокрутка одразу запускає розкриття; фігура робить повний
  * оберт; формули його систем проєктуються збоку на невидиму площину — вона не
  * має ні кольору, ні країв, видно лише світло написів: вони проступають
- * рядками з-за силуету фігури і розходяться до країв. Крізь саму фігуру не
- * малюється нічого — ні написів, ні зерен; зерна світла летять туди, куди вже
- * дійшла хвиля написів; камера облітає фігуру. Розмір
- * фігури не змінюється. На компʼютері hero липкий на час прокрутки; миша дає
+ * рядками від фігури і розходяться до країв. З ядра фігури крізь раму назовні
+ * летять вогники — вони трохи випереджають фронт написів, ніби самі й
+ * створюють проєкцію; камера облітає фігуру. Розмір фігури не змінюється. На компʼютері hero липкий на час прокрутки; миша дає
  * паралакс, рядки біля курсора яскравішають; на телефоні 30 к/с. Поза екраном
  * цикл спить, при «зменшити рух» — один нерухомий кадр.
  *
@@ -52,10 +51,12 @@ function init() {
   renderer.setClearColor(0x0b0f19, 0);
 
   /* усе спільне — до першого використання */
-  const R = band ? 1.0 : 1.25;
-  const cPos = band ? new THREE.Vector3(0, R + 0.5, 0) : new THREE.Vector3(4.6, R + 0.7, 0.6);
+  /* розмір фігури — як на /preview/3d/: там R 1,55 при відстані 8,3, тобто кутовий радіус ≈ 0,187;
+     тут камера стоїть трохи далі (фігура зсунута праворуч від точки погляду), тож R перерахований під ту саму видиму величину */
+  const R = band ? 1.13 : 1.62;
+  const cPos = band ? new THREE.Vector3(0, R + 0.5, 0) : new THREE.Vector3(5.0, R + 0.7, 0.6);
   const cam0 = band ? new THREE.Vector3(0, cPos.y + 0.2, 7.4) : new THREE.Vector3(0.3, cPos.y + 0.2, 8.8);
-  const target = band ? new THREE.Vector3(0, cPos.y + 0.05, 0) : new THREE.Vector3(2.7, cPos.y, 0);
+  const target = band ? new THREE.Vector3(0, cPos.y + 0.05, 0) : new THREE.Vector3(3.1, cPos.y, 0);
   const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), tmpC = new THREE.Vector3(), tmpD = new THREE.Vector3();
   const tmpS = new THREE.Vector3(), tmpT = new THREE.Vector3();
   const UP = new THREE.Vector3(0, 1, 0), RIGHT = new THREE.Vector3(1, 0, 0), mtx = new THREE.Matrix4();
@@ -137,13 +138,12 @@ function init() {
       uOrigin: { value: wallOrigin }, uRadius: { value: 0 }, uSoft: { value: 2.0 },
       uSpot: { value: new THREE.Vector3(0, -50, 0) }, uSpotR: { value: 3.0 }, uSpotK: { value: fine && !lo ? 0.7 : 0 }, uTime: { value: 0 },
       uEdge: { value: band ? 0.3 : 0.2 },
-      uRes: { value: new THREE.Vector2(1, 1) }, uFig: { value: new THREE.Vector2(0, 0) }, uHole: { value: 0 }, uAspect: { value: 1 },
     },
     vertexShader: `varying vec2 vUv; varying vec3 vW;
       void main(){ vUv = uv; vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }`,
     fragmentShader: `uniform sampler2D uMap; uniform vec3 uTint; uniform float uOpacity; uniform vec3 uOrigin; uniform float uRadius; uniform float uSoft;
       uniform vec3 uSpot; uniform float uSpotR; uniform float uSpotK; uniform float uTime; uniform float uEdge;
-      uniform vec2 uRes; uniform vec2 uFig; uniform float uHole; uniform float uAspect; varying vec2 vUv; varying vec3 vW;
+      varying vec2 vUv; varying vec3 vW;
       void main(){
         vec4 t = texture2D(uMap, vUv);
         float d = distance(vW, uOrigin);
@@ -151,12 +151,9 @@ function init() {
         float fall = 1.0 / (1.0 + d * d * 0.014);
         /* площина не має країв: написи мʼяко згасають до її меж */
         float edge = smoothstep(0.0, uEdge, vUv.x) * smoothstep(1.0, 1.0 - uEdge, vUv.x) * smoothstep(0.0, 0.22, vUv.y) * smoothstep(1.0, 0.78, vUv.y);
-        /* нічого крізь фігуру: за її силуетом на екрані написів немає, світло йде вбік від нього */
-        vec2 ndc = gl_FragCoord.xy / uRes * 2.0 - 1.0;
-        float hole = smoothstep(uHole, uHole * 1.55, length((ndc - uFig) * vec2(uAspect, 1.0)));
         float spot = 1.0 + uSpotK * (1.0 - smoothstep(0.0, uSpotR, distance(vW, uSpot)));
         float breathe = 0.92 + 0.08 * sin(uTime * 0.45 + vW.z * 0.7 + vW.y * 0.9);
-        vec3 c = uTint * t.rgb * t.a * uOpacity * m * edge * hole * (0.35 + 0.65 * fall) * spot * breathe;
+        vec3 c = uTint * t.rgb * t.a * uOpacity * m * edge * (0.35 + 0.65 * fall) * spot * breathe;
         gl_FragColor = vec4(c, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
@@ -175,7 +172,7 @@ function init() {
 
   /* зерна світла, що летять від фігури на площину проєкції */
   const rnd = seeded(31);
-  const N = lo ? 700 : 1600;
+  const N = lo ? 1100 : 2600;
   const gDir = [], gMax = [], gPhase = [], gSpeed = [], gPos = new Float32Array(N * 3);
   for (let i = 0; i < N; i++) {
     const p = wallPoint((rnd() - 0.5) * (WW - 3), (rnd() - 0.5) * (H - 2));
@@ -190,22 +187,20 @@ function init() {
   gGeo.setAttribute('aSpeed', new THREE.Float32BufferAttribute(gSpeed, 1));
   gGeo.boundingSphere = new THREE.Sphere(cPos.clone(), 30);
   const grainMat = new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uOrigin: { value: cPos.clone() }, uStart: { value: R * 1.15 }, uSpread: { value: 0 }, uSize: { value: lo ? 4 : 7 }, uPR: { value: renderer.getPixelRatio() }, uColorA: { value: new THREE.Color(0x60a5fa) }, uColorB: { value: new THREE.Color(0xa78bfa) },
-      uRes: wallMat.uniforms.uRes, uFig: wallMat.uniforms.uFig, uHole: wallMat.uniforms.uHole, uAspect: wallMat.uniforms.uAspect,
+    uniforms: { uTime: { value: 0 }, uOrigin: { value: cPos.clone() }, uStart: { value: R * 0.12 }, uSpread: { value: 0 }, uSize: { value: lo ? 5 : 8 }, uPR: { value: renderer.getPixelRatio() }, uColorA: { value: new THREE.Color(0x60a5fa) }, uColorB: { value: new THREE.Color(0xa78bfa) },
       uWave: wallMat.uniforms.uOrigin, uRadius: wallMat.uniforms.uRadius, uSoft: wallMat.uniforms.uSoft },
     vertexShader: `attribute vec3 aDir; attribute float aMax; attribute float aPhase; attribute float aSpeed;
       uniform float uTime; uniform vec3 uOrigin; uniform vec3 uWave; uniform float uRadius; uniform float uSoft;
       uniform float uStart; uniform float uSpread; uniform float uSize; uniform float uPR; varying float vA; varying float vK;
-      void main(){ float u = fract(aPhase + uTime * aSpeed); vec3 p = uOrigin + aDir * mix(uStart, aMax, u);   // від краю рами до своєї точки на площині
-        /* летять лише туди, куди вже дійшла хвиля світла — без скупчення біля фігури */
-        float lit = 1.0 - smoothstep(uRadius - uSoft, uRadius + uSoft * 0.25, distance(uOrigin + aDir * aMax, uWave));
-        vA = (1.0 - u * u) * smoothstep(0.0, 0.08, u) * lit * smoothstep(0.0, 0.12, uSpread); vK = aPhase;
+      void main(){ float u = fract(aPhase + uTime * aSpeed); vec3 p = uOrigin + aDir * mix(uStart, aMax, u);   // з ядра фігури до своєї точки на площині
+        /* трохи випереджають фронт написів: спершу долітає вогник, слідом займається рядок */
+        float lit = 1.0 - smoothstep(uRadius + uSoft * 0.6, uRadius + uSoft * 2.4, distance(uOrigin + aDir * aMax, uWave));
+        /* зʼявляються, вийшовши з ядра, і гаснуть, торкнувшись площини */
+        vA = smoothstep(0.0, 0.16, u) * (1.0 - smoothstep(0.86, 1.0, u)) * lit * smoothstep(0.0, 0.12, uSpread); vK = aPhase;
         vec4 mv = modelViewMatrix * vec4(p, 1.0); gl_PointSize = min(uSize * uPR * (6.0 / -mv.z), 9.0 * uPR); gl_Position = projectionMatrix * mv; }`,
-    fragmentShader: `uniform vec3 uColorA; uniform vec3 uColorB; uniform vec2 uRes; uniform vec2 uFig; uniform float uHole; uniform float uAspect; varying float vA; varying float vK;
+    fragmentShader: `uniform vec3 uColorA; uniform vec3 uColorB; varying float vA; varying float vK;
       void main(){ vec2 c = gl_PointCoord - 0.5; float a = smoothstep(0.5, 0.08, length(c)); vec3 col = mix(uColorA, uColorB, vK);
-        vec2 ndc = gl_FragCoord.xy / uRes * 2.0 - 1.0;
-        a *= smoothstep(uHole, uHole * 1.3, length((ndc - uFig) * vec2(uAspect, 1.0)));   // зерна не перетинають силует фігури
-        gl_FragColor = vec4(col * a * vA * 0.5, 1.0);
+        gl_FragColor = vec4(col * a * vA * 0.85, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
         gl_FragColor.a = max(gl_FragColor.r, max(gl_FragColor.g, gl_FragColor.b)); }`,
@@ -228,8 +223,6 @@ function init() {
     renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.updateProjectionMatrix();
     grainMat.uniforms.uPR.value = renderer.getPixelRatio();
-    renderer.getDrawingBufferSize(wallMat.uniforms.uRes.value);
-    wallMat.uniforms.uAspect.value = w / h;
   }
   function progress() {
     if (dbgP != null) return dbgP;
@@ -257,7 +250,7 @@ function init() {
     L.lightMat.color.copy(LIGHT).multiplyScalar(0.2 + 1.35 * br);      // не вище ~1.5×, щоб лінії лишались синіми, а не білими
     if (L.glow) L.glow.material.opacity = 0.03 + 0.16 * br;
   }
-  const camPos = new THREE.Vector3(), camRight = new THREE.Vector3(), figNdc = new THREE.Vector3(), figEdge = new THREE.Vector3();
+  const camPos = new THREE.Vector3();
   function apply(fF, fS, tt) {
     /* радіант — як на /preview/3d/ */
     const open = fF.open;
@@ -279,20 +272,14 @@ function init() {
     const az = az0 + fS.orbit + mx * 0.14 + yaw, el = el0 + fS.elev + my * 0.07;
     camPos.set(target.x + d0 * Math.cos(el) * Math.sin(az), target.y + d0 * Math.sin(el), target.z + d0 * Math.cos(el) * Math.cos(az));
     camera.position.copy(camPos); camera.lookAt(target);
-    /* силует фігури на екрані: за ним не малюємо ні написів, ні зерен */
     camera.updateMatrixWorld(); camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
-    camRight.setFromMatrixColumn(camera.matrixWorld, 0);
-    figNdc.copy(outer.position).project(camera);
-    figEdge.copy(outer.position).addScaledVector(camRight, R * open * 1.12).project(camera);
-    wallMat.uniforms.uFig.value.set(figNdc.x, figNdc.y);
-    wallMat.uniforms.uHole.value = Math.abs(figEdge.x - figNdc.x) * wallMat.uniforms.uAspect.value;
     /* проєкція: хвиля росте з точки площини за фігурою; зерна летять на неї */
     figRay.origin.copy(camera.position); figRay.direction.copy(outer.position).sub(camera.position).normalize();
     if (!figRay.intersectPlane(wallPlane, wallOrigin)) wallOrigin.copy(wallC);
     let far = 0;
     for (const c of wallCorners) far = Math.max(far, c.distanceTo(wallOrigin));
-    /* світло виходить з-за силуету фігури (там, де закінчується гап) і росте до країв площини */
-    const base = camera.position.distanceTo(wallOrigin) * (R * open * 1.12 / camera.position.distanceTo(outer.position)) * 1.55;
+    /* перші рядки займаються рівно на краю силуету фігури і далі хвиля росте до країв площини */
+    const base = camera.position.distanceTo(wallOrigin) * (R * open / camera.position.distanceTo(outer.position));
     wallMat.uniforms.uRadius.value = base + fS.coverage * Math.max(far - base, 0.5);
     wallMat.uniforms.uTime.value = tt; wallMat.uniforms.uSpot.value.copy(spot);
     wall.visible = fS.coverage > 0.001;
