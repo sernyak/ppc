@@ -55,10 +55,12 @@ function init() {
 
   /* усе спільне — до першого використання */
   /* фігура — як на /preview/3d/, лише в півтора раза менша (прохання власника) */
-  const R = band ? 0.78 : 0.97;
-  const cPos = band ? new THREE.Vector3(-0.45, R + 0.45, 0) : new THREE.Vector3(5.0, R + 0.7, 0.6);
-  const cam0 = band ? new THREE.Vector3(0, cPos.y + 0.25, 7.0) : new THREE.Vector3(0.3, cPos.y + 0.2, 8.8);
-  const target = band ? new THREE.Vector3(0.35, cPos.y + 0.05, 0) : new THREE.Vector3(3.1, cPos.y, 0);
+  const R = band ? 1.25 : 0.97;
+  const cPos = band ? new THREE.Vector3(-0.1, R + 0.3, 0) : new THREE.Vector3(5.0, R + 0.7, 0.6);
+  const cam0 = band ? new THREE.Vector3(0, cPos.y + 0.15, 5.2) : new THREE.Vector3(0.3, cPos.y + 0.2, 8.8);
+  const target = band ? new THREE.Vector3(0.1, cPos.y, 0) : new THREE.Vector3(3.1, cPos.y, 0);
+  /* телефон: зі скролом камера відходить і веде погляд правіше — фігура меншає і йде ліворуч, даючи місце стіні */
+  const PULL_BACK = 0.62, PULL_SIDE = 1.45;
   const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), tmpC = new THREE.Vector3(), tmpD = new THREE.Vector3();
   const tmpS = new THREE.Vector3(), tmpT = new THREE.Vector3();
   const UP = new THREE.Vector3(0, 1, 0), RIGHT = new THREE.Vector3(1, 0, 0), mtx = new THREE.Matrix4();
@@ -139,9 +141,9 @@ function init() {
 
   /* ---------- проєкція формул: невидима похила площина збоку за фігурою ---------- */
   const H = band ? 5.0 : 7.5;
-  const wallC = band ? new THREE.Vector3(1.35, 2.35, -1.1) : new THREE.Vector3(9.3, H / 2, -1.8);
-  const wallRot = band ? -Math.PI / 2 + 0.5 : -Math.PI / 2 + 0.62;
-  const WW = band ? 5.6 : 19;
+  const wallC = band ? new THREE.Vector3(2.35, 2.3, -1.4) : new THREE.Vector3(9.3, H / 2, -1.8);
+  const wallRot = band ? -Math.PI / 2 + 1.25 : -Math.PI / 2 + 0.62;   // телефон: майже фронтально, інакше після відходу камери рядки злипаються
+  const WW = band ? 4.8 : 19;
   const wallN = new THREE.Vector3(-Math.cos(wallRot + Math.PI / 2), 0, Math.sin(wallRot + Math.PI / 2)); // нормаль площини
   const wallU = new THREE.Vector3(Math.cos(wallRot), 0, -Math.sin(wallRot));                             // напрям уздовж площини
   const wallPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(wallN, wallC);
@@ -380,7 +382,7 @@ function init() {
     L.lightMat.color.copy(LIGHT).multiplyScalar(0.2 + 1.35 * br);      // не вище ~1.5×, щоб лінії лишались синіми, а не білими
     if (L.glow) L.glow.material.opacity = 0.03 + 0.16 * br;
   }
-  const camPos = new THREE.Vector3();
+  const camPos = new THREE.Vector3(), look = new THREE.Vector3();
   function apply(fF, fS, tt) {
     /* радіант — як на /preview/3d/ */
     const open = fF.open;
@@ -400,8 +402,10 @@ function init() {
     outer.position.y = cPos.y + Math.sin(tt * 0.6) * 0.03;
     /* камера: обліт без підʼїзду, паралакс від миші або поворот від пальця */
     const az = az0 + fS.orbit + mx * 0.14 + yaw, el = el0 + fS.elev + my * 0.07;
-    camPos.set(target.x + d0 * Math.cos(el) * Math.sin(az), target.y + d0 * Math.sin(el), target.z + d0 * Math.cos(el) * Math.cos(az));
-    camera.position.copy(camPos); camera.lookAt(target);
+    const dist = band ? d0 * (1 + PULL_BACK * fS.pull) : d0;
+    look.copy(target); if (band) look.x += PULL_SIDE * fS.pull;
+    camPos.set(look.x + dist * Math.cos(el) * Math.sin(az), look.y + dist * Math.sin(el), look.z + dist * Math.cos(el) * Math.cos(az));
+    camera.position.copy(camPos); camera.lookAt(look);
     camera.updateMatrixWorld(); camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
     const cz = camera.position.distanceTo(outer.position), rr = R * open;
     xray.uCz.value = cz; xray.uCr.value = rr;

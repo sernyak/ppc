@@ -14,7 +14,7 @@ test('до кінця вступу скрол не діє: сцена порож
 
 test('після вступу при p = 0 — лише фігура, нічого довкола', () => {
   const f = getFrame(0, 1);
-  assert.equal(f.coverage, 0); assert.equal(f.fade, 0); assert.equal(f.grains, 0); assert.equal(f.spin, 0); assert.equal(f.orbit, 0); assert.equal(f.elev, 0);
+  assert.equal(f.coverage, 0); assert.equal(f.fade, 0); assert.equal(f.grains, 0); assert.equal(f.pull, 0); assert.equal(f.spin, 0); assert.equal(f.orbit, 0); assert.equal(f.elev, 0);
   assert.equal(f.after, true);
 });
 
@@ -53,7 +53,7 @@ test('усе монотонно зростає зі скролом і лежит
   let prev = getFrame(0, 1);
   for (let i = 1; i <= 50; i++) {
     const f = getFrame(i / 50, 1);
-    for (const k of ['coverage', 'fade', 'grains', 'spin', 'orbit', 'elev']) assert.ok(f[k] >= prev[k] - 1e-12, `${k} не спадає при p=${i / 50}`);
+    for (const k of ['coverage', 'fade', 'grains', 'pull', 'spin', 'orbit', 'elev']) assert.ok(f[k] >= prev[k] - 1e-12, `${k} не спадає при p=${i / 50}`);
     assert.ok(f.coverage >= 0 && f.coverage <= 1 && f.grains >= 0 && f.grains <= 1);
     prev = f;
   }
@@ -89,4 +89,10 @@ test('поява: «вдих» вузлів — один мʼякий горб, 
   const peak = Math.max(...Array.from({ length: 301 }, (_, i) => introFrame(i / 300, counts).joints[0]));
   assert.ok(peak > 1 && peak <= 1 + CFG.intro.bump + 1e-9, `пік ${peak} — вдих помітний, але не стрибок`);
   assert.ok(ups < 200, 'яскравих коливань немає: одне наростання і один спад');
+});
+
+test('телефон: фігура відходить і звільняє місце ще до появи написів', () => {
+  assert.equal(getFrame(0, 1).pull, 0, 'при завантаженні фігура на весь кадр');
+  assert.ok(getFrame(CFG.fade[0], 1).pull > 0.9, 'до першого напису вона вже відійшла й зменшилась');
+  assert.equal(getFrame(1, 1).pull, 1);
 });
