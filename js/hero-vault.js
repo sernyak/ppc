@@ -55,12 +55,12 @@ function init() {
 
   /* усе спільне — до першого використання */
   /* фігура — як на /preview/3d/, лише в півтора раза менша (прохання власника) */
-  const R = band ? 0.82 : 0.97;
+  const R = band ? 0.61 : 0.97;
   const cPos = band ? new THREE.Vector3(0, R + 0.3, 0) : new THREE.Vector3(5.0, R + 0.7, 0.6);
   const cam0 = band ? new THREE.Vector3(0, cPos.y, 7.0) : new THREE.Vector3(0.3, cPos.y + 0.2, 8.8);
-  const target = band ? new THREE.Vector3(0, cPos.y - 0.55, 0) : new THREE.Vector3(3.1, cPos.y, 0);   // дивимось нижче фігури — вона стає під заголовком, а знизу лишається місце під текст
+  const target = band ? new THREE.Vector3(0, cPos.y - 0.62, 0) : new THREE.Vector3(3.1, cPos.y, 0);   // дивимось нижче фігури — вона стає під заголовком, а знизу лишається місце під текст
   /* телефон: зі скролом камера відходить і веде погляд правіше — фігура меншає і йде ліворуч, даючи місце стіні */
-  const PULL_BACK = 0.14, PULL_SIDE = 0;
+  const PULL_BACK = 0, PULL_SIDE = 0, RISE = 0.42, SHRINK = 0.34;   // телефон: фігура сама підіймається до заголовка й меншає
   const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), tmpC = new THREE.Vector3(), tmpD = new THREE.Vector3();
   const tmpS = new THREE.Vector3(), tmpT = new THREE.Vector3();
   const UP = new THREE.Vector3(0, 1, 0), RIGHT = new THREE.Vector3(1, 0, 0), mtx = new THREE.Matrix4();
@@ -307,30 +307,29 @@ function init() {
   /* зерна світла, що летять від фігури на площину проєкції */
   const rnd = seeded(31);
   const N = lo ? 1100 : 2600;
-  const gDir = [], gMax = [], gPhase = [], gSpeed = [], gPos = new Float32Array(N * 3);
+  const gTo = [], gPhase = [], gSpeed = [], gPos = new Float32Array(N * 3);
   /* телефон: ціль зерен — смуга під фігурою, там, де на екрані лежить абзац; десктоп — площина збоку */
-  const fallPoint = () => new THREE.Vector3(cPos.x + (rnd() - 0.5) * 2.0, cPos.y - 0.9 - rnd() * 1.7, cPos.z + (rnd() - 0.5) * 0.7);
+  const fallPoint = () => new THREE.Vector3(cPos.x + (rnd() - 0.5) * 1.9, cPos.y - 1.15 - rnd() * 1.65, cPos.z + (rnd() - 0.5) * 0.7);
   for (let i = 0; i < N; i++) {
     const p = band ? fallPoint() : wallPoint((rnd() - 0.5) * (WW - 3), (rnd() - 0.5) * (H - 2));
-    const dir = p.clone().sub(cPos); const dist = dir.length(); dir.normalize();
-    gDir.push(dir.x, dir.y, dir.z); gMax.push(dist); gPhase.push(rnd()); gSpeed.push(0.035 + rnd() * 0.055);
+    gTo.push(p.x, p.y, p.z); gPhase.push(rnd()); gSpeed.push(0.035 + rnd() * 0.055);
   }
   const gGeo = new THREE.BufferGeometry();
   gGeo.setAttribute('position', new THREE.BufferAttribute(gPos, 3));
-  gGeo.setAttribute('aDir', new THREE.Float32BufferAttribute(gDir, 3));
-  gGeo.setAttribute('aMax', new THREE.Float32BufferAttribute(gMax, 1));
+  gGeo.setAttribute('aTo', new THREE.Float32BufferAttribute(gTo, 3));
   gGeo.setAttribute('aPhase', new THREE.Float32BufferAttribute(gPhase, 1));
   gGeo.setAttribute('aSpeed', new THREE.Float32BufferAttribute(gSpeed, 1));
   gGeo.boundingSphere = new THREE.Sphere(cPos.clone(), 30);
   const grainMat = new THREE.ShaderMaterial({
     uniforms: { uTime: { value: 0 }, uOrigin: { value: cPos.clone() }, uStart: { value: R * 0.12 }, uSpread: { value: 0 }, uSize: { value: lo ? 5 : 8 }, uPR: { value: renderer.getPixelRatio() }, uColorA: { value: new THREE.Color(0x60a5fa) }, uColorB: { value: new THREE.Color(0xa78bfa) },
       uWave: wallMat.uniforms.uOrigin, uReach: { value: 0 }, uSoft: wallMat.uniforms.uSoft },
-    vertexShader: `attribute vec3 aDir; attribute float aMax; attribute float aPhase; attribute float aSpeed;
+    vertexShader: `attribute vec3 aTo; attribute float aPhase; attribute float aSpeed;
       uniform float uTime; uniform vec3 uOrigin; uniform vec3 uWave; uniform float uReach; uniform float uSoft;
       uniform float uStart; uniform float uSpread; uniform float uSize; uniform float uPR; varying float vA; varying float vK;
-      void main(){ float u = fract(aPhase + uTime * aSpeed); vec3 p = uOrigin + aDir * mix(uStart, aMax, u);   // з ядра фігури до своєї точки на площині
+      void main(){ float u = fract(aPhase + uTime * aSpeed);
+        vec3 d = aTo - uOrigin; float maxD = length(d); vec3 p = uOrigin + d / max(maxD, 0.001) * mix(uStart, maxD, u);   // з ядра фігури до своєї цілі
         /* мають власний, швидший фронт: вогники летять уже тоді, коли написів ще немає, і весь час випереджають їх */
-        float lit = 1.0 - smoothstep(uReach + uSoft * 0.6, uReach + uSoft * 2.4, distance(uOrigin + aDir * aMax, uWave));
+        float lit = 1.0 - smoothstep(uReach + uSoft * 0.6, uReach + uSoft * 2.4, distance(aTo, uWave));
         /* зʼявляються, вийшовши з ядра, і гаснуть, торкнувшись площини */
         vA = smoothstep(0.0, 0.16, u) * (1.0 - smoothstep(0.86, 1.0, u)) * lit * smoothstep(0.0, 0.12, uSpread); vK = aPhase;
         vec4 mv = modelViewMatrix * vec4(p, 1.0); gl_PointSize = min(uSize * uPR * (6.0 / -mv.z), 9.0 * uPR); gl_Position = projectionMatrix * mv; }`,
@@ -427,7 +426,9 @@ function init() {
     /* повільне обертання у спокої + повний оберт від скролу, ледь помітне плавання, паралакс від миші; розмір не змінюється */
     spin.rotation.y = angle + fS.spin + mx * 0.06;
     outer.rotation.x = 0.22 + my * 0.03;
-    outer.position.y = cPos.y + Math.sin(tt * 0.6) * 0.03;
+    outer.position.y = cPos.y + Math.sin(tt * 0.6) * 0.03 + (band ? RISE * fS.pull : 0);
+    if (band) outer.scale.setScalar(1 - SHRINK * fS.pull);
+    grainMat.uniforms.uOrigin.value.copy(outer.position);          // зерна вилітають із фігури, де б вона не була
     /* камера: обліт без підʼїзду, паралакс від миші або поворот від пальця */
     const az = az0 + fS.orbit + mx * 0.14 + yaw, el = el0 + fS.elev + my * 0.07;
     const dist = band ? d0 * (1 + PULL_BACK * fS.pull) : d0;
