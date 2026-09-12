@@ -33,6 +33,11 @@ export const CFG = {
   spin: Math.PI * 2,       // повний оберт фігури за скрол
   orbit: 0.45,             // обліт камери, радіани
   elev: 0.06,
+  /* Перший екран не має бути порожнім до скролу. Щойно фігура зібралась, вона САМА, без скролу,
+     випускає перше речення опису й ледь засвічує поле даних за собою — далі все веде скрол.
+     letters — доки доходить самостійний випуск літер (решта абзацу лежить вище за порогом),
+     wall — яскравість поля даних у спокої, cover — наскільки воно розходиться від фігури. */
+  rest: { dur: 2.0, letters: 0.062, wall: 0.32, cover: 0.32 },
 };
 
 export function clamp01(x) { return x < 0 ? 0 : x > 1 ? 1 : x; }
@@ -65,6 +70,17 @@ export function introFrame(introT, counts, cfg = CFG) {
     drift: fly.map((u) => 1 + I.drift * (1 - smooth(0, 1, u))),
     edges: windows(counts.outer, t, I.links, I.linkLen),
   };
+}
+
+/**
+ * Те, що сцена робить сама, без скролу, — відлік іде від кінця вступу.
+ * Повертає рівні, нижче яких скрол уже нічого не змінює: перше речення опису вилітає з ядра,
+ * поле даних за фігурою тліє. Усе наростає однією повільною хвилею, без жодного спалаху.
+ * @param {number} sinceIntro — секунд від кінця вступу
+ */
+export function introRelease(sinceIntro, cfg = CFG) {
+  const s = smooth(0, 1, clamp01(sinceIntro / cfg.rest.dur));
+  return { letters: cfg.rest.letters * s, wall: cfg.rest.wall * s, cover: cfg.rest.cover * s };
 }
 
 /** Прогрес для модуля фігури: її історія проходить за перші figureSpan скролу. */

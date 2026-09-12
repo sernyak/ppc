@@ -11,21 +11,27 @@
  *
  * Своє тут — те, що довкола: історія фігури стиснута в першу частину скролу,
  * тож невелика прокрутка одразу запускає розкриття; фігура робить повний
- * оберт; формули його систем проєктуються збоку на невидиму площину — вона не
- * має ні кольору, ні країв, видно лише світло написів: вони проступають
- * рядками від фігури і розходяться до країв. Спершу з ядра крізь раму летять
- * вогники — вони випереджають написи, ніби самі й створюють проєкцію, — а
- * написи наздоганяють пізніше й плавно набирають яскравість, щоб устигнути
- * роздивитись, як збирається ґратка; камера облітає фігуру. Розмір фігури не
- * змінюється. На компʼютері hero липкий на час прокрутки; миша дає
- * паралакс, рядки біля курсора яскравішають; на телефоні 30 к/с. Поза екраном
- * цикл спить, при «зменшити рух» — один нерухомий кадр.
+ * оберт, але не змінює розміру.
+ *
+ * ОПИС — ЦЕ ПРОЄКЦІЯ. В усіх розкладках абзац «Мене звати Олександр Серняк…»
+ * не звичайний текст, а ~430 окремих літер, що вилітають з ядра фігури й
+ * сідають на своє місце — рівно туди, де абзац лежить у розмітці (сам <p>
+ * лишається прозорим носієм змісту для пошуку й читалок). Перше речення
+ * фігура віддає САМА, щойно зібралась, — перший екран не порожній до скролу;
+ * решту відпускає скрол, і кожна літера далі летить за власним часом, тож
+ * навіть різкий скрол не проскакує ефект. Рама тексту прибита до кадру, тому
+ * камера може вільно облітати фігуру. За фігурою — поле бізнес-формул на
+ * невидимій площині: воно тліє від початку й розходиться зі скролом, але
+ * лишається глибиною кадру, а не другим текстом; з ядра на нього летять
+ * вогники, ніби вони його й пишуть. На компʼютері hero липкий на час
+ * прокрутки; миша дає паралакс; на телефоні 30 к/с. Поза екраном цикл спить,
+ * при «зменшити рух» — один нерухомий кадр.
  *
  * Для знімків: ?p=0.5 фіксує прогрес скролу, ?intro=1 — вступ, ?still=1 — один кадр.
  */
 import * as THREE from 'three';
 import { getFrame as figureFrame, clamp01 } from './hero-crystal-frame.js';
-import { getFrame as sceneFrame, figureProgress, introFrame } from './hero-vault-frame.js';
+import { getFrame as sceneFrame, figureProgress, introFrame, introRelease } from './hero-vault-frame.js';
 
 const sceneEl = document.getElementById('vault-scene');
 const canvas = document.getElementById('vault-canvas');
@@ -36,11 +42,16 @@ function init() {
   const dbgP = q.has('p') ? clamp01(parseFloat(q.get('p'))) : null;
   const dbgIntro = q.has('intro') ? clamp01(parseFloat(q.get('intro'))) : null;
   const still = q.has('still');
+  const AGE = q.has('age') ? parseFloat(q.get('age')) : 0;     // для знімків: стільки секунд «уже минуло» після вступу
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
   const band = matchMedia('(max-width: 1023px)').matches;      // сцена — смуга між заголовком і абзацом
   const wallMode = sceneEl.dataset.variant === 'wall';         // варіант «Стіна»: фігура збоку проєктує опис на похилу площину
   const lo = matchMedia('(max-width: 767px)').matches || !fine; // телефон/планшет: без сяйва навколо ліній, 30 к/с
+  /* Компʼютер, основний варіант: опис — головний текст екрана, тож він проєктується на своєму місці,
+     рама тексту прибита до кадру (камера облітає — інакше напис поїде за нею), а перше речення
+     фігура випускає сама, щойно зібралась, щоб перший екран не був порожнім до скролу. */
+  const deskLede = !band && !wallMode;
 
   let renderer;
   try {
@@ -164,9 +175,9 @@ function init() {
     uniforms: {
       uAtlas: { value: blankTexture() }, uGrid: { value: blankData() }, uCell: { value: new THREE.Vector2(1, 1) }, uAt: { value: new THREE.Vector2(1, 1) },
       uPlain: { value: blankTexture() }, uUsePlain: { value: band ? 1 : 0 },
-      /* на компʼютері голограма — тло історії, а не текст для читання: тон сіріший і тьмяніший за абзац
-         ліворуч, щоб не було сумніву, що саме читати. На телефоні вона сама і є текстом, тож лишається світлою */
-      uTint: { value: new THREE.Color(band ? 0xbcd3ff : 0x8295b5) }, uOpacity: { value: 1.0 },
+      /* тепер опис — це літери, що вилітають з ядра, і саме їх читають. Поле формул за фігурою лишається
+         глибиною кадру: тон сірий і тьмяний, щоб не було сумніву, що саме текст, а що — атмосфера */
+      uTint: { value: new THREE.Color(band ? 0xbcd3ff : 0x62728d) }, uOpacity: { value: 1.0 },
       uOrigin: { value: wallOrigin }, uRadius: { value: 0 }, uSoft: { value: band ? 0.5 : 2.0 },
       uSpot: { value: new THREE.Vector3(0, -50, 0) }, uSpotR: { value: 3.0 }, uSpotK: { value: fine && !lo ? 0.7 : 0 }, uTime: { value: 0 },
       uEdge: { value: band ? 0.025 : 0.2 },
@@ -245,7 +256,7 @@ function init() {
   });
   const shade = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), shadeMat);
   shade.renderOrder = -2; shade.visible = false;
-  if (band || wallMode) scene.add(shade);
+  scene.add(shade);                 // опис усюди голограма, тож підкладка потрібна в усіх розкладках
   /* Не про мої проєкти, а про економіку того, хто читає: як рахується його прибуток, що коштує
      рутина, наскільки швидше йде заявка. Три голоси: модель · результат · процес. */
   const CORPUS = [
@@ -466,17 +477,21 @@ function init() {
   /* ---------- стан і цикл ---------- */
   let w = 1, h = 1;
   let introMs = -300, last = 0, t = 0, angle = 0.4, frameNo = 0, lastInput = 0;
+  const ZERO = { letters: 0, wall: 0, cover: 0 };
+  let restSec = AGE;                     // секунд від кінця вступу: за ними сцена оживає сама, без скролу
   let pTarget = 0, pSmooth = 0, mx = 0, my = 0, tmx = 0, tmy = 0, yaw = 0, tyaw = 0;
   let visible = false, running = false;
   const spot = new THREE.Vector3(0, -50, 0), tspot = new THREE.Vector3(0, -50, 0);
   const raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2();
   const track = document.getElementById('vault-track');
-  const lede = (band || wallMode) ? document.getElementById('vault-lede') : null;
+  const lede = document.getElementById('vault-lede');
   /* Текст абзацу малюємо голограмою на площині під фігурою — саме його «виводять» зерна.
      Сам абзац лишається в розмітці (пошук і читалки його бачать), але стає прозорим носієм місця,
      а площина стає рівно туди, де він лежить. */
+  /* «зменшити рух» — сцена малює один нерухомий кадр, і літерам просто немає коли долетіти:
+     тоді опис лишається звичайним текстом розмітки, а голограми немає зовсім */
   let ledeTokens = null;
-  if (lede) {
+  if (lede && !reduced) {
     ledeTokens = [];
     (function walk(node, bold) {
       for (const n of node.childNodes) {
@@ -485,6 +500,14 @@ function init() {
       }
     })(lede, false);
     lede.classList.add('vault-lede-holo');
+  }
+  /* Скільки літер на початку опису фігура віддає сама: рівно перше речення — «Мене звати
+     Олександр Серняк, я технічний PPC-маркетолог із 2016 року.» Далі вже веде скрол. */
+  const REST = introRelease(1e9);
+  let autoLetters = 0;
+  if (ledeTokens && deskLede) {
+    let c = 0;
+    for (const tk of ledeTokens) { c += tk.w.length; if (/[.!?]$/.test(tk.w)) { autoLetters = c; break; } }
   }
   /* Атлас літер: кожен знак абзацу в своїй квадратній комірці, звичайним і жирним накресленням.
      Далі кожна літера стає окремою площинкою, що вилітає з ядра фігури й сідає на своє місце в рядку. */
@@ -510,8 +533,8 @@ function init() {
     return { tex, cols, rows, adv, index, space: adv[' 0'] || 0.26 };
   }
   /* Розкладка абзацу по літерах у пікселях CSS — точно так само, як його верстає браузер. */
-  function ledeLayout(atlas, fsCss, boxW) {
-    const out = [], lh = fsCss * 1.42, pad = 0;
+  function ledeLayout(atlas, fsCss, boxW, lhCss) {
+    const out = [], lh = lhCss || fsCss * 1.42, pad = 0;
     let x = pad, y = fsCss * 0.95;
     const widthOf = (word, bold) => { let w = 0; for (const ch of word) w += (atlas.adv[ch + (bold ? '1' : '0')] || 0.3) * fsCss; return w; };
     const sp = atlas.space * fsCss;
@@ -530,33 +553,47 @@ function init() {
   }
   /* поставити площину рівно на місце абзацу і перемалювати текст під її поточний розмір */
   const ledeCorner = new THREE.Vector3(), ndcToWorld = new THREE.Vector3();
+  /* Рама опису: прямокутник абзацу, винесений у світ перед камерою й повернутий до неї. Літери
+     лежать у її власних координатах, тож раму можна переставляти щокадру — текст лишається рівно
+     на місці абзацу, поки камера облітає фігуру. */
+  const ledeFrame = new THREE.Object3D(); scene.add(ledeFrame);
+  let ledeBox = null;                               // {cx, cy, D, tilt, yaw, back} — де в кадрі лежить опис
+  function placeLedeFrame() {
+    if (!ledeBox) return;
+    ndcToWorld.set(ledeBox.cx, ledeBox.cy, 0.5).unproject(camera).sub(camera.position).normalize();
+    ledeFrame.position.copy(camera.position).addScaledVector(ndcToWorld, ledeBox.D);
+    ledeFrame.quaternion.copy(camera.quaternion);
+    ledeFrame.rotateX(-ledeBox.tilt); if (ledeBox.yaw) ledeFrame.rotateY(ledeBox.yaw);
+    ledeFrame.updateMatrixWorld();
+    shade.position.copy(ledeFrame.position).addScaledVector(ndcToWorld, -ledeBox.back);   // трохи ближче до глядача
+    shade.quaternion.copy(ledeFrame.quaternion);
+    if (letterMat) letterMat.uniforms.uFrame.value.copy(ledeFrame.matrixWorld);
+  }
   function fitLede() {
-    if (!lede) return;
+    if (!lede || !ledeTokens) return;
     if (wallMode) return fitWallLede();
     const r = lede.getBoundingClientRect(), b = sceneEl.getBoundingClientRect();
     if (!r.width || !b.width) return;
     /* Голограма стоїть обличчям до камери й лягає рівно на прямокутник абзацу. Вертикальна площина
        при погляді згори проєктувалась би трапецією — нижні рядки розповзались за краї екрана. */
-    const cx = ((r.left + r.width / 2 - b.left) / b.width) * 2 - 1;
-    const cy = -(((r.top + r.height / 2 - b.top) / b.height) * 2 - 1);
-    ndcToWorld.set(cx, cy, 0.5).unproject(camera).sub(camera.position).normalize();
     const D = 6.2, TILT = 0.13;                     // легкий нахил лишає відчуття обʼєму, майже без спотворення
-    wall.position.copy(camera.position).addScaledVector(ndcToWorld, D);
-    wall.quaternion.copy(camera.quaternion); wall.rotateX(-TILT);
     const vh = 2 * D * Math.tan(camera.fov * Math.PI / 360);
     const ww = vh * camera.aspect * (r.width / b.width), hh = vh * (r.height / b.height) / Math.cos(TILT);
     if (ww < 0.05 || hh < 0.05) return;
-    WW = ww;
-    wall.geometry.dispose();
-    wall.geometry = new THREE.PlaneGeometry(ww, hh);
-    wall.updateMatrixWorld();
+    ledeBox = {
+      cx: ((r.left + r.width / 2 - b.left) / b.width) * 2 - 1,
+      cy: -(((r.top + r.height / 2 - b.top) / b.height) * 2 - 1),
+      D, tilt: TILT, back: 0.12,
+    };
+    placeLedeFrame();
     shade.geometry.dispose();
     shade.geometry = new THREE.PlaneGeometry(ww * 1.22, hh * 1.3);
-    shade.position.copy(wall.position).addScaledVector(ndcToWorld, -0.12);   // трохи ближче до глядача
-    shade.quaternion.copy(wall.quaternion);
-    const fsCss = parseFloat(getComputedStyle(lede).fontSize) || 18;
-    placeLetters(ww, hh, fsCss, r.width, r.height);
-    const onPlane = (u, v, out) => wall.localToWorld(out.set(u * ww / 2, v * hh / 2, 0));
+    const cs = getComputedStyle(lede), fsCss = parseFloat(cs.fontSize) || 18;
+    /* на компʼютері голограма заступає сам абзац, тож і міжрядковий беремо його — рядки лягають
+       точно туди, де їх верстає браузер, і блок тексту тримає свою висоту в композиції */
+    placeLetters(ww, hh, fsCss, r.width, r.height, deskLede ? parseFloat(cs.lineHeight) || 0 : 0);
+    if (deskLede) return;                           // на компʼютері хвилю й зерна веде стіна даних збоку
+    const onPlane = (u, v, out) => ledeFrame.localToWorld(out.set(u * ww / 2, v * hh / 2, 0));
     onPlane(0, 1.12, wallOrigin);                   // хвиля світла заходить згори, з боку фігури
     wallCorners.length = 0;
     for (const sx of [-1, 1]) for (const sy of [-1, 1]) wallCorners.push(onPlane(sx, sy, new THREE.Vector3()));
@@ -571,7 +608,7 @@ function init() {
      Порядок прильоту — зліва направо, рядок за рядком, тож слова складаються на очах. */
   let letterAtl = null, letters = null, letterMat = null, letterOrder = null, letterLaunch = null;
   function buildLetters() {
-    if (!lede || letters) return;
+    if (!ledeTokens || letters) return;
     letterAtl = letterAtlas();
     const geo = new THREE.InstancedBufferGeometry();
     const quad = new THREE.PlaneGeometry(1, 1);          // не «q» — так звався б обʼєкт параметрів URL
@@ -579,16 +616,20 @@ function init() {
     letterMat = new THREE.ShaderMaterial({
       uniforms: {
         uAtlas: { value: letterAtl.tex }, uGrid: { value: new THREE.Vector2(letterAtl.cols, letterAtl.rows) },
-        uOrigin: { value: new THREE.Vector3() }, uRight: { value: new THREE.Vector3(1, 0, 0) }, uUp: { value: new THREE.Vector3(0, 1, 0) },
-        uTint: { value: new THREE.Color(0xcfe0ff) }, uTime: { value: 0 }, uOpacity: { value: 0 }, uAge: { value: q.has('age') ? parseFloat(q.get('age')) : 0 },
+        uOrigin: { value: new THREE.Vector3() }, uFrame: { value: new THREE.Matrix4() },
+        uTint: { value: new THREE.Color(0xcfe0ff) }, uTime: { value: 0 }, uOpacity: { value: 0 }, uAge: { value: AGE },
       },
+      /* aTo — місце літери у власних координатах рами опису, а не у світі: раму можна переставляти
+         щокадру за камерою, і текст лишається рівно там, де в розмітці лежить абзац */
       vertexShader: `attribute vec3 aTo; attribute vec2 aGlyph; attribute float aSize; attribute float aLaunch; attribute float aSeed; attribute float aRow;
-        uniform vec3 uOrigin; uniform vec3 uRight; uniform vec3 uUp; uniform vec2 uGrid; uniform float uTime; uniform float uAge;
+        uniform vec3 uOrigin; uniform mat4 uFrame; uniform vec2 uGrid; uniform float uTime; uniform float uAge;
         varying vec2 vUv; varying float vFly; varying float vRow; varying float vSeed;
         void main(){
           /* Скрол лише ВИПУСКАЄ літеру; далі вона летить за власним часом, тож навіть при блискавичному
              скролі видно, як знаки складаються в текст. Затримка і тривалість — у кожної свої. */
           if (aLaunch < 0.0) { vFly = 0.0; gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
+          vec3 uRight = uFrame[0].xyz, uUp = uFrame[1].xyz;
+          vec3 aToW = (uFrame * vec4(aTo, 1.0)).xyz;
           float delay = fract(aSeed * 3.7) * 0.85;
           float dur = 1.05 + fract(aSeed * 11.0) * 0.75;
           float t = clamp((uTime + uAge - aLaunch - delay) / dur, 0.0, 1.0);   // uAge — лише для знімків: стільки секунд «уже минуло»
@@ -596,10 +637,10 @@ function init() {
           vFly = e; vRow = aRow; vSeed = aSeed;
           vec3 from = uOrigin + vec3(sin(aSeed * 51.0), cos(aSeed * 37.0), sin(aSeed * 23.0)) * 0.14;
           /* дуга через власну контрольну точку збоку — літери розлітаються врозтіч і сходяться на місця */
-          vec3 ctrl = mix(from, aTo, 0.45)
+          vec3 ctrl = mix(from, aToW, 0.45)
                     + uRight * (sin(aSeed * 61.0) * 1.15)
                     + uUp * (0.25 + fract(aSeed * 17.0) * 0.7);
-          vec3 mid = mix(mix(from, ctrl, e), mix(ctrl, aTo, e), e);
+          vec3 mid = mix(mix(from, ctrl, e), mix(ctrl, aToW, e), e);
           /* сідає з коротким загасаючим коливанням — відчутний «клац» на місце */
           float st = clamp((t - 0.72) / 0.28, 0.0, 1.0);
           mid += (uRight * sin(aSeed * 91.0) + uUp * cos(aSeed * 73.0)) * sin(st * 12.0) * (1.0 - st) * (1.0 - st) * 0.035;
@@ -633,24 +674,25 @@ function init() {
     scene.add(letters);
   }
   /* розкласти літери по площині абзацу і роздати їм цілі */
-  function placeLetters(ww, hh, fsCss, rw, rh) {
+  function placeLetters(ww, hh, fsCss, rw, rh, lhCss) {
     buildLetters();
     if (!letters) return;
-    const lay = ledeLayout(letterAtl, fsCss, rw);
+    const lay = ledeLayout(letterAtl, fsCss, rw, lhCss);
     const n = lay.letters.length, scale = ww / rw;
     const to = new Float32Array(n * 3), gl = new Float32Array(n * 2), sz = new Float32Array(n), or = new Float32Array(n), sd = new Float32Array(n), rowv = new Float32Array(n);
     letterOrder = or; letterLaunch = new Float32Array(n).fill(-1);
-    const v = new THREE.Vector3();
     lay.letters.forEach((L, i) => {
-      wall.localToWorld(v.set((L.cx - rw / 2) * scale, (rh / 2 - L.cy) * scale, 0.004));
-      to[i * 3] = v.x; to[i * 3 + 1] = v.y; to[i * 3 + 2] = v.z;
+      to[i * 3] = (L.cx - rw / 2) * scale; to[i * 3 + 1] = (rh / 2 - L.cy) * scale; to[i * 3 + 2] = 0.004;
       const gi = letterAtl.index[L.k];
       gl[i * 2] = gi % letterAtl.cols; gl[i * 2 + 1] = Math.floor(gi / letterAtl.cols);
       sz[i] = (LCELL / LFS) * fsCss * scale;
-      /* порядок переважно зліва направо, але перемішаний: сусідні літери летять урозтіч, а не ланцюжком */
-      /* найпізніший старт + найдовший політ мусять укластися до кінця: 0,46 + 0,48 < 1, інакше частина
-         літер так і не сяде на місце */
-      or[i] = 0.07 + Math.min(0.83, (i / n) * 0.45 + rnd2() * 0.4);   // скрол відпускає літери приблизно зліва направо
+      /* Перше речення («Мене звати…») фігура випускає сама, щойно зібралась: його літери лежать нижче
+         рівня спокою rest.letters, тож вилітають без скролу — перший екран одразу представляє власника.
+         Решта абзацу починається вище за цей рівень, її відпускає вже скрол: переважно зліва направо,
+         але перемішано, щоб сусідні літери летіли врозтіч, а не ланцюжком. */
+      or[i] = !autoLetters ? 0.07 + Math.min(0.83, (i / n) * 0.45 + rnd2() * 0.4)
+        : i < autoLetters ? (i / autoLetters) * REST.letters * 0.88
+          : 0.1 + Math.min(0.8, ((i - autoLetters) / Math.max(1, n - autoLetters)) * 0.45 + rnd2() * 0.4);
       sd[i] = rnd2();   // власний характер польоту кожної літери
       rowv[i] = L.cy / rh;
     });
@@ -662,8 +704,7 @@ function init() {
     g.setAttribute('aSeed', new THREE.InstancedBufferAttribute(sd, 1));
     g.setAttribute('aRow', new THREE.InstancedBufferAttribute(rowv, 1));
     g.instanceCount = n;
-    letterMat.uniforms.uRight.value.set(1, 0, 0).applyQuaternion(wall.quaternion);
-    letterMat.uniforms.uUp.value.set(0, 1, 0).applyQuaternion(wall.quaternion);
+    letterMat.uniforms.uFrame.value.copy(ledeFrame.matrixWorld);
   }
   /* Варіант «Стіна»: площина стоїть праворуч від фігури й похило до глядача, опис лягає на неї.
      Розмір беремо з кадру, щоб вона заповнювала вільну половину екрана, а не тікала за край. */
@@ -672,24 +713,20 @@ function init() {
     if (!b.width) return;
     const D = band ? 6.4 : 8.6, TILT = band ? 0.1 : 0.08;
     const cx = band ? 0.18 : 0.5, cy = band ? 0.2 : -0.04;     // центр площини в кадрі
-    ndcToWorld.set(cx, cy, 0.5).unproject(camera).sub(camera.position).normalize();
-    wall.position.copy(camera.position).addScaledVector(ndcToWorld, D);
-    wall.quaternion.copy(camera.quaternion);
-    wall.rotateX(-TILT); wall.rotateY(band ? 0.22 : 0.24);      // легкий розворот до фігури, щоб рядки не злипались
+    /* тут площина ставиться раз: на неї ж націлені зерна, тож рухати її за камерою не можна —
+       розійшлися б із текстом. Розворот до фігури — щоб рядки не злипались. */
+    ledeBox = { cx, cy, D, tilt: TILT, yaw: band ? 0.22 : 0.24, back: 0.1 };
+    placeLedeFrame();
     const vh = 2 * D * Math.tan(camera.fov * Math.PI / 360);
     const ww = vh * camera.aspect * (band ? 0.86 : 0.5), hh = vh * (band ? 0.44 : 0.5);
-    wall.geometry.dispose();
-    wall.geometry = new THREE.PlaneGeometry(ww, hh);
-    wall.updateMatrixWorld();
-    WW = ww;
     shade.geometry.dispose();
     shade.geometry = new THREE.PlaneGeometry(ww * 1.16, hh * 1.24);
-    shade.position.copy(wall.position).addScaledVector(ndcToWorld, -0.1);
-    shade.quaternion.copy(wall.quaternion);
+    shade.position.copy(ledeFrame.position).addScaledVector(ndcToWorld, -0.1);
+    shade.quaternion.copy(ledeFrame.quaternion);
     /* кегль підбираємо так, щоб опис уклався в площину: ширина рядка в умовних «пікселях» = 640 */
     const boxW = band ? 640 : 560, fsCss = boxW * (band ? 0.034 : 0.042);   // кегль такий, щоб опис читався і вкладався в площину
     placeLetters(ww, hh, fsCss, boxW, boxW * hh / ww);
-    const onPlane = (u, v, out) => wall.localToWorld(out.set(u * ww / 2, v * hh / 2, 0));
+    const onPlane = (u, v, out) => ledeFrame.localToWorld(out.set(u * ww / 2, v * hh / 2, 0));
     onPlane(-0.9, 1.1, wallOrigin);
     wallCorners.length = 0;
     for (const sx of [-1, 1]) for (const sy of [-1, 1]) wallCorners.push(onPlane(sx, sy, new THREE.Vector3()));
@@ -774,23 +811,34 @@ function init() {
       figRay.origin.copy(camera.position); figRay.direction.copy(outer.position).sub(camera.position).normalize();
       if (!figRay.intersectPlane(wallPlane, wallOrigin)) wallOrigin.copy(wallC);
     }
+    /* рівень спокою: те, що сцена робить сама після вступу, без жодного скролу */
+    const rest = deskLede ? introRelease(restSec) : ZERO;
+    const release = Math.max(fS.fade, rest.letters);      // доки випущено літери опису
     let far = 0;
     for (const c of wallCorners) far = Math.max(far, c.distanceTo(wallOrigin));
-    wallMat.uniforms.uRadius.value = fS.coverage * far;
-    wallMat.uniforms.uOpacity.value = fS.fade;
+    wallMat.uniforms.uRadius.value = Math.max(fS.coverage, rest.cover) * far;
+    /* поле даних за фігурою — атмосфера, а не текст для читання: воно тліє від самого початку,
+       але навіть у повній силі лишається помітно тьмянішим за опис, який людина читає */
+    wallMat.uniforms.uOpacity.value = Math.max(fS.fade, rest.wall) * (deskLede ? 0.5 : 1);
     wallMat.uniforms.uTime.value = tt; wallMat.uniforms.uSpot.value.copy(spot);
-    wall.visible = !band && !wallMode && fS.fade > 0.002;
-    shade.visible = (band || wallMode) && fS.fade > 0.002; shadeMat.uniforms.uOp.value = fS.fade * 0.62;
+    wall.visible = !band && !wallMode && wallMat.uniforms.uOpacity.value > 0.002;
+    if (deskLede) placeLedeFrame();                       // камера облітає — рама тексту лишається на місці абзацу
+    /* темна підкладка потрібна там, де голограма лежить поверх самої сцени (телефон і «Стіна»);
+       на компʼютері текст лежить на порожньому тлі сторінки, і підкладка читалась би як прямокутник */
+    shade.visible = !deskLede && !!ledeTokens && release > 0.002;
+    shadeMat.uniforms.uOp.value = Math.max(fS.fade, rest.cover) * 0.62;
     if (letters) {
-      letters.visible = fS.fade > 0.002;
-      letterMat.uniforms.uOpacity.value = 1;
+      letters.visible = release > 0.002;
+      /* на компʼютері опис читають довше й з близької відстані — трохи спокійніша яскравість,
+         щоб голограма не «жирніла» на тонкому накресленні Inter */
+      letterMat.uniforms.uOpacity.value = deskLede ? 0.86 : 1;
       letterMat.uniforms.uTime.value = tt;
       letterMat.uniforms.uOrigin.value.copy(outer.position);
       /* скрол лише відкриває «ворота»: щойно він дійшов до порога літери, та вилітає і далі живе своїм часом */
       let touched = false;
       for (let i = 0; i < letterOrder.length; i++) {
-        if (letterLaunch[i] < 0 && fS.fade >= letterOrder[i]) { letterLaunch[i] = tt; touched = true; }
-        else if (letterLaunch[i] >= 0 && fS.fade < letterOrder[i] - 0.03) { letterLaunch[i] = -1; touched = true; }
+        if (letterLaunch[i] < 0 && release >= letterOrder[i]) { letterLaunch[i] = tt; touched = true; }
+        else if (letterLaunch[i] >= 0 && release < letterOrder[i] - 0.03) { letterLaunch[i] = -1; touched = true; }
       }
       if (touched) letters.geometry.attributes.aLaunch.needsUpdate = true;
     }
@@ -823,6 +871,7 @@ function init() {
     t += dt / 1000; frameNo++;
     if (dbgIntro == null) introMs += dt;
     const introT = dbgIntro != null ? dbgIntro : clamp01(introMs / 2400);
+    restSec = introT >= 1 ? restSec + dt / 1000 : AGE;
     pTarget = progress();
     pSmooth += (pTarget - pSmooth) * 0.16;
     mx += (tmx - mx) * 0.08; my += (tmy - my) * 0.08; yaw += (tyaw - yaw) * 0.1;

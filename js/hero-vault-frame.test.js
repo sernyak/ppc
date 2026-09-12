@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { getFrame, figureProgress, introFrame, CFG, clamp01, smooth } from './hero-vault-frame.js';
+import { getFrame, figureProgress, introFrame, introRelease, CFG, clamp01, smooth } from './hero-vault-frame.js';
 
 const near = (a, b, m) => assert.ok(Math.abs(a - b) < 1e-9, `${m}: ${a} ≠ ${b}`);
 
@@ -89,6 +89,28 @@ test('поява: «вдих» вузлів — один мʼякий горб, 
   const peak = Math.max(...Array.from({ length: 301 }, (_, i) => introFrame(i / 300, counts).joints[0]));
   assert.ok(peak > 1 && peak <= 1 + CFG.intro.bump + 1e-9, `пік ${peak} — вдих помітний, але не стрибок`);
   assert.ok(ups < 200, 'яскравих коливань немає: одне наростання і один спад');
+});
+
+test('сцена оживає сама: перший екран не порожній ще до скролу', () => {
+  const at0 = introRelease(0);
+  assert.equal(at0.letters, 0); assert.equal(at0.wall, 0); assert.equal(at0.cover, 0);
+  const mid = introRelease(CFG.rest.dur / 2);
+  assert.ok(mid.letters > 0 && mid.wall > 0, 'через секунду після вступу вже щось є');
+  const end = introRelease(CFG.rest.dur * 3);
+  assert.ok(Math.abs(end.letters - CFG.rest.letters) < 1e-9 && Math.abs(end.wall - CFG.rest.wall) < 1e-9, 'і зупиняється на рівні спокою');
+});
+
+test('самостійний випуск не зʼїдає скрол: решта абзацу лишається йому', () => {
+  assert.ok(CFG.rest.letters < 0.1, 'сама вилітає лише перша частина опису');
+  assert.ok(CFG.rest.wall < 0.5 && CFG.rest.cover < 0.6, 'поле даних у спокої лише тліє');
+  let prev = -1, maxStep = 0;
+  for (let i = 0; i <= 300; i++) {
+    const v = introRelease(CFG.rest.dur * i / 300).wall;
+    if (prev >= 0) maxStep = Math.max(maxStep, v - prev);
+    assert.ok(v >= prev, 'наростає монотонно');
+    prev = v;
+  }
+  assert.ok(maxStep < 0.01, `крок ${maxStep} — одна повільна хвиля, нічого не спалахує`);
 });
 
 test('телефон: фігура відходить і звільняє місце ще до появи написів', () => {
