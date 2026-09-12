@@ -506,14 +506,23 @@ function init() {
         uniform vec3 uOrigin; uniform vec3 uRight; uniform vec3 uUp; uniform float uProgress; uniform vec2 uGrid; uniform float uTime;
         varying vec2 vUv; varying float vFly;
         void main(){
-          float t = clamp((uProgress - aOrder) / 0.14, 0.0, 1.0);
+          /* Кожна літера має власний момент вильоту і власну тривалість — текст не проступає рівним
+             фронтом, а кристалізується з хмари знаків, що ширяють у повітрі. */
+          float span = 0.18 + fract(aSeed * 7.3) * 0.3;
+          float t = clamp((uProgress - aOrder) / span, 0.0, 1.0);
           float e = t * t * (3.0 - 2.0 * t);
           vFly = e;
-          /* старт — не точка, а невеликий розкид усередині ядра, щоб літери не злипались в одну цятку */
-          vec3 from = uOrigin + vec3(sin(aSeed * 51.0), cos(aSeed * 37.0), sin(aSeed * 23.0)) * 0.12;
-          vec3 mid = mix(from, aTo, e) + uUp * sin(e * 3.1416) * (0.18 + 0.2 * fract(aSeed * 13.0));
-          float sz = aSize * mix(0.45, 1.0, e);
-          float sp = sin(aSeed * 29.0) * (1.0 - e) * 1.6;          // у польоті знак ледь крутиться
+          vec3 from = uOrigin + vec3(sin(aSeed * 51.0), cos(aSeed * 37.0), sin(aSeed * 23.0)) * 0.14;
+          /* дуга через власну контрольну точку збоку — літери розлітаються врозтіч і сходяться на місця */
+          vec3 ctrl = mix(from, aTo, 0.45)
+                    + uRight * (sin(aSeed * 61.0) * 1.15)
+                    + uUp * (0.25 + fract(aSeed * 17.0) * 0.7);
+          vec3 mid = mix(mix(from, ctrl, e), mix(ctrl, aTo, e), e);
+          /* сідає з коротким загасаючим коливанням — відчутний «клац» на місце */
+          float st = clamp((t - 0.72) / 0.28, 0.0, 1.0);
+          mid += (uRight * sin(aSeed * 91.0) + uUp * cos(aSeed * 73.0)) * sin(st * 12.0) * (1.0 - st) * (1.0 - st) * 0.035;
+          float sz = aSize * mix(0.42, 1.0, e);
+          float sp = sin(aSeed * 29.0) * (1.0 - e) * 3.4;          // у польоті знак крутиться помітніше
           vec2 rp = vec2(position.x * cos(sp) - position.y * sin(sp), position.x * sin(sp) + position.y * cos(sp));
           vec3 w = mid + uRight * (rp.x * sz) + uUp * (rp.y * sz);
           vUv = (aGlyph + vec2(uv.x, 1.0 - uv.y)) / uGrid;   // атлас без flipY, а uv квада рахується знизу
@@ -553,8 +562,11 @@ function init() {
       const gi = letterAtl.index[L.k];
       gl[i * 2] = gi % letterAtl.cols; gl[i * 2 + 1] = Math.floor(gi / letterAtl.cols);
       sz[i] = (LCELL / LFS) * fsCss * scale;
-      or[i] = (i / n) * 0.82;                                       // останні літери сідають ближче до кінця скролу
-      sd[i] = rnd2();
+      /* порядок переважно зліва направо, але перемішаний: сусідні літери летять урозтіч, а не ланцюжком */
+      /* найпізніший старт + найдовший політ мусять укластися до кінця: 0,46 + 0,48 < 1, інакше частина
+         літер так і не сяде на місце */
+      or[i] = Math.min(0.46, (i / n) * 0.24 + rnd2() * 0.3);
+      sd[i] = rnd2();   // власний характер польоту кожної літери
     });
     const g = letters.geometry;
     g.setAttribute('aTo', new THREE.InstancedBufferAttribute(to, 3));
