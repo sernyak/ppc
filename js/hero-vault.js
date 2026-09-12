@@ -58,13 +58,13 @@ function init() {
   /* фігура — як на /preview/3d/, лише в півтора раза менша (прохання власника) */
   const R = band ? 0.61 : 0.97;
   const cPos = wallMode
-    ? (band ? new THREE.Vector3(-0.8, R + 0.2, 0.4) : new THREE.Vector3(-1.1, R + 0.55, 0.8))
+    ? (band ? new THREE.Vector3(-0.45, R + 0.35, 0.3) : new THREE.Vector3(-2.3, R + 0.35, 0.6))
     : (band ? new THREE.Vector3(0, R + 0.3, 0) : new THREE.Vector3(5.0, R + 0.7, 0.6));
   const cam0 = wallMode
-    ? (band ? new THREE.Vector3(0.5, cPos.y + 0.9, 6.6) : new THREE.Vector3(0.2, cPos.y + 1.1, 8.4))
+    ? (band ? new THREE.Vector3(0.35, cPos.y + 0.15, 6.9) : new THREE.Vector3(0.4, cPos.y + 0.1, 9.2))
     : (band ? new THREE.Vector3(0, cPos.y, 7.0) : new THREE.Vector3(0.3, cPos.y + 0.2, 8.8));
   const target = wallMode
-    ? (band ? new THREE.Vector3(0.75, cPos.y + 1.25, 0) : new THREE.Vector3(1.7, cPos.y + 1.35, 0))
+    ? (band ? new THREE.Vector3(0.6, cPos.y - 0.1, 0) : new THREE.Vector3(1.55, cPos.y - 0.05, 0))
     : (band ? new THREE.Vector3(0, cPos.y - 0.72, 0) : new THREE.Vector3(3.1, cPos.y + 0.6, 0));   // дивимось нижче фігури — вона стає під заголовком, а знизу лишається місце під текст
   /* телефон: зі скролом камера відходить і веде погляд правіше — фігура меншає і йде ліворуч, даючи місце стіні */
   const PULL_BACK = 0, PULL_SIDE = 0, RISE = wallMode ? 0 : 0.42, SHRINK = wallMode ? 0 : 0.34;   // телефон: фігура сама підіймається до заголовка й меншає
@@ -393,7 +393,7 @@ function init() {
 
   /* Далекий пил: кілька сотень ледь помітних цяток у глибині навколо фігури. Вони нічого не «роблять»,
      але дають простору глибину — без них перші секунди виглядають пласко. */
-  const DUST = lo ? 260 : 420;
+  const DUST = lo ? 420 : 700;
   const dPos = new Float32Array(DUST * 3), dSeed = new Float32Array(DUST);
   for (let i = 0; i < DUST; i++) {
     const a = rnd() * Math.PI * 2, rr = 2.2 + rnd() * 7.5, yy = (rnd() - 0.5) * 7;
@@ -423,6 +423,45 @@ function init() {
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, premultipliedAlpha: true,
   });
   const dust = new THREE.Points(dGeo, dustMat); dust.renderOrder = -3; scene.add(dust);
+
+  /* Туманності: кілька великих мʼяких плям світла далеко за фігурою. Саме вони дають глибину —
+     дрібні цятки самі по собі читаються як шум на пласкому тлі. */
+  const NEB = lo ? 7 : 11;
+  const nPos = new Float32Array(NEB * 3), nSeed = new Float32Array(NEB), nSize = new Float32Array(NEB);
+  for (let i = 0; i < NEB; i++) {
+    const a = rnd() * Math.PI * 2, rr = 3 + rnd() * 9;
+    nPos[i * 3] = cPos.x + Math.cos(a) * rr;
+    nPos[i * 3 + 1] = cPos.y + (rnd() - 0.5) * 8;
+    nPos[i * 3 + 2] = cPos.z - 4 - rnd() * 9;
+    nSeed[i] = rnd(); nSize[i] = 5 + rnd() * 9;
+  }
+  const nGeo = new THREE.BufferGeometry();
+  nGeo.setAttribute('position', new THREE.BufferAttribute(nPos, 3));
+  nGeo.setAttribute('aSeed', new THREE.Float32BufferAttribute(nSeed, 1));
+  nGeo.setAttribute('aSize', new THREE.Float32BufferAttribute(nSize, 1));
+  nGeo.boundingSphere = new THREE.Sphere(cPos.clone(), 60);
+  const nebMat = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uPR: { value: renderer.getPixelRatio() }, uA: { value: new THREE.Color(0x2b3f78) }, uB: { value: new THREE.Color(0x3a2c6b) } },
+    vertexShader: `attribute float aSeed; attribute float aSize; uniform float uTime; uniform float uPR; varying float vK;
+      void main(){
+        vec3 p = position + vec3(sin(uTime * 0.03 + aSeed * 21.0), cos(uTime * 0.024 + aSeed * 13.0), 0.0) * 0.9;
+        vK = aSeed;
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        gl_PointSize = uPR * aSize * (60.0 / -mv.z);
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: `uniform vec3 uA; uniform vec3 uB; uniform float uTime; varying float vK;
+      void main(){
+        float d = length(gl_PointCoord - 0.5);
+        float a = smoothstep(0.5, 0.0, d);
+        a *= a * (0.05 + 0.035 * sin(uTime * 0.25 + vK * 9.0));
+        gl_FragColor = vec4(mix(uA, uB, vK) * a, 1.0);
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
+        gl_FragColor.a = max(gl_FragColor.r, max(gl_FragColor.g, gl_FragColor.b)); }`,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, premultipliedAlpha: true,
+  });
+  const nebula = new THREE.Points(nGeo, nebMat); nebula.renderOrder = -4; scene.add(nebula);
 
   /* ---------- стан і цикл ---------- */
   let w = 1, h = 1;
@@ -611,7 +650,7 @@ function init() {
       /* порядок переважно зліва направо, але перемішаний: сусідні літери летять урозтіч, а не ланцюжком */
       /* найпізніший старт + найдовший політ мусять укластися до кінця: 0,46 + 0,48 < 1, інакше частина
          літер так і не сяде на місце */
-      or[i] = Math.min(0.9, (i / n) * 0.45 + rnd2() * 0.42);      // скрол відпускає літери приблизно зліва направо
+      or[i] = 0.07 + Math.min(0.83, (i / n) * 0.45 + rnd2() * 0.4);   // скрол відпускає літери приблизно зліва направо
       sd[i] = rnd2();   // власний характер польоту кожної літери
       rowv[i] = L.cy / rh;
     });
@@ -631,14 +670,14 @@ function init() {
   function fitWallLede() {
     const b = sceneEl.getBoundingClientRect();
     if (!b.width) return;
-    const D = band ? 6.4 : 8.0, TILT = band ? 0.1 : 0.12;
-    const cx = band ? 0.18 : 0.44, cy = band ? 0.16 : -0.1;     // центр площини в кадрі
+    const D = band ? 6.6 : 8.6, TILT = band ? 0.06 : 0.08;
+    const cx = band ? 0.12 : 0.5, cy = band ? 0.26 : -0.04;     // центр площини в кадрі
     ndcToWorld.set(cx, cy, 0.5).unproject(camera).sub(camera.position).normalize();
     wall.position.copy(camera.position).addScaledVector(ndcToWorld, D);
     wall.quaternion.copy(camera.quaternion);
-    wall.rotateX(-TILT); wall.rotateY(band ? 0.22 : 0.34);      // розворот до фігури — площина «дивиться» на неї
+    wall.rotateX(-TILT); wall.rotateY(band ? 0.16 : 0.24);      // легкий розворот до фігури, щоб рядки не злипались
     const vh = 2 * D * Math.tan(camera.fov * Math.PI / 360);
-    const ww = vh * camera.aspect * (band ? 0.86 : 0.56), hh = vh * (band ? 0.44 : 0.62);
+    const ww = vh * camera.aspect * (band ? 0.8 : 0.5), hh = vh * (band ? 0.34 : 0.5);
     wall.geometry.dispose();
     wall.geometry = new THREE.PlaneGeometry(ww, hh);
     wall.updateMatrixWorld();
@@ -648,7 +687,7 @@ function init() {
     shade.position.copy(wall.position).addScaledVector(ndcToWorld, -0.1);
     shade.quaternion.copy(wall.quaternion);
     /* кегль підбираємо так, щоб опис уклався в площину: ширина рядка в умовних «пікселях» = 640 */
-    const boxW = 640, fsCss = boxW * (band ? 0.034 : 0.030);
+    const boxW = 560, fsCss = boxW * (band ? 0.034 : 0.042);   // кегль такий, щоб опис читався і вкладався в площину
     placeLetters(ww, hh, fsCss, boxW, boxW * hh / ww);
     const onPlane = (u, v, out) => wall.localToWorld(out.set(u * ww / 2, v * hh / 2, 0));
     onPlane(-0.9, 1.1, wallOrigin);
@@ -676,7 +715,7 @@ function init() {
   function progress() {
     if (dbgP != null) return dbgP;
     /* компʼютер: hero липкий на час прокрутки доріжки; телефон: історію веде положення сторінки */
-    const span = !band && track ? Math.max(1, track.offsetHeight - window.innerHeight) : window.innerHeight * 0.5;
+    const span = !band && track ? Math.max(1, track.offsetHeight - window.innerHeight) : window.innerHeight * 1.15;
     return clamp01(window.scrollY / span);
   }
   /* поставити брус між a і b, намальований на частку d від a; орієнтація як у beam() */
@@ -755,7 +794,7 @@ function init() {
       }
       if (touched) letters.geometry.attributes.aLaunch.needsUpdate = true;
     }
-    dustMat.uniforms.uTime.value = tt;
+    dustMat.uniforms.uTime.value = tt; nebMat.uniforms.uTime.value = tt;
     grainMat.uniforms.uTime.value = tt; grainMat.uniforms.uSpread.value = fS.grains;
     grainMat.uniforms.uReach.value = fS.grains * far; grains.visible = fS.grains > 0.001;
   }
