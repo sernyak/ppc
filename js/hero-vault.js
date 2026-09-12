@@ -58,7 +58,7 @@ function init() {
   const R = band ? 0.61 : 0.97;
   const cPos = band ? new THREE.Vector3(0, R + 0.3, 0) : new THREE.Vector3(5.0, R + 0.7, 0.6);
   const cam0 = band ? new THREE.Vector3(0, cPos.y, 7.0) : new THREE.Vector3(0.3, cPos.y + 0.2, 8.8);
-  const target = band ? new THREE.Vector3(0, cPos.y - 0.62, 0) : new THREE.Vector3(3.1, cPos.y, 0);   // дивимось нижче фігури — вона стає під заголовком, а знизу лишається місце під текст
+  const target = band ? new THREE.Vector3(0, cPos.y - 0.86, 0) : new THREE.Vector3(3.1, cPos.y + 0.6, 0);   // дивимось нижче фігури — вона стає під заголовком, а знизу лишається місце під текст
   /* телефон: зі скролом камера відходить і веде погляд правіше — фігура меншає і йде ліворуч, даючи місце стіні */
   const PULL_BACK = 0, PULL_SIDE = 0, RISE = 0.42, SHRINK = 0.34;   // телефон: фігура сама підіймається до заголовка й меншає
   const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), tmpC = new THREE.Vector3(), tmpD = new THREE.Vector3();
@@ -384,6 +384,39 @@ function init() {
   });
   const grains = new THREE.Points(gGeo, grainMat); grains.visible = false; scene.add(grains);
 
+  /* Далекий пил: кілька сотень ледь помітних цяток у глибині навколо фігури. Вони нічого не «роблять»,
+     але дають простору глибину — без них перші секунди виглядають пласко. */
+  const DUST = lo ? 260 : 420;
+  const dPos = new Float32Array(DUST * 3), dSeed = new Float32Array(DUST);
+  for (let i = 0; i < DUST; i++) {
+    const a = rnd() * Math.PI * 2, rr = 2.2 + rnd() * 7.5, yy = (rnd() - 0.5) * 7;
+    dPos[i * 3] = cPos.x + Math.cos(a) * rr; dPos[i * 3 + 1] = cPos.y + yy; dPos[i * 3 + 2] = cPos.z + Math.sin(a) * rr * 0.7 - 1.5;
+    dSeed[i] = rnd();
+  }
+  const dGeo = new THREE.BufferGeometry();
+  dGeo.setAttribute('position', new THREE.BufferAttribute(dPos, 3));
+  dGeo.setAttribute('aSeed', new THREE.Float32BufferAttribute(dSeed, 1));
+  dGeo.boundingSphere = new THREE.Sphere(cPos.clone(), 40);
+  const dustMat = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uPR: { value: renderer.getPixelRatio() }, uTint: { value: new THREE.Color(0x7d9ad6) } },
+    vertexShader: `attribute float aSeed; uniform float uTime; uniform float uPR; varying float vA;
+      void main(){
+        vec3 p = position + vec3(sin(uTime * 0.07 + aSeed * 31.0), cos(uTime * 0.05 + aSeed * 17.0), 0.0) * 0.35;
+        vA = 0.18 + 0.42 * fract(aSeed * 13.0);
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        gl_PointSize = max(1.0, uPR * (1.1 + fract(aSeed * 7.0) * 1.4) * (7.0 / -mv.z));
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: `uniform vec3 uTint; varying float vA;
+      void main(){ float d = length(gl_PointCoord - 0.5); float a = smoothstep(0.5, 0.05, d) * vA;
+        gl_FragColor = vec4(uTint * a, 1.0);
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
+        gl_FragColor.a = max(gl_FragColor.r, max(gl_FragColor.g, gl_FragColor.b)); }`,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, premultipliedAlpha: true,
+  });
+  const dust = new THREE.Points(dGeo, dustMat); dust.renderOrder = -3; scene.add(dust);
+
   /* ---------- стан і цикл ---------- */
   let w = 1, h = 1;
   let introMs = -300, last = 0, t = 0, angle = 0.4, frameNo = 0, lastInput = 0;
@@ -489,7 +522,7 @@ function init() {
   }
   /* Літери летять із ядра фігури й сідають у рядок: кожна — своя площинка з гліфом з атласа.
      Порядок прильоту — зліва направо, рядок за рядком, тож слова складаються на очах. */
-  let letterAtl = null, letters = null, letterMat = null;
+  let letterAtl = null, letters = null, letterMat = null, letterOrder = null, letterLaunch = null;
   function buildLetters() {
     if (!lede || letters) return;
     letterAtl = letterAtlas();
@@ -500,18 +533,20 @@ function init() {
       uniforms: {
         uAtlas: { value: letterAtl.tex }, uGrid: { value: new THREE.Vector2(letterAtl.cols, letterAtl.rows) },
         uOrigin: { value: new THREE.Vector3() }, uRight: { value: new THREE.Vector3(1, 0, 0) }, uUp: { value: new THREE.Vector3(0, 1, 0) },
-        uProgress: { value: 0 }, uTint: { value: new THREE.Color(0xcfe0ff) }, uTime: { value: 0 }, uOpacity: { value: 0 },
+        uTint: { value: new THREE.Color(0xcfe0ff) }, uTime: { value: 0 }, uOpacity: { value: 0 },
       },
-      vertexShader: `attribute vec3 aTo; attribute vec2 aGlyph; attribute float aSize; attribute float aOrder; attribute float aSeed;
-        uniform vec3 uOrigin; uniform vec3 uRight; uniform vec3 uUp; uniform float uProgress; uniform vec2 uGrid; uniform float uTime;
-        varying vec2 vUv; varying float vFly;
+      vertexShader: `attribute vec3 aTo; attribute vec2 aGlyph; attribute float aSize; attribute float aLaunch; attribute float aSeed; attribute float aRow;
+        uniform vec3 uOrigin; uniform vec3 uRight; uniform vec3 uUp; uniform vec2 uGrid; uniform float uTime;
+        varying vec2 vUv; varying float vFly; varying float vRow; varying float vSeed;
         void main(){
-          /* Кожна літера має власний момент вильоту і власну тривалість — текст не проступає рівним
-             фронтом, а кристалізується з хмари знаків, що ширяють у повітрі. */
-          float span = 0.18 + fract(aSeed * 7.3) * 0.3;
-          float t = clamp((uProgress - aOrder) / span, 0.0, 1.0);
+          /* Скрол лише ВИПУСКАЄ літеру; далі вона летить за власним часом, тож навіть при блискавичному
+             скролі видно, як знаки складаються в текст. Затримка і тривалість — у кожної свої. */
+          if (aLaunch < 0.0) { vFly = 0.0; gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
+          float delay = fract(aSeed * 3.7) * 0.85;
+          float dur = 1.05 + fract(aSeed * 11.0) * 0.75;
+          float t = clamp((uTime - aLaunch - delay) / dur, 0.0, 1.0);
           float e = t * t * (3.0 - 2.0 * t);
-          vFly = e;
+          vFly = e; vRow = aRow; vSeed = aSeed;
           vec3 from = uOrigin + vec3(sin(aSeed * 51.0), cos(aSeed * 37.0), sin(aSeed * 23.0)) * 0.14;
           /* дуга через власну контрольну точку збоку — літери розлітаються врозтіч і сходяться на місця */
           vec3 ctrl = mix(from, aTo, 0.45)
@@ -529,13 +564,15 @@ function init() {
           gl_Position = projectionMatrix * viewMatrix * vec4(w, 1.0);
         }`,
       fragmentShader: `uniform sampler2D uAtlas; uniform vec3 uTint; uniform float uOpacity; uniform float uTime;
-        varying vec2 vUv; varying float vFly;
+        varying vec2 vUv; varying float vFly; varying float vRow; varying float vSeed;
         void main(){
           float a = texture2D(uAtlas, vUv).a;
           if (a < 0.01 || vFly < 0.001) discard;
           float scan = 0.93 + 0.07 * sin(gl_FragCoord.y * 1.35);
           float glow = 1.0 + 1.5 * (1.0 - vFly);                   // у польоті літера світліша, на місці — спокійна
-          vec3 c = uTint * a * uOpacity * scan * glow;
+          float land = exp(-pow((vFly - 0.9) * 11.0, 2.0)) * 1.6;   // спалах у мить приземлення
+          float beam = exp(-pow((fract(uTime * 0.11) - vRow) * 7.0, 2.0)) * 0.75;   // блік, що повільно сходить по тексту
+          vec3 c = uTint * a * uOpacity * scan * (glow + land + beam);
           gl_FragColor = vec4(c, 1.0);
           #include <tonemapping_fragment>
           #include <colorspace_fragment>
@@ -554,7 +591,8 @@ function init() {
     if (!letters) return;
     const lay = ledeLayout(letterAtl, fsCss, rw);
     const n = lay.letters.length, scale = ww / rw;
-    const to = new Float32Array(n * 3), gl = new Float32Array(n * 2), sz = new Float32Array(n), or = new Float32Array(n), sd = new Float32Array(n);
+    const to = new Float32Array(n * 3), gl = new Float32Array(n * 2), sz = new Float32Array(n), or = new Float32Array(n), sd = new Float32Array(n), rowv = new Float32Array(n);
+    letterOrder = or; letterLaunch = new Float32Array(n).fill(-1);
     const v = new THREE.Vector3();
     lay.letters.forEach((L, i) => {
       wall.localToWorld(v.set((L.cx - rw / 2) * scale, (rh / 2 - L.cy) * scale, 0.004));
@@ -565,15 +603,17 @@ function init() {
       /* порядок переважно зліва направо, але перемішаний: сусідні літери летять урозтіч, а не ланцюжком */
       /* найпізніший старт + найдовший політ мусять укластися до кінця: 0,46 + 0,48 < 1, інакше частина
          літер так і не сяде на місце */
-      or[i] = Math.min(0.46, (i / n) * 0.24 + rnd2() * 0.3);
+      or[i] = Math.min(0.9, (i / n) * 0.45 + rnd2() * 0.42);      // скрол відпускає літери приблизно зліва направо
       sd[i] = rnd2();   // власний характер польоту кожної літери
+      rowv[i] = L.cy / rh;
     });
     const g = letters.geometry;
     g.setAttribute('aTo', new THREE.InstancedBufferAttribute(to, 3));
     g.setAttribute('aGlyph', new THREE.InstancedBufferAttribute(gl, 2));
     g.setAttribute('aSize', new THREE.InstancedBufferAttribute(sz, 1));
-    g.setAttribute('aOrder', new THREE.InstancedBufferAttribute(or, 1));
+    g.setAttribute('aLaunch', new THREE.InstancedBufferAttribute(letterLaunch, 1));
     g.setAttribute('aSeed', new THREE.InstancedBufferAttribute(sd, 1));
+    g.setAttribute('aRow', new THREE.InstancedBufferAttribute(rowv, 1));
     g.instanceCount = n;
     letterMat.uniforms.uRight.value.set(1, 0, 0).applyQuaternion(wall.quaternion);
     letterMat.uniforms.uUp.value.set(0, 1, 0).applyQuaternion(wall.quaternion);
@@ -661,11 +701,18 @@ function init() {
     shade.visible = band && fS.fade > 0.002; shadeMat.uniforms.uOp.value = fS.fade * 0.62;
     if (letters) {
       letters.visible = fS.fade > 0.002;
-      letterMat.uniforms.uProgress.value = fS.fade;
       letterMat.uniforms.uOpacity.value = 1;
       letterMat.uniforms.uTime.value = tt;
       letterMat.uniforms.uOrigin.value.copy(outer.position);
+      /* скрол лише відкриває «ворота»: щойно він дійшов до порога літери, та вилітає і далі живе своїм часом */
+      let touched = false;
+      for (let i = 0; i < letterOrder.length; i++) {
+        if (letterLaunch[i] < 0 && fS.fade >= letterOrder[i]) { letterLaunch[i] = tt; touched = true; }
+        else if (letterLaunch[i] >= 0 && fS.fade < letterOrder[i] - 0.03) { letterLaunch[i] = -1; touched = true; }
+      }
+      if (touched) letters.geometry.attributes.aLaunch.needsUpdate = true;
     }
+    dustMat.uniforms.uTime.value = tt;
     grainMat.uniforms.uTime.value = tt; grainMat.uniforms.uSpread.value = fS.grains;
     grainMat.uniforms.uReach.value = fS.grains * far; grains.visible = fS.grains > 0.001;
   }
