@@ -184,16 +184,15 @@ function init() {
            і світла смуга, що раз на кілька секунд повільно сходить згори. Читабельність не страждає. */
         float holo = 1.0, halo = 0.0;
         if (uUsePlain > 0.5) {
-          vec2 uv = vUv + vec2(sin(vUv.y * 17.0 + uTime * 0.45) * 0.0018, 0.0);
-          t = texture2D(uPlain, uv);
-          t.r = texture2D(uPlain, uv + vec2(0.0016, 0.0)).r;
-          t.b = texture2D(uPlain, uv - vec2(0.0016, 0.0)).b;
-          /* світловий ореол навколо літер — головне, що відрізняє проєкцію від просто тексту */
-          halo = (texture2D(uPlain, uv + vec2(0.0045, 0.0)).a + texture2D(uPlain, uv - vec2(0.0045, 0.0)).a
-                + texture2D(uPlain, uv + vec2(0.0, 0.008)).a + texture2D(uPlain, uv - vec2(0.0, 0.008)).a) * 0.25;
-          float scan = 0.82 + 0.18 * sin(gl_FragCoord.y * 1.35);
+          /* Літери беремо різко, без зсувів: розліт кольорів і плавання читались як розмитість.
+             Проєкцію тепер видає не спотворення тексту, а мʼякий ореол ДОВКОЛА нього і світло, що по ньому йде. */
+          t = texture2D(uPlain, vUv);
+          halo = (texture2D(uPlain, vUv + vec2(0.0035, 0.0)).a + texture2D(uPlain, vUv - vec2(0.0035, 0.0)).a
+                + texture2D(uPlain, vUv + vec2(0.0, 0.006)).a + texture2D(uPlain, vUv - vec2(0.0, 0.006)).a) * 0.25;
+          halo = max(0.0, halo - t.a);                    // світиться лише поле навколо літери, самої літери не торкається
+          float scan = 0.93 + 0.07 * sin(gl_FragCoord.y * 1.35);
           float band = (1.0 - fract(uTime * 0.12)) - vUv.y;
-          holo = scan * (1.0 + 0.55 * exp(-band * band * 40.0)) * mix(0.86, 1.16, vUv.y);
+          holo = scan * (1.0 + 0.4 * exp(-band * band * 40.0)) * mix(0.9, 1.12, vUv.y);
         }
         float d = distance(vW, uOrigin);
         float m = 1.0 - smoothstep(uRadius - uSoft, uRadius + uSoft * 0.25, d);
@@ -203,12 +202,8 @@ function init() {
         float spot = 1.0 + uSpotK * (1.0 - smoothstep(0.0, uSpotR, distance(vW, uSpot)));
         float breathe = 0.92 + 0.08 * sin(uTime * 0.45 + vW.z * 0.7 + vW.y * 0.9);
         float lit = uOpacity * m * edge * (0.35 + 0.65 * fall) * spot * breathe;
-        vec3 c = uTint * t.rgb * t.a * lit * holo + uTint * halo * halo * 0.5 * lit;
+        vec3 c = uTint * t.rgb * t.a * lit * holo + uTint * halo * 0.5 * lit;
         /* ледь помітне поле самого променя — щоб текст читався як напис на світлі, а не на тлі сторінки */
-        if (uUsePlain > 0.5) {
-          float soft = smoothstep(0.0, 0.2, vUv.x) * smoothstep(1.0, 0.8, vUv.x) * smoothstep(0.0, 0.16, vUv.y) * smoothstep(1.0, 0.86, vUv.y);
-          c += uTint * 0.024 * mix(0.1, 1.0, vUv.y) * soft * lit * holo;
-        }
         gl_FragColor = vec4(c, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
@@ -227,6 +222,21 @@ function init() {
     wallMat.depthTest = false; wall.renderOrder = -1;
   }
   scene.add(wall);
+  /* підкладка: мʼяка темна пляма трохи ближче до глядача, ніж напис. Адитивним матеріалом затемнити
+     не можна, тож це окрема площина зі звичайним змішуванням — вона й ховає зерна, що летять за нею. */
+  const shadeMat = new THREE.ShaderMaterial({
+    uniforms: { uOp: { value: 0 } },
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: `uniform float uOp; varying vec2 vUv;
+      void main(){
+        float s = smoothstep(0.0, 0.26, vUv.x) * smoothstep(1.0, 0.74, vUv.x) * smoothstep(0.0, 0.2, vUv.y) * smoothstep(1.0, 0.8, vUv.y);
+        gl_FragColor = vec4(0.0, 0.0, 0.0, s * uOp);
+      }`,
+    transparent: true, depthWrite: false, depthTest: false,
+  });
+  const shade = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), shadeMat);
+  shade.renderOrder = -2; shade.visible = false;
+  if (band) scene.add(shade);
   /* Не про мої проєкти, а про економіку того, хто читає: як рахується його прибуток, що коштує
      рутина, наскільки швидше йде заявка. Три голоси: модель · результат · процес. */
   const CORPUS = [
@@ -359,7 +369,7 @@ function init() {
         /* мають власний, швидший фронт: вогники летять уже тоді, коли написів ще немає, і весь час випереджають їх */
         float lit = 1.0 - smoothstep(uReach + uSoft * 0.6, uReach + uSoft * 2.4, distance(aTo, uWave));
         /* зʼявляються, вийшовши з ядра, і гаснуть, торкнувшись площини */
-        vA = smoothstep(0.0, 0.16, u) * (1.0 - smoothstep(0.86, 1.0, u)) * lit * smoothstep(0.0, 0.12, uSpread); vK = aPhase;
+        vA = smoothstep(0.0, 0.16, u) * (1.0 - smoothstep(0.55, 0.88, u)) * lit * smoothstep(0.0, 0.12, uSpread); vK = aPhase;
         vec4 mv = modelViewMatrix * vec4(p, 1.0); gl_PointSize = min(uSize * uPR * (6.0 / -mv.z), 9.0 * uPR); gl_Position = projectionMatrix * mv; }`,
     fragmentShader: `uniform vec3 uColorA; uniform vec3 uColorB; varying float vA; varying float vK;
       void main(){ vec2 c = gl_PointCoord - 0.5; float a = smoothstep(0.5, 0.08, length(c)); vec3 col = mix(uColorA, uColorB, vK);
@@ -425,7 +435,7 @@ function init() {
     const cx = ((r.left + r.width / 2 - b.left) / b.width) * 2 - 1;
     const cy = -(((r.top + r.height / 2 - b.top) / b.height) * 2 - 1);
     ndcToWorld.set(cx, cy, 0.5).unproject(camera).sub(camera.position).normalize();
-    const D = 6.2, TILT = 0.3;                     // легкий нахил лишає відчуття обʼєму, майже без спотворення
+    const D = 6.2, TILT = 0.13;                     // легкий нахил лишає відчуття обʼєму, майже без спотворення
     wall.position.copy(camera.position).addScaledVector(ndcToWorld, D);
     wall.quaternion.copy(camera.quaternion); wall.rotateX(-TILT);
     const vh = 2 * D * Math.tan(camera.fov * Math.PI / 360);
@@ -435,8 +445,12 @@ function init() {
     wall.geometry.dispose();
     wall.geometry = new THREE.PlaneGeometry(ww, hh);
     wall.updateMatrixWorld();
+    shade.geometry.dispose();
+    shade.geometry = new THREE.PlaneGeometry(ww * 1.22, hh * 1.3);
+    shade.position.copy(wall.position).addScaledVector(ndcToWorld, -0.12);   // трохи ближче до глядача
+    shade.quaternion.copy(wall.quaternion);
     const fsCss = parseFloat(getComputedStyle(lede).fontSize) || 18;
-    const px = Math.min(1600, Math.round(r.width * 2));
+    const px = Math.min(2048, Math.round(r.width * 3));
     const old = wallMat.uniforms.uPlain.value;
     wallMat.uniforms.uPlain.value = ledeTexture(px, Math.round(px * hh / ww), Math.round(fsCss * px / r.width)).tex;
     if (old && old.dispose) old.dispose();
@@ -531,6 +545,7 @@ function init() {
     wallMat.uniforms.uOpacity.value = fS.fade;
     wallMat.uniforms.uTime.value = tt; wallMat.uniforms.uSpot.value.copy(spot);
     wall.visible = fS.fade > 0.002;
+    shade.visible = band && wall.visible; shadeMat.uniforms.uOp.value = fS.fade * 0.62;
     grainMat.uniforms.uTime.value = tt; grainMat.uniforms.uSpread.value = fS.grains;
     grainMat.uniforms.uReach.value = fS.grains * far; grains.visible = fS.grains > 0.001;
   }
