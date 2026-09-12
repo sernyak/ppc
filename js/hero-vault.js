@@ -157,7 +157,9 @@ function init() {
     uniforms: {
       uAtlas: { value: blankTexture() }, uGrid: { value: blankData() }, uCell: { value: new THREE.Vector2(1, 1) }, uAt: { value: new THREE.Vector2(1, 1) },
       uPlain: { value: blankTexture() }, uUsePlain: { value: band ? 1 : 0 },
-      uTint: { value: new THREE.Color(0xbcd3ff) }, uOpacity: { value: 1.0 },
+      /* на компʼютері голограма — тло історії, а не текст для читання: тон сіріший і тьмяніший за абзац
+         ліворуч, щоб не було сумніву, що саме читати. На телефоні вона сама і є текстом, тож лишається світлою */
+      uTint: { value: new THREE.Color(band ? 0xbcd3ff : 0x8295b5) }, uOpacity: { value: 1.0 },
       uOrigin: { value: wallOrigin }, uRadius: { value: 0 }, uSoft: { value: band ? 0.5 : 2.0 },
       uSpot: { value: new THREE.Vector3(0, -50, 0) }, uSpotR: { value: 3.0 }, uSpotK: { value: fine && !lo ? 0.7 : 0 }, uTime: { value: 0 },
       uEdge: { value: band ? 0.025 : 0.2 },
