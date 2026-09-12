@@ -39,6 +39,7 @@ function init() {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
   const band = matchMedia('(max-width: 1023px)').matches;      // сцена — смуга між заголовком і абзацом
+  const wallMode = sceneEl.dataset.variant === 'wall';         // варіант «Стіна»: фігура збоку проєктує опис на похилу площину
   const lo = matchMedia('(max-width: 767px)').matches || !fine; // телефон/планшет: без сяйва навколо ліній, 30 к/с
 
   let renderer;
@@ -56,11 +57,17 @@ function init() {
   /* усе спільне — до першого використання */
   /* фігура — як на /preview/3d/, лише в півтора раза менша (прохання власника) */
   const R = band ? 0.61 : 0.97;
-  const cPos = band ? new THREE.Vector3(0, R + 0.3, 0) : new THREE.Vector3(5.0, R + 0.7, 0.6);
-  const cam0 = band ? new THREE.Vector3(0, cPos.y, 7.0) : new THREE.Vector3(0.3, cPos.y + 0.2, 8.8);
-  const target = band ? new THREE.Vector3(0, cPos.y - 0.86, 0) : new THREE.Vector3(3.1, cPos.y + 0.6, 0);   // дивимось нижче фігури — вона стає під заголовком, а знизу лишається місце під текст
+  const cPos = wallMode
+    ? (band ? new THREE.Vector3(-0.8, R + 0.2, 0.4) : new THREE.Vector3(-1.1, R + 0.55, 0.8))
+    : (band ? new THREE.Vector3(0, R + 0.3, 0) : new THREE.Vector3(5.0, R + 0.7, 0.6));
+  const cam0 = wallMode
+    ? (band ? new THREE.Vector3(0.5, cPos.y + 0.9, 6.6) : new THREE.Vector3(0.2, cPos.y + 1.1, 8.4))
+    : (band ? new THREE.Vector3(0, cPos.y, 7.0) : new THREE.Vector3(0.3, cPos.y + 0.2, 8.8));
+  const target = wallMode
+    ? (band ? new THREE.Vector3(0.75, cPos.y + 1.25, 0) : new THREE.Vector3(1.7, cPos.y + 1.35, 0))
+    : (band ? new THREE.Vector3(0, cPos.y - 0.72, 0) : new THREE.Vector3(3.1, cPos.y + 0.6, 0));   // дивимось нижче фігури — вона стає під заголовком, а знизу лишається місце під текст
   /* телефон: зі скролом камера відходить і веде погляд правіше — фігура меншає і йде ліворуч, даючи місце стіні */
-  const PULL_BACK = 0, PULL_SIDE = 0, RISE = 0.42, SHRINK = 0.34;   // телефон: фігура сама підіймається до заголовка й меншає
+  const PULL_BACK = 0, PULL_SIDE = 0, RISE = wallMode ? 0 : 0.42, SHRINK = wallMode ? 0 : 0.34;   // телефон: фігура сама підіймається до заголовка й меншає
   const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), tmpC = new THREE.Vector3(), tmpD = new THREE.Vector3();
   const tmpS = new THREE.Vector3(), tmpT = new THREE.Vector3();
   const UP = new THREE.Vector3(0, 1, 0), RIGHT = new THREE.Vector3(1, 0, 0), mtx = new THREE.Matrix4();
@@ -218,7 +225,7 @@ function init() {
     blending: THREE.AdditiveBlending, premultipliedAlpha: true,
   });
   const wall = new THREE.Mesh(new THREE.PlaneGeometry(WW, H), wallMat); wall.position.copy(wallC); wall.rotation.y = wallRot;
-  if (band) {
+  if (band || wallMode) {
     /* голограма лежить нижче тіньової підлоги — та писала б глибину і відсікала її; малюємо без перевірки
        глибини й найпершою, щоб зерна лишались поверх */
     wallMat.depthTest = false; wall.renderOrder = -1;
@@ -238,7 +245,7 @@ function init() {
   });
   const shade = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), shadeMat);
   shade.renderOrder = -2; shade.visible = false;
-  if (band) scene.add(shade);
+  if (band || wallMode) scene.add(shade);
   /* Не про мої проєкти, а про економіку того, хто читає: як рахується його прибуток, що коштує
      рутина, наскільки швидше йде заявка. Три голоси: модель · результат · процес. */
   const CORPUS = [
@@ -267,7 +274,7 @@ function init() {
   const fontsReady = Promise.race([Promise.all([document.fonts.load('400 40px Inter'), document.fonts.load('600 40px Inter')]).catch(() => null), new Promise((r) => setTimeout(r, 1200))]);
   let glyphs = null;
   fontsReady.then(() => {
-    if (band) { schedule(); return; }                              // телефону атлас знаків не потрібен
+    if (band || wallMode) { schedule(); return; }                  // тут стіна формул не потрібна
     glyphs = glyphAtlas(64);
     wallMat.uniforms.uAtlas.value = glyphs.tex;
     wallMat.uniforms.uAt.value.set(glyphs.cols, glyphs.rows);
@@ -320,7 +327,7 @@ function init() {
   }
   let gridSeed = 400, rollTick = 0;
   function stepGrid(dt) {
-    if (!glyphs || band || !wall.visible) return;
+    if (!glyphs || band || wallMode || !wall.visible) return;
     rollTick += dt;
     const roll = rollTick > 0.055;                                  // знаки перебираються ~18 разів на секунду
     if (roll) rollTick = 0;
@@ -349,9 +356,9 @@ function init() {
   const N = lo ? 1100 : 2600;
   const gTo = [], gPhase = [], gSpeed = [], gPos = new Float32Array(N * 3);
   /* телефон: ціль зерен — смуга під фігурою, там, де на екрані лежить абзац; десктоп — площина збоку */
-  const fallPoint = () => new THREE.Vector3(cPos.x + (rnd() - 0.5) * 1.9, cPos.y - 1.15 - rnd() * 1.65, cPos.z + (rnd() - 0.5) * 0.7);
+  const fallPoint = () => new THREE.Vector3(cPos.x + (rnd() - 0.5) * 1.9, cPos.y - 1.15 - rnd() * 1.65, cPos.z + (rnd() - 0.5) * 0.7);   // перезаписується у fitLede
   for (let i = 0; i < N; i++) {
-    const p = band ? fallPoint() : wallPoint((rnd() - 0.5) * (WW - 3), (rnd() - 0.5) * (H - 2));
+    const p = (band || wallMode) ? fallPoint() : wallPoint((rnd() - 0.5) * (WW - 3), (rnd() - 0.5) * (H - 2));
     gTo.push(p.x, p.y, p.z); gPhase.push(rnd()); gSpeed.push(0.035 + rnd() * 0.055);
   }
   const gGeo = new THREE.BufferGeometry();
@@ -425,7 +432,7 @@ function init() {
   const spot = new THREE.Vector3(0, -50, 0), tspot = new THREE.Vector3(0, -50, 0);
   const raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2();
   const track = document.getElementById('vault-track');
-  const lede = band ? document.getElementById('vault-lede') : null;
+  const lede = (band || wallMode) ? document.getElementById('vault-lede') : null;
   /* Текст абзацу малюємо голограмою на площині під фігурою — саме його «виводять» зерна.
      Сам абзац лишається в розмітці (пошук і читалки його бачать), але стає прозорим носієм місця,
      а площина стає рівно туди, де він лежить. */
@@ -486,6 +493,7 @@ function init() {
   const ledeCorner = new THREE.Vector3(), ndcToWorld = new THREE.Vector3();
   function fitLede() {
     if (!lede) return;
+    if (wallMode) return fitWallLede();
     const r = lede.getBoundingClientRect(), b = sceneEl.getBoundingClientRect();
     if (!r.width || !b.width) return;
     /* Голограма стоїть обличчям до камери й лягає рівно на прямокутник абзацу. Вертикальна площина
@@ -527,16 +535,16 @@ function init() {
     if (!lede || letters) return;
     letterAtl = letterAtlas();
     const geo = new THREE.InstancedBufferGeometry();
-    const q = new THREE.PlaneGeometry(1, 1);
-    geo.index = q.index; geo.attributes.position = q.attributes.position; geo.attributes.uv = q.attributes.uv;
+    const quad = new THREE.PlaneGeometry(1, 1);          // не «q» — так звався б обʼєкт параметрів URL
+    geo.index = quad.index; geo.attributes.position = quad.attributes.position; geo.attributes.uv = quad.attributes.uv;
     letterMat = new THREE.ShaderMaterial({
       uniforms: {
         uAtlas: { value: letterAtl.tex }, uGrid: { value: new THREE.Vector2(letterAtl.cols, letterAtl.rows) },
         uOrigin: { value: new THREE.Vector3() }, uRight: { value: new THREE.Vector3(1, 0, 0) }, uUp: { value: new THREE.Vector3(0, 1, 0) },
-        uTint: { value: new THREE.Color(0xcfe0ff) }, uTime: { value: 0 }, uOpacity: { value: 0 },
+        uTint: { value: new THREE.Color(0xcfe0ff) }, uTime: { value: 0 }, uOpacity: { value: 0 }, uAge: { value: q.has('age') ? parseFloat(q.get('age')) : 0 },
       },
       vertexShader: `attribute vec3 aTo; attribute vec2 aGlyph; attribute float aSize; attribute float aLaunch; attribute float aSeed; attribute float aRow;
-        uniform vec3 uOrigin; uniform vec3 uRight; uniform vec3 uUp; uniform vec2 uGrid; uniform float uTime;
+        uniform vec3 uOrigin; uniform vec3 uRight; uniform vec3 uUp; uniform vec2 uGrid; uniform float uTime; uniform float uAge;
         varying vec2 vUv; varying float vFly; varying float vRow; varying float vSeed;
         void main(){
           /* Скрол лише ВИПУСКАЄ літеру; далі вона летить за власним часом, тож навіть при блискавичному
@@ -544,7 +552,7 @@ function init() {
           if (aLaunch < 0.0) { vFly = 0.0; gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
           float delay = fract(aSeed * 3.7) * 0.85;
           float dur = 1.05 + fract(aSeed * 11.0) * 0.75;
-          float t = clamp((uTime - aLaunch - delay) / dur, 0.0, 1.0);
+          float t = clamp((uTime + uAge - aLaunch - delay) / dur, 0.0, 1.0);   // uAge — лише для знімків: стільки секунд «уже минуло»
           float e = t * t * (3.0 - 2.0 * t);
           vFly = e; vRow = aRow; vSeed = aSeed;
           vec3 from = uOrigin + vec3(sin(aSeed * 51.0), cos(aSeed * 37.0), sin(aSeed * 23.0)) * 0.14;
@@ -617,6 +625,41 @@ function init() {
     g.instanceCount = n;
     letterMat.uniforms.uRight.value.set(1, 0, 0).applyQuaternion(wall.quaternion);
     letterMat.uniforms.uUp.value.set(0, 1, 0).applyQuaternion(wall.quaternion);
+  }
+  /* Варіант «Стіна»: площина стоїть праворуч від фігури й похило до глядача, опис лягає на неї.
+     Розмір беремо з кадру, щоб вона заповнювала вільну половину екрана, а не тікала за край. */
+  function fitWallLede() {
+    const b = sceneEl.getBoundingClientRect();
+    if (!b.width) return;
+    const D = band ? 6.4 : 8.0, TILT = band ? 0.1 : 0.12;
+    const cx = band ? 0.18 : 0.44, cy = band ? 0.16 : -0.1;     // центр площини в кадрі
+    ndcToWorld.set(cx, cy, 0.5).unproject(camera).sub(camera.position).normalize();
+    wall.position.copy(camera.position).addScaledVector(ndcToWorld, D);
+    wall.quaternion.copy(camera.quaternion);
+    wall.rotateX(-TILT); wall.rotateY(band ? 0.22 : 0.34);      // розворот до фігури — площина «дивиться» на неї
+    const vh = 2 * D * Math.tan(camera.fov * Math.PI / 360);
+    const ww = vh * camera.aspect * (band ? 0.86 : 0.56), hh = vh * (band ? 0.44 : 0.62);
+    wall.geometry.dispose();
+    wall.geometry = new THREE.PlaneGeometry(ww, hh);
+    wall.updateMatrixWorld();
+    WW = ww;
+    shade.geometry.dispose();
+    shade.geometry = new THREE.PlaneGeometry(ww * 1.16, hh * 1.24);
+    shade.position.copy(wall.position).addScaledVector(ndcToWorld, -0.1);
+    shade.quaternion.copy(wall.quaternion);
+    /* кегль підбираємо так, щоб опис уклався в площину: ширина рядка в умовних «пікселях» = 640 */
+    const boxW = 640, fsCss = boxW * (band ? 0.034 : 0.030);
+    placeLetters(ww, hh, fsCss, boxW, boxW * hh / ww);
+    const onPlane = (u, v, out) => wall.localToWorld(out.set(u * ww / 2, v * hh / 2, 0));
+    onPlane(-0.9, 1.1, wallOrigin);
+    wallCorners.length = 0;
+    for (const sx of [-1, 1]) for (const sy of [-1, 1]) wallCorners.push(onPlane(sx, sy, new THREE.Vector3()));
+    const a = gGeo.attributes.aTo;
+    for (let i = 0; i < N; i++) {
+      onPlane((rnd2() - 0.5) * 1.9, (rnd2() - 0.5) * 1.9, ledeCorner);
+      a.setXYZ(i, ledeCorner.x, ledeCorner.y, ledeCorner.z);
+    }
+    a.needsUpdate = true;
   }
   const rnd2 = seeded(77);
 
@@ -697,8 +740,8 @@ function init() {
     wallMat.uniforms.uRadius.value = fS.coverage * far;
     wallMat.uniforms.uOpacity.value = fS.fade;
     wallMat.uniforms.uTime.value = tt; wallMat.uniforms.uSpot.value.copy(spot);
-    wall.visible = !band && fS.fade > 0.002;
-    shade.visible = band && fS.fade > 0.002; shadeMat.uniforms.uOp.value = fS.fade * 0.62;
+    wall.visible = !band && !wallMode && fS.fade > 0.002;
+    shade.visible = (band || wallMode) && fS.fade > 0.002; shadeMat.uniforms.uOp.value = fS.fade * 0.62;
     if (letters) {
       letters.visible = fS.fade > 0.002;
       letterMat.uniforms.uOpacity.value = 1;
