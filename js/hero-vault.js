@@ -179,7 +179,22 @@ function init() {
            тож шрифт лишається пропорційним, а міняти можна й далі кожен знак окремо */
         float lx = cellData.b + (f.x - 0.5) / max(1.0, cellData.a * 255.0);
         vec4 t = texture2D(uAtlas, (gp + vec2(lx, f.y)) / uAt); t.a *= cellData.g * 1.35;
-        if (uUsePlain > 0.5) t = texture2D(uPlain, vUv);          // телефон: готовий напис замість сітки знаків
+        /* Телефон: готовий напис замість сітки знаків — і йому додаємо фактуру проєкції, інакше це просто
+           текст на тлі: растрові смужки, легкий розлад кольорів по краях літер, ледь помітне плавання
+           і світла смуга, що раз на кілька секунд повільно сходить згори. Читабельність не страждає. */
+        float holo = 1.0, halo = 0.0;
+        if (uUsePlain > 0.5) {
+          vec2 uv = vUv + vec2(sin(vUv.y * 17.0 + uTime * 0.45) * 0.0018, 0.0);
+          t = texture2D(uPlain, uv);
+          t.r = texture2D(uPlain, uv + vec2(0.0016, 0.0)).r;
+          t.b = texture2D(uPlain, uv - vec2(0.0016, 0.0)).b;
+          /* світловий ореол навколо літер — головне, що відрізняє проєкцію від просто тексту */
+          halo = (texture2D(uPlain, uv + vec2(0.0045, 0.0)).a + texture2D(uPlain, uv - vec2(0.0045, 0.0)).a
+                + texture2D(uPlain, uv + vec2(0.0, 0.008)).a + texture2D(uPlain, uv - vec2(0.0, 0.008)).a) * 0.25;
+          float scan = 0.82 + 0.18 * sin(gl_FragCoord.y * 1.35);
+          float band = (1.0 - fract(uTime * 0.12)) - vUv.y;
+          holo = scan * (1.0 + 0.55 * exp(-band * band * 40.0)) * mix(0.86, 1.16, vUv.y);
+        }
         float d = distance(vW, uOrigin);
         float m = 1.0 - smoothstep(uRadius - uSoft, uRadius + uSoft * 0.25, d);
         float fall = 1.0 / (1.0 + d * d * 0.014);
@@ -187,7 +202,13 @@ function init() {
         float edge = smoothstep(0.0, uEdge, vUv.x) * smoothstep(1.0, 1.0 - uEdge, vUv.x) * smoothstep(0.0, uEdge, vUv.y) * smoothstep(1.0, 1.0 - uEdge, vUv.y);
         float spot = 1.0 + uSpotK * (1.0 - smoothstep(0.0, uSpotR, distance(vW, uSpot)));
         float breathe = 0.92 + 0.08 * sin(uTime * 0.45 + vW.z * 0.7 + vW.y * 0.9);
-        vec3 c = uTint * t.rgb * t.a * uOpacity * m * edge * (0.35 + 0.65 * fall) * spot * breathe;
+        float lit = uOpacity * m * edge * (0.35 + 0.65 * fall) * spot * breathe;
+        vec3 c = uTint * t.rgb * t.a * lit * holo + uTint * halo * halo * 0.5 * lit;
+        /* ледь помітне поле самого променя — щоб текст читався як напис на світлі, а не на тлі сторінки */
+        if (uUsePlain > 0.5) {
+          float soft = smoothstep(0.0, 0.2, vUv.x) * smoothstep(1.0, 0.8, vUv.x) * smoothstep(0.0, 0.16, vUv.y) * smoothstep(1.0, 0.86, vUv.y);
+          c += uTint * 0.024 * mix(0.1, 1.0, vUv.y) * soft * lit * holo;
+        }
         gl_FragColor = vec4(c, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
@@ -404,7 +425,7 @@ function init() {
     const cx = ((r.left + r.width / 2 - b.left) / b.width) * 2 - 1;
     const cy = -(((r.top + r.height / 2 - b.top) / b.height) * 2 - 1);
     ndcToWorld.set(cx, cy, 0.5).unproject(camera).sub(camera.position).normalize();
-    const D = 6.2, TILT = 0.16;                     // легкий нахил лишає відчуття обʼєму, майже без спотворення
+    const D = 6.2, TILT = 0.3;                     // легкий нахил лишає відчуття обʼєму, майже без спотворення
     wall.position.copy(camera.position).addScaledVector(ndcToWorld, D);
     wall.quaternion.copy(camera.quaternion); wall.rotateX(-TILT);
     const vh = 2 * D * Math.tan(camera.fov * Math.PI / 360);
