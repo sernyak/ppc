@@ -407,24 +407,47 @@ function init() {
     })(lede, false);
     lede.classList.add('vault-lede-holo');
   }
-  function ledeTexture(w, h, fs) {
-    const c = document.createElement('canvas'); c.width = w; c.height = h;
+  /* Атлас літер: кожен знак абзацу в своїй квадратній комірці, звичайним і жирним накресленням.
+     Далі кожна літера стає окремою площинкою, що вилітає з ядра фігури й сідає на своє місце в рядку. */
+  const LCELL = 64, LFS = 42;
+  function letterAtlas() {
+    const set = [];
+    for (const t of ledeTokens) for (const ch of t.w) { const k = ch + (t.bold ? '1' : '0'); if (!set.includes(k)) set.push(k); }
+    const cols = 16, rows = Math.ceil(set.length / cols);
+    const c = document.createElement('canvas'); c.width = cols * LCELL; c.height = rows * LCELL;
     const g = c.getContext('2d');
-    g.textBaseline = 'middle'; g.fillStyle = '#cfe0ff';
-    const pad = fs * 0.2, lh = fs * 1.42, maxW = w - pad * 2;
-    let x = pad, y = fs * 0.9;
-    for (const t of ledeTokens) {
-      g.font = `${t.bold ? 700 : 400} ${fs}px Inter, sans-serif`;
-      const tw = g.measureText(t.w).width, sp = g.measureText(' ').width;
-      if (/^[,.;:!?»)\]]/.test(t.w)) x -= sp;                 // розділовий знак ліпиться до слова
-      if (x > pad && x + tw > maxW) { x = pad; y += lh; }
-      g.globalAlpha = t.bold ? 1 : 0.82;
-      g.fillText(t.w, x, y);
-      x += tw + sp;
-    }
+    g.fillStyle = '#ffffff'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    const adv = {}, index = {};
+    set.forEach((k, i) => {
+      const ch = k.slice(0, -1), bold = k.endsWith('1');
+      g.font = `${bold ? 700 : 400} ${LFS}px Inter, sans-serif`;
+      g.fillText(ch, (i % cols + 0.5) * LCELL, (Math.floor(i / cols) + 0.5) * LCELL);
+      adv[k] = g.measureText(ch).width / LFS;                   // ширина знака в частках кегля
+      index[k] = i;
+    });
     const tex = new THREE.CanvasTexture(c);
-    tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-    return { tex, lines: Math.ceil((y + lh) / h * 1) };
+    tex.flipY = false; tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    return { tex, cols, rows, adv, index, space: adv[' 0'] || 0.26 };
+  }
+  /* Розкладка абзацу по літерах у пікселях CSS — точно так само, як його верстає браузер. */
+  function ledeLayout(atlas, fsCss, boxW) {
+    const out = [], lh = fsCss * 1.42, pad = 0;
+    let x = pad, y = fsCss * 0.95;
+    const widthOf = (word, bold) => { let w = 0; for (const ch of word) w += (atlas.adv[ch + (bold ? '1' : '0')] || 0.3) * fsCss; return w; };
+    const sp = atlas.space * fsCss;
+    for (const t of ledeTokens) {
+      const tw = widthOf(t.w, t.bold);
+      if (/^[,.;:!?»)\]]/.test(t.w)) x -= sp;
+      if (x > pad && x + tw > boxW) { x = pad; y += lh; }
+      for (const ch of t.w) {
+        const k = ch + (t.bold ? '1' : '0'), a = (atlas.adv[k] || 0.3) * fsCss;
+        out.push({ k, cx: x + a / 2, cy: y - fsCss * 0.32, bold: t.bold });
+        x += a;
+      }
+      x += tw > 0 ? sp : 0;
+    }
+    return { letters: out, height: y + lh * 0.4 };
   }
   /* поставити площину рівно на місце абзацу і перемалювати текст під її поточний розмір */
   const ledeCorner = new THREE.Vector3(), ndcToWorld = new THREE.Vector3();
@@ -452,10 +475,7 @@ function init() {
     shade.position.copy(wall.position).addScaledVector(ndcToWorld, -0.12);   // трохи ближче до глядача
     shade.quaternion.copy(wall.quaternion);
     const fsCss = parseFloat(getComputedStyle(lede).fontSize) || 18;
-    const px = Math.min(2048, Math.round(r.width * 3));
-    const old = wallMat.uniforms.uPlain.value;
-    wallMat.uniforms.uPlain.value = ledeTexture(px, Math.round(px * hh / ww), Math.round(fsCss * px / r.width)).tex;
-    if (old && old.dispose) old.dispose();
+    placeLetters(ww, hh, fsCss, r.width, r.height);
     const onPlane = (u, v, out) => wall.localToWorld(out.set(u * ww / 2, v * hh / 2, 0));
     onPlane(0, 1.12, wallOrigin);                   // хвиля світла заходить згори, з боку фігури
     wallCorners.length = 0;
@@ -466,6 +486,85 @@ function init() {
       a.setXYZ(i, ledeCorner.x, ledeCorner.y, ledeCorner.z);
     }
     a.needsUpdate = true;
+  }
+  /* Літери летять із ядра фігури й сідають у рядок: кожна — своя площинка з гліфом з атласа.
+     Порядок прильоту — зліва направо, рядок за рядком, тож слова складаються на очах. */
+  let letterAtl = null, letters = null, letterMat = null;
+  function buildLetters() {
+    if (!lede || letters) return;
+    letterAtl = letterAtlas();
+    const geo = new THREE.InstancedBufferGeometry();
+    const q = new THREE.PlaneGeometry(1, 1);
+    geo.index = q.index; geo.attributes.position = q.attributes.position; geo.attributes.uv = q.attributes.uv;
+    letterMat = new THREE.ShaderMaterial({
+      uniforms: {
+        uAtlas: { value: letterAtl.tex }, uGrid: { value: new THREE.Vector2(letterAtl.cols, letterAtl.rows) },
+        uOrigin: { value: new THREE.Vector3() }, uRight: { value: new THREE.Vector3(1, 0, 0) }, uUp: { value: new THREE.Vector3(0, 1, 0) },
+        uProgress: { value: 0 }, uTint: { value: new THREE.Color(0xcfe0ff) }, uTime: { value: 0 }, uOpacity: { value: 0 },
+      },
+      vertexShader: `attribute vec3 aTo; attribute vec2 aGlyph; attribute float aSize; attribute float aOrder; attribute float aSeed;
+        uniform vec3 uOrigin; uniform vec3 uRight; uniform vec3 uUp; uniform float uProgress; uniform vec2 uGrid; uniform float uTime;
+        varying vec2 vUv; varying float vFly;
+        void main(){
+          float t = clamp((uProgress - aOrder) / 0.14, 0.0, 1.0);
+          float e = t * t * (3.0 - 2.0 * t);
+          vFly = e;
+          /* старт — не точка, а невеликий розкид усередині ядра, щоб літери не злипались в одну цятку */
+          vec3 from = uOrigin + vec3(sin(aSeed * 51.0), cos(aSeed * 37.0), sin(aSeed * 23.0)) * 0.12;
+          vec3 mid = mix(from, aTo, e) + uUp * sin(e * 3.1416) * (0.18 + 0.2 * fract(aSeed * 13.0));
+          float sz = aSize * mix(0.45, 1.0, e);
+          float sp = sin(aSeed * 29.0) * (1.0 - e) * 1.6;          // у польоті знак ледь крутиться
+          vec2 rp = vec2(position.x * cos(sp) - position.y * sin(sp), position.x * sin(sp) + position.y * cos(sp));
+          vec3 w = mid + uRight * (rp.x * sz) + uUp * (rp.y * sz);
+          vUv = (aGlyph + vec2(uv.x, 1.0 - uv.y)) / uGrid;   // атлас без flipY, а uv квада рахується знизу
+          gl_Position = projectionMatrix * viewMatrix * vec4(w, 1.0);
+        }`,
+      fragmentShader: `uniform sampler2D uAtlas; uniform vec3 uTint; uniform float uOpacity; uniform float uTime;
+        varying vec2 vUv; varying float vFly;
+        void main(){
+          float a = texture2D(uAtlas, vUv).a;
+          if (a < 0.01 || vFly < 0.001) discard;
+          float scan = 0.93 + 0.07 * sin(gl_FragCoord.y * 1.35);
+          float glow = 1.0 + 1.5 * (1.0 - vFly);                   // у польоті літера світліша, на місці — спокійна
+          vec3 c = uTint * a * uOpacity * scan * glow;
+          gl_FragColor = vec4(c, 1.0);
+          #include <tonemapping_fragment>
+          #include <colorspace_fragment>
+          gl_FragColor.a = max(gl_FragColor.r, max(gl_FragColor.g, gl_FragColor.b));
+        }`,
+      transparent: true, depthWrite: false, depthTest: false,
+      blending: THREE.AdditiveBlending, premultipliedAlpha: true,
+    });
+    letters = new THREE.Mesh(geo, letterMat);
+    letters.frustumCulled = false; letters.renderOrder = -1;
+    scene.add(letters);
+  }
+  /* розкласти літери по площині абзацу і роздати їм цілі */
+  function placeLetters(ww, hh, fsCss, rw, rh) {
+    buildLetters();
+    if (!letters) return;
+    const lay = ledeLayout(letterAtl, fsCss, rw);
+    const n = lay.letters.length, scale = ww / rw;
+    const to = new Float32Array(n * 3), gl = new Float32Array(n * 2), sz = new Float32Array(n), or = new Float32Array(n), sd = new Float32Array(n);
+    const v = new THREE.Vector3();
+    lay.letters.forEach((L, i) => {
+      wall.localToWorld(v.set((L.cx - rw / 2) * scale, (rh / 2 - L.cy) * scale, 0.004));
+      to[i * 3] = v.x; to[i * 3 + 1] = v.y; to[i * 3 + 2] = v.z;
+      const gi = letterAtl.index[L.k];
+      gl[i * 2] = gi % letterAtl.cols; gl[i * 2 + 1] = Math.floor(gi / letterAtl.cols);
+      sz[i] = (LCELL / LFS) * fsCss * scale;
+      or[i] = (i / n) * 0.82;                                       // останні літери сідають ближче до кінця скролу
+      sd[i] = rnd2();
+    });
+    const g = letters.geometry;
+    g.setAttribute('aTo', new THREE.InstancedBufferAttribute(to, 3));
+    g.setAttribute('aGlyph', new THREE.InstancedBufferAttribute(gl, 2));
+    g.setAttribute('aSize', new THREE.InstancedBufferAttribute(sz, 1));
+    g.setAttribute('aOrder', new THREE.InstancedBufferAttribute(or, 1));
+    g.setAttribute('aSeed', new THREE.InstancedBufferAttribute(sd, 1));
+    g.instanceCount = n;
+    letterMat.uniforms.uRight.value.set(1, 0, 0).applyQuaternion(wall.quaternion);
+    letterMat.uniforms.uUp.value.set(0, 1, 0).applyQuaternion(wall.quaternion);
   }
   const rnd2 = seeded(77);
 
@@ -546,8 +645,15 @@ function init() {
     wallMat.uniforms.uRadius.value = fS.coverage * far;
     wallMat.uniforms.uOpacity.value = fS.fade;
     wallMat.uniforms.uTime.value = tt; wallMat.uniforms.uSpot.value.copy(spot);
-    wall.visible = fS.fade > 0.002;
-    shade.visible = band && wall.visible; shadeMat.uniforms.uOp.value = fS.fade * 0.62;
+    wall.visible = !band && fS.fade > 0.002;
+    shade.visible = band && fS.fade > 0.002; shadeMat.uniforms.uOp.value = fS.fade * 0.62;
+    if (letters) {
+      letters.visible = fS.fade > 0.002;
+      letterMat.uniforms.uProgress.value = fS.fade;
+      letterMat.uniforms.uOpacity.value = 1;
+      letterMat.uniforms.uTime.value = tt;
+      letterMat.uniforms.uOrigin.value.copy(outer.position);
+    }
     grainMat.uniforms.uTime.value = tt; grainMat.uniforms.uSpread.value = fS.grains;
     grainMat.uniforms.uReach.value = fS.grains * far; grains.visible = fS.grains > 0.001;
   }
