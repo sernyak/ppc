@@ -58,13 +58,13 @@ function init() {
   /* фігура — як на /preview/3d/, лише в півтора раза менша (прохання власника) */
   const R = band ? 0.61 : 0.97;
   const cPos = wallMode
-    ? (band ? new THREE.Vector3(-0.45, R + 0.35, 0.3) : new THREE.Vector3(-2.3, R + 0.35, 0.6))
+    ? (band ? new THREE.Vector3(-0.8, R + 0.2, 0.4) : new THREE.Vector3(-2.3, R + 0.35, 0.6))
     : (band ? new THREE.Vector3(0, R + 0.3, 0) : new THREE.Vector3(5.0, R + 0.7, 0.6));
   const cam0 = wallMode
-    ? (band ? new THREE.Vector3(0.35, cPos.y + 0.15, 6.9) : new THREE.Vector3(0.4, cPos.y + 0.1, 9.2))
+    ? (band ? new THREE.Vector3(0.5, cPos.y + 0.9, 6.6) : new THREE.Vector3(0.4, cPos.y + 0.1, 9.2))
     : (band ? new THREE.Vector3(0, cPos.y, 7.0) : new THREE.Vector3(0.3, cPos.y + 0.2, 8.8));
   const target = wallMode
-    ? (band ? new THREE.Vector3(0.6, cPos.y - 0.1, 0) : new THREE.Vector3(1.55, cPos.y - 0.05, 0))
+    ? (band ? new THREE.Vector3(0.75, cPos.y + 1.25, 0) : new THREE.Vector3(1.55, cPos.y - 0.05, 0))
     : (band ? new THREE.Vector3(0, cPos.y - 0.72, 0) : new THREE.Vector3(3.1, cPos.y + 0.6, 0));   // дивимось нижче фігури — вона стає під заголовком, а знизу лишається місце під текст
   /* телефон: зі скролом камера відходить і веде погляд правіше — фігура меншає і йде ліворуч, даючи місце стіні */
   const PULL_BACK = 0, PULL_SIDE = 0, RISE = wallMode ? 0 : 0.42, SHRINK = wallMode ? 0 : 0.34;   // телефон: фігура сама підіймається до заголовка й меншає
@@ -670,14 +670,14 @@ function init() {
   function fitWallLede() {
     const b = sceneEl.getBoundingClientRect();
     if (!b.width) return;
-    const D = band ? 6.6 : 8.6, TILT = band ? 0.06 : 0.08;
-    const cx = band ? 0.12 : 0.5, cy = band ? 0.26 : -0.04;     // центр площини в кадрі
+    const D = band ? 6.4 : 8.6, TILT = band ? 0.1 : 0.08;
+    const cx = band ? 0.18 : 0.5, cy = band ? 0.2 : -0.04;     // центр площини в кадрі
     ndcToWorld.set(cx, cy, 0.5).unproject(camera).sub(camera.position).normalize();
     wall.position.copy(camera.position).addScaledVector(ndcToWorld, D);
     wall.quaternion.copy(camera.quaternion);
-    wall.rotateX(-TILT); wall.rotateY(band ? 0.16 : 0.24);      // легкий розворот до фігури, щоб рядки не злипались
+    wall.rotateX(-TILT); wall.rotateY(band ? 0.22 : 0.24);      // легкий розворот до фігури, щоб рядки не злипались
     const vh = 2 * D * Math.tan(camera.fov * Math.PI / 360);
-    const ww = vh * camera.aspect * (band ? 0.8 : 0.5), hh = vh * (band ? 0.34 : 0.5);
+    const ww = vh * camera.aspect * (band ? 0.86 : 0.5), hh = vh * (band ? 0.44 : 0.5);
     wall.geometry.dispose();
     wall.geometry = new THREE.PlaneGeometry(ww, hh);
     wall.updateMatrixWorld();
@@ -687,7 +687,7 @@ function init() {
     shade.position.copy(wall.position).addScaledVector(ndcToWorld, -0.1);
     shade.quaternion.copy(wall.quaternion);
     /* кегль підбираємо так, щоб опис уклався в площину: ширина рядка в умовних «пікселях» = 640 */
-    const boxW = 560, fsCss = boxW * (band ? 0.034 : 0.042);   // кегль такий, щоб опис читався і вкладався в площину
+    const boxW = band ? 640 : 560, fsCss = boxW * (band ? 0.034 : 0.042);   // кегль такий, щоб опис читався і вкладався в площину
     placeLetters(ww, hh, fsCss, boxW, boxW * hh / ww);
     const onPlane = (u, v, out) => wall.localToWorld(out.set(u * ww / 2, v * hh / 2, 0));
     onPlane(-0.9, 1.1, wallOrigin);
@@ -715,7 +715,7 @@ function init() {
   function progress() {
     if (dbgP != null) return dbgP;
     /* компʼютер: hero липкий на час прокрутки доріжки; телефон: історію веде положення сторінки */
-    const span = !band && track ? Math.max(1, track.offsetHeight - window.innerHeight) : window.innerHeight * 1.15;
+    const span = !band && track ? Math.max(1, track.offsetHeight - window.innerHeight) : window.innerHeight * 0.5;
     return clamp01(window.scrollY / span);
   }
   /* поставити брус між a і b, намальований на частку d від a; орієнтація як у beam() */
