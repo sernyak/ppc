@@ -25,7 +25,7 @@
  * ?still=1 — один кадр, ?age=3 — стільки секунд «уже минуло» після вступу.
  */
 import * as THREE from 'three';
-import { figureFrame, figureProgress, getFrame as sceneFrame, introRelease, flapStart, clamp01, CFG } from './hero-vault-desk-frame.js';
+import { figureFrame, figureProgress, getFrame as sceneFrame, introRelease, flapStart, clamp01, CFG, FIG } from './hero-vault-desk-frame.js';
 
 const sceneEl = document.getElementById('vault-scene');
 const canvas = document.getElementById('vault-canvas');
@@ -43,7 +43,9 @@ function init() {
   let renderer;
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
-  } catch (e) { sceneEl.classList.add('vault-nogl'); return; }
+  } catch (e) { sceneEl.classList.add('vault-nogl'); document.documentElement.classList.remove('vault-holo'); return; }
+  const html = document.documentElement;
+  html.classList.add('vault-live');                           // сцена запустилась — запасний таймер у <head> більше не потрібен
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -390,6 +392,15 @@ function init() {
   const spot = new THREE.Vector3(0, -50, 0), tspot = new THREE.Vector3(0, -50, 0);
   const raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2();
   const track = document.getElementById('vault-track');
+  const section = sceneEl.closest('section');
+  const titleEl = document.querySelector('#vault-hero h1.vault-rise');
+  /* положення елемента всередині hero без урахування transform — колонка тексту при завантаженні ще
+     доїжджає анімацією fade-in-up, а заголовок опущений; прямокутники з getBoundingClientRect тоді брешуть */
+  function offsetIn(el) {
+    let x = 0, y = 0, n = el;
+    while (n && n !== section) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; }
+    return n === section ? { x, y } : null;
+  }
   const lede = document.getElementById('vault-lede');
 
   /* ---------- опис: літери ---------- */
@@ -468,18 +479,23 @@ function init() {
   }
   function fitLede() {
     if (!ledeTokens) return;
-    const r = lede.getBoundingClientRect(), b = sceneEl.getBoundingClientRect();
-    if (!r.width || !b.width) return;
+    const bw = sceneEl.clientWidth, bh = sceneEl.clientHeight, o = offsetIn(lede);
+    let r;
+    if (o) r = { left: o.x, top: o.y, width: lede.offsetWidth, height: lede.offsetHeight };
+    else { const a = lede.getBoundingClientRect(), b = sceneEl.getBoundingClientRect(); r = { left: a.left - b.left, top: a.top - b.top, width: a.width, height: a.height }; }
+    if (!r.width || !bw) return;
     const D = 6.2, TILT = 0.13;
     const vh = 2 * D * Math.tan(camera.fov * Math.PI / 360);
-    const ww = vh * camera.aspect * (r.width / b.width);
+    const ww = vh * camera.aspect * (r.width / bw);
     if (ww < 0.05) return;
-    ledeBox = { cx: ((r.left + r.width / 2 - b.left) / b.width) * 2 - 1, cy: -(((r.top + r.height / 2 - b.top) / b.height) * 2 - 1), D, tilt: TILT };
+    ledeBox = { cx: ((r.left + r.width / 2) / bw) * 2 - 1, cy: -(((r.top + r.height / 2) / bh) * 2 - 1), D, tilt: TILT };
     placeLedeFrame();
     const cs = getComputedStyle(lede);
     placeLetters(ww, parseFloat(cs.fontSize) || 18, r.width, r.height, parseFloat(cs.lineHeight) || 0);
   }
 
+  /* «ще не випущена» — окрема мітка: час запуску буває відʼємним (після перезавантаження літери ставимо як уже приземлені) */
+  const UNSET = -1e6;
   let letterAtl = null, letters = null, letterMat = null, letterOrder = null, letterLaunch = null;
   let flaps = null, flapMat = null;
   const rnd2 = seeded(77);
@@ -501,7 +517,7 @@ function init() {
         varying vec2 vUv; varying float vFly; varying float vRow;
         void main(){
           /* скрол лише ВИПУСКАЄ літеру; далі вона летить за власним часом */
-          if (aLaunch < 0.0) { vFly = 0.0; gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
+          if (aLaunch < -1e5) { vFly = 0.0; gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }   // ще не випущена
           vec3 uRight = uFrame[0].xyz, uUp = uFrame[1].xyz;
           vec3 aToW = (uFrame * vec4(aTo, 1.0)).xyz;
           float delay = fract(aSeed * 3.7) * 0.85;
@@ -632,7 +648,10 @@ function init() {
     const cellW = (LCELL / LFS) * fsCss * scale;
     const to = new Float32Array(n * 3), gl = new Float32Array(n * 2), sz = new Float32Array(n), or = new Float32Array(n), sd = new Float32Array(n), rowv = new Float32Array(n);
     const fTo = new Float32Array(na * 3), fIdx = new Float32Array(na), fSz = new Float32Array(na), fSeed = new Float32Array(na), fStart = new Float32Array(na), fHalf = new Float32Array(na), fRow = new Float32Array(na);
-    letterOrder = or; letterLaunch = new Float32Array(n).fill(-1);
+    /* перерахунок розкладки (довантажився шрифт, змінився розмір вікна) не має заново запускати вже випущені літери */
+    const prevLaunch = letterLaunch;
+    letterOrder = or; letterLaunch = new Float32Array(n).fill(UNSET);
+    if (prevLaunch && prevLaunch.length === n) letterLaunch.set(prevLaunch);
     lay.letters.forEach((L, i) => {
       const x = (L.cx - rw / 2) * scale, y = (rh / 2 - L.cy) * scale, gi = letterAtl.index[L.k];
       to[i * 3] = x; to[i * 3 + 1] = y; to[i * 3 + 2] = 0.004;
@@ -678,7 +697,35 @@ function init() {
     /* раму опису рахуємо з базового положення камери */
     camera.position.set(target.x + d0 * Math.cos(el0) * Math.sin(az0), target.y + d0 * Math.sin(el0), target.z + d0 * Math.cos(el0) * Math.cos(az0));
     camera.lookAt(target); camera.updateMatrixWorld();
+    placeTitle();
     fitLede();
+  }
+  /* Поки опису ще немає, заголовок стоїть на рівні центра фігури — без порожнечі під ним. Щойно фігура
+     починає зʼєднувати вузли лініями, він відʼїжджає вгору на своє місце (перехід — у CSS, клас vault-risen). */
+  let risen = false;
+  function placeTitle() {
+    if (!titleEl || !html.classList.contains('vault-holo')) return;
+    const o = offsetIn(titleEl);
+    if (!o) return;
+    tmpA.copy(cPos).project(camera);
+    const figY = (1 - tmpA.y) / 2 * sceneEl.clientHeight;
+    html.style.setProperty('--vault-drop', Math.max(0, Math.round(figY - (o.y + titleEl.offsetHeight / 2))) + 'px');
+  }
+  function rise(now) {
+    if (risen) return;
+    risen = true;
+    if (now) { html.classList.add('vault-instant'); setTimeout(() => html.classList.remove('vault-instant'), 80); }
+    html.classList.add('vault-risen');
+  }
+  /* Після перезавантаження браузер повертає сторінку туди, де її лишили. Тоді нічого не програється саме:
+     фігура вже зібрана, заголовок на місці, літери, які відкрив би цей скрол, уже стоять, табло складене. */
+  let userInput = false, instantLand = false;
+  for (const ev of ['wheel', 'touchstart', 'keydown', 'pointerdown']) window.addEventListener(ev, () => { userInput = true; }, { passive: true });
+  function enterInstant() {
+    introMs = CFG.introMs; restSec = 99;
+    pTarget = pSmooth = progress();
+    instantLand = true;
+    rise(true);
   }
   /* hero липкий на час прокрутки доріжки */
   function progress() {
@@ -742,14 +789,15 @@ function init() {
       /* скрол відкриває «ворота»: дійшов до порога літери — вона вилітає і далі живе своїм часом */
       let touched = false, any = false;
       for (let i = 0; i < letterOrder.length; i++) {
-        if (letterLaunch[i] < 0 && fS.fade >= letterOrder[i] && letterOrder[i] <= 1) { letterLaunch[i] = tt; touched = true; }
-        else if (letterLaunch[i] >= 0 && fS.fade < letterOrder[i] - 0.03) { letterLaunch[i] = -1; touched = true; }
-        if (letterLaunch[i] >= 0) any = true;
+        if (letterLaunch[i] === UNSET && fS.fade >= letterOrder[i] && letterOrder[i] <= 1) { letterLaunch[i] = instantLand ? tt - 10 : tt; touched = true; }
+        else if (letterLaunch[i] !== UNSET && fS.fade < letterOrder[i] - 0.03) { letterLaunch[i] = UNSET; touched = true; }
+        if (letterLaunch[i] !== UNSET) any = true;
       }
       if (touched) letters.geometry.attributes.aLaunch.needsUpdate = true;
       letters.visible = any;
       flapMat.uniforms.uRest.value = restSec; flapMat.uniforms.uTime.value = tt;
       flaps.visible = fS.after;
+      instantLand = false;
     }
     dustMat.uniforms.uTime.value = tt; nebMat.uniforms.uTime.value = tt;
     grainMat.uniforms.uTime.value = tt; grainMat.uniforms.uSpread.value = fS.grains;
@@ -760,6 +808,7 @@ function init() {
 
   fit();
   if (reduced) {
+    html.classList.remove('vault-holo');
     const pp = dbgP != null ? dbgP : 0.95;
     const one = () => render(...frames(pp, 1));
     one();
@@ -767,6 +816,7 @@ function init() {
     new ResizeObserver(() => { fit(); one(); }).observe(sceneEl);
     return;
   }
+  if (dbgP == null && window.scrollY > 40) enterInstant();
 
   function tick(now) {
     running = false;
@@ -775,6 +825,9 @@ function init() {
     if (dbgIntro == null) introMs += dt;
     const introT = dbgIntro != null ? dbgIntro : clamp01(introMs / CFG.introMs);
     restSec = introT >= 1 ? restSec + dt / 1000 : AGE;
+    /* браузер міг повернути прокрутку трохи пізніше за старт сцени — ловимо це в перші миті, якщо людина ще нічого не торкалась */
+    if (!instantLand && !userInput && dbgP == null && t < 0.8 && introT < 1 && window.scrollY > 40) enterInstant();
+    if (!risen && introT >= FIG.intro.inner[0]) rise(dbgIntro != null);   // фігура почала зʼєднувати вузли — заголовок звільняє місце опису
     pTarget = progress();
     pSmooth += (pTarget - pSmooth) * 0.16;
     mx += (tmx - mx) * 0.08; my += (tmy - my) * 0.08;

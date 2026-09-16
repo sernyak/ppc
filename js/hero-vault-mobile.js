@@ -39,7 +39,8 @@ function init() {
   let renderer;
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
-  } catch (e) { sceneEl.classList.add('vault-nogl'); return; }
+  } catch (e) { sceneEl.classList.add('vault-nogl'); document.documentElement.classList.remove('vault-holo'); return; }
+  document.documentElement.classList.add('vault-live');       // сцена запустилась — запасний таймер у <head> більше не потрібен
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -287,6 +288,8 @@ function init() {
   const ledeFrame = new THREE.Object3D(); scene.add(ledeFrame);
   const ndcToWorld = new THREE.Vector3(), wave = new THREE.Vector3(), corner = new THREE.Vector3();
   let far = 1;
+  /* «ще не відпущена» — окрема мітка: час старту буває відʼємним (після перезавантаження табло ставимо вже складеним) */
+  const UNSET = -1e6;
   let flaps = null, flapMat = null, letterAtl = null, order = null, launch = null, lastStart = -1e9, released = 0;
   function fitLede() {
     if (!ledeTokens) return;
@@ -352,7 +355,7 @@ function init() {
         vec2 cellOf(float gi){ return vec2(mod(gi, uGrid.x), floor(gi / uGrid.x)); }
         float glyphAt(float j){ return j >= FLIPS - 1.0 ? aIdx : floor(hash(aSeed * 91.7 + j * 17.3) * uCount); }
         void main(){
-          if (aLaunch < 0.0) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }   // скрол ще не відпустив цю літеру
+          if (aLaunch < -1e5) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }  // скрол ще не відпустив цю літеру
           float s = (uTime + uAge - aLaunch) / DUR;
           if (s <= 0.0) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }        // стоїть у черзі
           float k = min(floor(s), FLIPS - 1.0);
@@ -407,7 +410,7 @@ function init() {
     const n = lay.letters.length, scale = ww / rw, cellW = (LCELL / LFS) * fsCss * scale;
     const to = new Float32Array(n * 3), idxA = new Float32Array(n), sz = new Float32Array(n), sd = new Float32Array(n), half = new Float32Array(n), rowv = new Float32Array(n);
     const prev = launch;
-    order = new Float32Array(n); launch = new Float32Array(n).fill(-1);
+    order = new Float32Array(n); launch = new Float32Array(n).fill(UNSET);
     lay.letters.forEach((L, i) => {
       to[i * 3] = (L.cx - rw / 2) * scale; to[i * 3 + 1] = (rh / 2 - L.cy) * scale; to[i * 3 + 2] = 0.004;
       idxA[i] = letterAtl.index[L.k]; sz[i] = cellW; sd[i] = rnd2();
@@ -416,7 +419,7 @@ function init() {
       order[i] = letterOrder(i, n, rnd2());
       if (prev && i < prev.length) launch[i] = prev[i];          // перерахунок розміру не скидає вже складене табло
     });
-    released = 0; for (let i = 0; i < n; i++) if (launch[i] >= 0) released++;
+    released = 0; for (let i = 0; i < n; i++) if (launch[i] !== UNSET) released++;
     const g = flaps.geometry;
     g.setAttribute('aTo', new THREE.InstancedBufferAttribute(to, 3));
     g.setAttribute('aIdx', new THREE.InstancedBufferAttribute(idxA, 1));
@@ -519,10 +522,11 @@ function init() {
       /* скрол відпускає літери в порядку читання; ті, що відпущені разом, стають у чергу — табло біжить хвилею */
       let touched = false;
       for (let i = 0; i < order.length; i++) {
-        if (launch[i] < 0 && fS.release >= order[i]) { lastStart = queueLaunch(tt, lastStart, order.length); launch[i] = lastStart; released++; touched = true; }
+        if (launch[i] === UNSET && fS.release >= order[i]) { lastStart = instantLand ? tt - 10 : queueLaunch(tt, lastStart, order.length); launch[i] = lastStart; released++; touched = true; }
       }
       if (touched) flaps.geometry.attributes.aLaunch.needsUpdate = true;
       flaps.visible = released > 0;
+      instantLand = false;
       flapMat.uniforms.uTime.value = tt;
     }
     dustMat.uniforms.uTime.value = tt; nebMat.uniforms.uTime.value = tt;
@@ -552,6 +556,26 @@ function init() {
     if (q.has('stage')) jumpTo(pinEnd);
   });
   if (q.has('stage')) jumpTo(pinEnd);
+
+  /* Перезавантаження: доріжку прилипання будує цей скрипт, тож браузер сам місце не відновлює (у <head>
+     scrollRestoration = manual) — відновлюємо ми, уже з правильною висотою. І нічого не програється саме:
+     фігура зібрана, табло, яке відкрив би цей скрол, уже складене, сторінка людину не тримає. */
+  let instantLand = false;
+  function enterInstant() {
+    introMs = CFG.introMs;
+    [preT, pinT] = scrollParts(); preS = preT; pinS = pinT;
+    instantLand = true;
+  }
+  let restoreY = 0;
+  try {
+    const nav = performance.getEntriesByType('navigation')[0];
+    if (nav && (nav.type === 'reload' || nav.type === 'back_forward')) restoreY = parseFloat(sessionStorage.getItem('vault-y')) || 0;
+  } catch (e) { /* без сховища просто починаємо згори */ }
+  if (dbgP == null && !q.has('stage')) {
+    if (restoreY > 40) { lastY = restoreY; jumpTo(restoreY); enterInstant(); }
+    else if (window.scrollY > 40) enterInstant();
+  }
+  window.addEventListener('pagehide', () => { try { sessionStorage.setItem('vault-y', String(Math.round(window.scrollY))); } catch (e) { /* не критично */ } });
 
   function tick(now) {
     running = false;
