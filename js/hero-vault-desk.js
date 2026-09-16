@@ -25,7 +25,7 @@
  * ?still=1 — один кадр, ?age=3 — стільки секунд «уже минуло» після вступу.
  */
 import * as THREE from 'three';
-import { figureFrame, figureProgress, getFrame as sceneFrame, introRelease, flapStart, clamp01, CFG, FIG } from './hero-vault-desk-frame.js';
+import { figureFrame, figureProgress, getFrame as sceneFrame, introRelease, flapStart, clamp01, CFG } from './hero-vault-desk-frame.js';
 
 const sceneEl = document.getElementById('vault-scene');
 const canvas = document.getElementById('vault-canvas');
@@ -701,7 +701,8 @@ function init() {
     fitLede();
   }
   /* Поки опису ще немає, заголовок стоїть на рівні центра фігури — без порожнечі під ним. Щойно фігура
-     починає зʼєднувати вузли лініями, він відʼїжджає вгору на своє місце (перехід — у CSS, клас vault-risen). */
+     повністю зʼявилась, він плавно відʼїжджає вгору на своє місце (перехід — у CSS, клас vault-risen),
+     і лише тоді табло виводить перше речення. */
   let risen = false;
   function placeTitle() {
     if (!titleEl || !html.classList.contains('vault-holo')) return;
@@ -710,6 +711,7 @@ function init() {
     tmpA.copy(cPos).project(camera);
     const figY = (1 - tmpA.y) / 2 * sceneEl.clientHeight;
     html.style.setProperty('--vault-drop', Math.max(0, Math.round(figY - (o.y + titleEl.offsetHeight / 2))) + 'px');
+    html.style.setProperty('--vault-rise-dur', CFG.titleRise + 's');
   }
   function rise(now) {
     if (risen) return;
@@ -827,7 +829,7 @@ function init() {
     restSec = introT >= 1 ? restSec + dt / 1000 : AGE;
     /* браузер міг повернути прокрутку трохи пізніше за старт сцени — ловимо це в перші миті, якщо людина ще нічого не торкалась */
     if (!instantLand && !userInput && dbgP == null && t < 0.8 && introT < 1 && window.scrollY > 40) enterInstant();
-    if (!risen && introT >= FIG.intro.inner[0]) rise(dbgIntro != null);   // фігура почала зʼєднувати вузли — заголовок звільняє місце опису
+    if (!risen && introT >= 1) rise(dbgIntro != null);   // фігура повністю зʼявилась — заголовок звільняє місце опису
     pTarget = progress();
     pSmooth += (pTarget - pSmooth) * 0.16;
     mx += (tmx - mx) * 0.08; my += (tmy - my) * 0.08;

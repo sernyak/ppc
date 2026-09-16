@@ -75,6 +75,7 @@ test('табло: хвиля зліва направо, і вся фраза с�
   assert.ok(flapStart(n - 1, n, 0) > flapStart(0, n, 1), 'остання — помітно пізніше за першу');
   for (let i = 0; i < n; i++) assert.ok(flapStart(i, n, 1) + CFG.flap.flips * CFG.flap.dur <= flapDone() + 1e-9, 'кожна літера встигає зупинитись');
   assert.ok(flapDone() < 3, `табло зупиняється за ${flapDone()} с — перший екран не чекає довго`);
+  assert.ok(CFG.flap.delay >= CFG.titleRise, 'спершу заголовок підіймається й звільняє місце, лише потім зʼявляється текст');
   assert.ok(CFG.flap.dur >= 0.1, 'пластинка перекидається не частіше ~10 разів на секунду — без мерехтіння');
 });
 

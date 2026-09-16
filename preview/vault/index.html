@@ -114,7 +114,7 @@
         .vault-holo #vault-lede { opacity: 0; }
         @media (min-width: 1024px) {
             .vault-holo .vault-rise { transform: translateY(var(--vault-drop, 185px)); transition: transform .5s ease; }
-            .vault-holo.vault-risen .vault-rise { transform: none; transition: transform 1.25s cubic-bezier(.22,.8,.2,1); }
+            .vault-holo.vault-risen .vault-rise { transform: none; transition: transform var(--vault-rise-dur, 1s) cubic-bezier(.3,.1,.2,1); }
             .vault-holo.vault-instant .vault-rise { transition: none; }
         }
     </style>
@@ -170,7 +170,7 @@
                 </h1>
 
                 <p id="vault-lede" class="order-4 text-lg text-slate-400 leading-relaxed">
-                    Мене звати <strong class="text-slate-200">Олександр Серняк</strong>, я PPC-маркетолог із 2016 року.
+                    Мене звати <strong class="text-slate-200">Олександр Серняк</strong>, я займаюся маркетингом із 2016 року.
                     Я не «роблю сайти» — я будую системи, які приймають гроші й доставляють результат без участі людини:
                     від форми оплати й розрахунків до звіту, який сам приходить клієнту на пошту,
                     і до Telegram-ботів, які спілкуються з клієнтами замість менеджера.

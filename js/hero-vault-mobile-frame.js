@@ -37,7 +37,7 @@ export const CFG = {
   introMs: 2400,
   pull: [0.05, 0.85],       // частка ділянки pre: фігура меншає, поки сторінка доїжджає до опису
   pinScreens: 1.1,          // довжина ділянки pin у висотах екрана
-  grains: [0.0, 0.7],       // частка pin: вогники сиплються з фігури в опис
+  beams: [0.0, 0.14],       // частка pin: промені від фігури до опису проступають разом із першими літерами
   shade: [0.0, 0.12],       // частка pin: темна підкладка під описом
   order: { spread: 0.86, jitter: 0.06 },   // коли скрол відпускає i-ту літеру (частка pin): у порядку читання, з ледь помітним розкидом
   flap: { flips: 3, dur: 0.15, burst: 1.3 },   // burst — за скільки секунд пробігає хвиля, якщо скрол відпустив усе одразу
@@ -83,7 +83,7 @@ export function getFrame(pre, pin, introT, cfg = CFG) {
   return {
     pull: smooth(cfg.pull[0], cfg.pull[1], pre),
     story: clamp01(pre * 0.35 + pin * 0.65),
-    grains: smooth(cfg.grains[0], cfg.grains[1], pin),
+    beams: smooth(cfg.beams[0], cfg.beams[1], pin),
     shade: smooth(cfg.shade[0], cfg.shade[1], pin),
     release: pin,
     after,

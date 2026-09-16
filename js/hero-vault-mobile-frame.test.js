@@ -17,7 +17,7 @@ test('фігура: поява як на v6, від скролу крутить�
 
 test('до кінця вступу скрол нічого не робить', () => {
   const f = getFrame(1, 1, 0.9);
-  assert.equal(f.pull, 0); assert.equal(f.release, 0); assert.equal(f.grains, 0); assert.equal(f.story, 0); assert.equal(f.after, false);
+  assert.equal(f.pull, 0); assert.equal(f.release, 0); assert.equal(f.beams, 0); assert.equal(f.story, 0); assert.equal(f.after, false);
 });
 
 test('фігура встигає зменшитись ще до того, як hero прилипне', () => {
@@ -60,7 +60,7 @@ test('усе монотонно зростає зі скролом', () => {
       assert.ok(f.story >= 0 && f.story <= 1);
     }
     const f = getFrame(i / 40, i / 40, 1);
-    for (const k of ['pull', 'story', 'grains', 'shade', 'release']) assert.ok(f[k] >= prev[k] - 1e-12, k);
+    for (const k of ['pull', 'story', 'beams', 'shade', 'release']) assert.ok(f[k] >= prev[k] - 1e-12, k);
     prev = f;
   }
   assert.equal(clamp01(-1), 0); assert.equal(smooth(0, 1, 1), 1);

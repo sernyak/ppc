@@ -5,7 +5,8 @@
  * ФІГУРА — як на /preview/3d-v6/: при відкритті виринають усі вузли, між
  * ними малюється ґратка, каркас замикається, займається світло. Зі скролом
  * ґратка провертається, фігура докручується й трохи меншає. Каркас не
- * розсувається.
+ * розсувається. По металу раз на кілька секунд пробігає мʼякий блік, а
+ * від ядра до опису йдуть легкі промені світла.
  *
  * ОПИС — ТАБЛО. Абзац «Мене звати…» складається з літер точно на місці абзацу
  * в розмітці (сам <p> лишається прозорим носієм змісту). Кожну літеру
@@ -109,37 +110,67 @@ function init() {
   innerLines.sort((a, b) => a.y - b.y);
   const COUNTS = { joints: joints.length, inner: innerLines.length, outer: outerBeams.length };
 
-  /* ---------- вогники: сиплються з фігури в опис ---------- */
   const rnd = seeded(31), rnd2 = seeded(77);
-  const N = 1100;
-  const gTo = new Float32Array(N * 3), gPhase = [], gSpeed = [], gPos = new Float32Array(N * 3);
-  for (let i = 0; i < N; i++) { gPhase.push(rnd()); gSpeed.push(0.035 + rnd() * 0.055); }
-  const gGeo = new THREE.BufferGeometry();
-  gGeo.setAttribute('position', new THREE.BufferAttribute(gPos, 3));
-  gGeo.setAttribute('aTo', new THREE.BufferAttribute(gTo, 3));
-  gGeo.setAttribute('aPhase', new THREE.Float32BufferAttribute(gPhase, 1));
-  gGeo.setAttribute('aSpeed', new THREE.Float32BufferAttribute(gSpeed, 1));
-  gGeo.boundingSphere = new THREE.Sphere(cPos.clone(), 30);
-  const grainMat = new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uOrigin: { value: cPos.clone() }, uStart: { value: R * 0.12 }, uSpread: { value: 0 }, uSize: { value: 5 }, uPR: { value: renderer.getPixelRatio() }, uColorA: { value: new THREE.Color(0x60a5fa) }, uColorB: { value: new THREE.Color(0xa78bfa) },
-      uWave: { value: new THREE.Vector3() }, uReach: { value: 0 }, uSoft: { value: 0.5 } },
-    vertexShader: `attribute vec3 aTo; attribute float aPhase; attribute float aSpeed;
-      uniform float uTime; uniform vec3 uOrigin; uniform vec3 uWave; uniform float uReach; uniform float uSoft;
-      uniform float uStart; uniform float uSpread; uniform float uSize; uniform float uPR; varying float vA; varying float vK;
-      void main(){ float u = fract(aPhase + uTime * aSpeed);
-        vec3 d = aTo - uOrigin; float maxD = length(d); vec3 p = uOrigin + d / max(maxD, 0.001) * mix(uStart, maxD, u);
-        float lit = 1.0 - smoothstep(uReach + uSoft * 0.6, uReach + uSoft * 2.4, distance(aTo, uWave));
-        vA = smoothstep(0.0, 0.16, u) * (1.0 - smoothstep(0.55, 0.88, u)) * lit * smoothstep(0.0, 0.12, uSpread); vK = aPhase;
-        vec4 mv = modelViewMatrix * vec4(p, 1.0); gl_PointSize = min(uSize * uPR * (6.0 / -mv.z), 9.0 * uPR); gl_Position = projectionMatrix * mv; }`,
-    fragmentShader: `uniform vec3 uColorA; uniform vec3 uColorB; varying float vA; varying float vK;
-      void main(){ vec2 c = gl_PointCoord - 0.5; float a = smoothstep(0.5, 0.08, length(c)); vec3 col = mix(uColorA, uColorB, vK);
-        gl_FragColor = vec4(col * a * vA * 0.85, 1.0);
+
+  /* ---------- блік, що пробігає по металу ---------- */
+  /* Раз на кілька секунд по фігурі наскрізь проходить мʼяка світла смуга — вздовж однієї діагоналі у світі,
+     тож на фігурі, що обертається, вона читається як світло, яке ковзає по брусах. Одна повільна хвиля,
+     без спалахів. */
+  const glint = { uGlintT: { value: 0 }, uGlintC: { value: cPos.clone() }, uGlintR: { value: R } };
+  function addGlint(mat, k) {
+    mat.onBeforeCompile = (sh) => {
+      Object.assign(sh.uniforms, glint, { uGlintK: { value: k } });
+      sh.vertexShader = 'varying vec3 vGlintW;\n' + sh.vertexShader.replace('#include <project_vertex>',
+        '#include <project_vertex>\n\tvGlintW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+      sh.fragmentShader = 'uniform float uGlintT; uniform vec3 uGlintC; uniform float uGlintR; uniform float uGlintK; varying vec3 vGlintW;\n' + sh.fragmentShader.replace('#include <opaque_fragment>',
+        `float gd = dot(vGlintW - uGlintC, normalize(vec3(0.55, 1.0, 0.25))) / uGlintR;
+        float gph = fract(uGlintT / 5.0);                              // цикл 5 с
+        float gpos = mix(-1.6, 1.6, clamp(gph / 0.55, 0.0, 1.0));      // смуга проходить фігуру за ~2,7 с, далі пауза
+        float gband = exp(-pow((gd - gpos) * 4.5, 2.0)) * (1.0 - step(0.55, gph));
+        outgoingLight += vec3(0.6, 0.76, 1.0) * gband * uGlintK;
+        #include <opaque_fragment>`);
+    };
+  }
+  addGlint(metalOuter, 0.85); addGlint(metalInner, 0.55);
+
+  /* ---------- промені: мʼяке світло від фігури до опису ---------- */
+  /* Віяло від ядра фігури до верхнього краю опису: кілька світлих смуг, що повільно зсуваються, і хвиля
+     світла, яка раз на кілька секунд стікає по них до тексту. Над самим текстом промені згасають — читати
+     не заважають. Вершини віяла — рядками, щоб смуги не кривились на трапеції. */
+  const BEAM_ROWS = 28;
+  const beamGeo = new THREE.BufferGeometry();
+  {
+    const uv = [], idx = [];
+    for (let j = 0; j <= BEAM_ROWS; j++) { uv.push(0, j / BEAM_ROWS, 1, j / BEAM_ROWS); }
+    for (let j = 0; j < BEAM_ROWS; j++) { const a = j * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); }
+    beamGeo.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array((BEAM_ROWS + 1) * 6), 3));
+    beamGeo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    beamGeo.setIndex(idx);
+  }
+  const beamMat = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uOp: { value: 0 }, uStartV: { value: 0.2 }, uA: { value: new THREE.Color(0x4f8ff0) }, uB: { value: new THREE.Color(0xa8c8ff) } },
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: `uniform float uTime; uniform float uOp; uniform float uStartV; uniform vec3 uA; uniform vec3 uB; varying vec2 vUv;
+      void main(){
+        float u = vUv.x, v = vUv.y;
+        float across = smoothstep(0.0, 0.3, u) * smoothstep(1.0, 0.7, u);
+        /* зʼявляються одразу з-під фігури й тягнуться до тексту, мʼяко згасаючи на його перших рядках */
+        float along = smoothstep(uStartV, uStartV + 0.1, v) * (1.0 - smoothstep(0.55, 1.0, v));
+        /* кілька ширших променів, що розходяться від ядра (віяло) й повільно перебігають */
+        float s = 0.5 + 0.5 * sin(u * 11.0 + uTime * 0.35) * sin(u * 4.6 - uTime * 0.23 + 1.3);
+        float shafts = 0.18 + 0.82 * pow(s, 2.0);
+        float flow = 0.65 + 0.7 * exp(-pow((fract(uTime * 0.2) * 1.4 - 0.1 - v) * 4.0, 2.0));   // хвиля світла стікає до тексту
+        vec3 c = mix(uA, uB, v) * across * along * shafts * flow * uOp * 0.42;
+        gl_FragColor = vec4(c, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
-        gl_FragColor.a = max(gl_FragColor.r, max(gl_FragColor.g, gl_FragColor.b)); }`,
-    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, premultipliedAlpha: true,
+        gl_FragColor.a = max(gl_FragColor.r, max(gl_FragColor.g, gl_FragColor.b));
+      }`,
+    transparent: true, depthWrite: false, depthTest: false, side: THREE.DoubleSide,
+    blending: THREE.AdditiveBlending, premultipliedAlpha: true,
   });
-  const grains = new THREE.Points(gGeo, grainMat); grains.visible = false; scene.add(grains);
+  const beams = new THREE.Mesh(beamGeo, beamMat);
+  beams.frustumCulled = false; beams.renderOrder = -1.5; beams.visible = false; scene.add(beams);
 
   /* далекий пил і туманності — глибина кадру */
   const DUST = 420;
@@ -286,8 +317,7 @@ function init() {
   /* Рама опису: прямокутник абзацу перед камерою, обличчям до неї (вертикальна площина дала б трапецію).
      Камера нерухома, тож раму ставимо раз — при кожній зміні розміру. */
   const ledeFrame = new THREE.Object3D(); scene.add(ledeFrame);
-  const ndcToWorld = new THREE.Vector3(), wave = new THREE.Vector3(), corner = new THREE.Vector3();
-  let far = 1;
+  const ndcToWorld = new THREE.Vector3(), corner = new THREE.Vector3();
   /* «ще не відпущена» — окрема мітка: час старту буває відʼємним (після перезавантаження табло ставимо вже складеним) */
   const UNSET = -1e6;
   let flaps = null, flapMat = null, letterAtl = null, order = null, launch = null, lastStart = -1e9, released = 0;
@@ -311,15 +341,21 @@ function init() {
     /* міжрядковий — той самий, що в браузера: табло займає рівно прямокутник абзацу, без порожнечі під ним */
     const cs = getComputedStyle(lede);
     placeLetters(ww, parseFloat(cs.fontSize) || 18, r.width, r.height, parseFloat(cs.lineHeight) || 0);
-    /* вогники летять у прямокутник опису, фронт заходить згори — з боку фігури */
-    const onPlane = (u, v, out) => ledeFrame.localToWorld(out.set(u * ww / 2, v * hh / 2, 0));
-    onPlane(0, 1.12, wave);
-    far = 0;
-    for (const sx of [-1, 1]) for (const sy of [-1, 1]) far = Math.max(far, onPlane(sx, sy, corner).distanceTo(wave));
-    grainMat.uniforms.uWave.value.copy(wave);
-    const at = gGeo.attributes.aTo;
-    for (let i = 0; i < N; i++) { onPlane((rnd2() - 0.5) * 1.92, (rnd2() - 0.5) * 1.92, corner); at.setXYZ(i, corner.x, corner.y, corner.z); }
-    at.needsUpdate = true;
+    /* віяло променів: від ядра фігури до верхньої частини опису */
+    const right = new THREE.Vector3(1, 0, 0).applyQuaternion(ledeFrame.quaternion);
+    const apex = tmpA.copy(cPos);
+    const baseL = ledeFrame.localToWorld(corner.set(-ww * 0.56, hh * 0.5 - hh * 0.3, 0)).clone();
+    const baseR = ledeFrame.localToWorld(corner.set(ww * 0.56, hh * 0.5 - hh * 0.3, 0)).clone();
+    const apexL = apex.clone().addScaledVector(right, -R * 0.1), apexR = apex.clone().addScaledVector(right, R * 0.1);
+    const pos = beamGeo.attributes.position;
+    for (let j = 0; j <= BEAM_ROWS; j++) {
+      const k = j / BEAM_ROWS;
+      tmpB.copy(apexL).lerp(baseL, k); pos.setXYZ(j * 2, tmpB.x, tmpB.y, tmpB.z);
+      tmpC.copy(apexR).lerp(baseR, k); pos.setXYZ(j * 2 + 1, tmpC.x, tmpC.y, tmpC.z);
+    }
+    pos.needsUpdate = true;
+    /* звідки промінь видно: нижній край фігури (вона вже трохи зменшена), у частках довжини віяла */
+    beamMat.uniforms.uStartV.value = Math.min(0.5, (R * (1 - SHRINK) * 0.9) / Math.max(0.01, apex.distanceTo(tmpB.copy(baseL).lerp(baseR, 0.5))));
   }
   /* ТАБЛО: кожна літера — три шматки: верх нового знака (відкривається позаду), низ старого (його закриває
      пластинка) і сама пластинка на петлі посередині, що падає вниз: поки не пройшла ребром — на ній верх
@@ -482,7 +518,6 @@ function init() {
     renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.updateProjectionMatrix();
     camera.position.copy(cam0); camera.lookAt(target); camera.updateMatrixWorld();
-    grainMat.uniforms.uPR.value = renderer.getPixelRatio();
     measurePin();
     fitLede();
   }
@@ -516,7 +551,7 @@ function init() {
     outer.rotation.x = 0.22;
     outer.position.y = cPos.y + Math.sin(tt * 0.6) * 0.03;
     outer.scale.setScalar(1 - SHRINK * fS.pull);
-    grainMat.uniforms.uOrigin.value.copy(outer.position);
+    glint.uGlintC.value.copy(outer.position); glint.uGlintR.value = R * outer.scale.x; glint.uGlintT.value = tt;
     shade.visible = !!flaps && fS.shade > 0.002; shadeMat.uniforms.uOp.value = fS.shade * 0.62;
     if (flaps) {
       /* скрол відпускає літери в порядку читання; ті, що відпущені разом, стають у чергу — табло біжить хвилею */
@@ -530,8 +565,7 @@ function init() {
       flapMat.uniforms.uTime.value = tt;
     }
     dustMat.uniforms.uTime.value = tt; nebMat.uniforms.uTime.value = tt;
-    grainMat.uniforms.uTime.value = tt; grainMat.uniforms.uSpread.value = fS.grains;
-    grainMat.uniforms.uReach.value = fS.grains * far; grains.visible = fS.grains > 0.001;
+    beamMat.uniforms.uTime.value = tt; beamMat.uniforms.uOp.value = fS.beams; beams.visible = !!flaps && fS.beams > 0.002;
   }
   const frames = (pre, pin, introT) => { const fS = sceneFrame(pre, pin, introT); return [figureFrame(fS.story, introT, COUNTS), fS]; };
   function render(fF, fS) { apply(fF, fS, t); renderer.render(scene, camera); }
@@ -585,7 +619,7 @@ function init() {
     const introT = dbgIntro != null ? dbgIntro : clamp01(introMs / CFG.introMs);
     [preT, pinT] = scrollParts();
     preS += (preT - preS) * 0.16; pinS += (pinT - pinS) * 0.16;
-    angle += dt / 1000 * (0.1 + 0.08 * pinS);
+    angle += dt / 1000 * (0.2 + 0.12 * pinS);                          // фігура помітно крутиться, зі скролом — трохи швидше
     if (still) { preS = preT; pinS = pinT; render(...frames(preS, pinS, introT)); return; }
     if (frameNo % 2) render(...frames(preS, pinS, introT));          // 30 к/с
     if (visible && !document.hidden) schedule();
