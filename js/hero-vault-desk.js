@@ -204,6 +204,15 @@ function init() {
     wallMat.uniforms.uCell.value.set(COLS, ROWS);
     for (let y = 0; y < ROWS; y++) writeRow(y, 11 + y * 3);
     paintGrid();
+    /* літери опису могли намалюватись ще запасним шрифтом — тепер Inter готовий, перемальовуємо й перекладаємо */
+    if (letters) {
+      const old = letterAtl.tex;
+      letterAtl = letterAtlas();
+      letterMat.uniforms.uAtlas.value = letterAtl.tex; flapMat.uniforms.uAtlas.value = letterAtl.tex;
+      flapMat.uniforms.uCount.value = letterAtl.count;
+      old.dispose();
+    }
+    fitLede();
     schedule();
   });
   function writeRow(y, seed) {
