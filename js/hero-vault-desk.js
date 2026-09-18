@@ -496,7 +496,8 @@ function init() {
 
   /* «ще не випущена» — окрема мітка: час запуску буває відʼємним (після перезавантаження літери ставимо як уже приземлені) */
   const UNSET = -1e6;
-  let letterAtl = null, letters = null, letterMat = null, letterOrder = null, letterLaunch = null;
+  let letterAtl = null, letters = null, letterMat = null, letterOrder = null, letterLaunch = null, letterLand = null;
+  const fract = (x) => x - Math.floor(x);
   let flaps = null, flapMat = null;
   const rnd2 = seeded(77);
   function buildLetters() {
@@ -650,6 +651,7 @@ function init() {
     const fTo = new Float32Array(na * 3), fIdx = new Float32Array(na), fSz = new Float32Array(na), fSeed = new Float32Array(na), fStart = new Float32Array(na), fHalf = new Float32Array(na), fRow = new Float32Array(na);
     /* перерахунок розкладки (довантажився шрифт, змінився розмір вікна) не має заново запускати вже випущені літери */
     const prevLaunch = letterLaunch;
+    const land = new Float32Array(n); letterLand = land;
     letterOrder = or; letterLaunch = new Float32Array(n).fill(UNSET);
     if (prevLaunch && prevLaunch.length === n) letterLaunch.set(prevLaunch);
     lay.letters.forEach((L, i) => {
@@ -658,8 +660,12 @@ function init() {
       gl[i * 2] = gi % letterAtl.cols; gl[i * 2 + 1] = Math.floor(gi / letterAtl.cols);
       sz[i] = cellW;
       /* решта абзацу: скрол відпускає літери приблизно зліва направо, але врозтіч */
-      or[i] = i < na ? 2 : Math.min(0.92, ((i - na) / Math.max(1, n - na)) * 0.5 + rnd2() * 0.42);
+      /* поріг не нижчий за 0,04: літера ховається, коли скрол повертається нижче порогу − 0,03, — з майже
+         нульовим порогом цього не ставалося ніколи, і перші літери («н», «р» з «Я не «роблю…») лишались на екрані */
+      or[i] = i < na ? 2 : Math.min(0.92, 0.04 + ((i - na) / Math.max(1, n - na)) * 0.48 + rnd2() * 0.4);
       sd[i] = rnd2();
+      /* коли літера сяде після запуску — ті самі затримка й тривалість, що в шейдері */
+      land[i] = fract(sd[i] * 3.7) * 0.85 + 1.05 + fract(sd[i] * 11) * 0.75;
       rowv[i] = L.cy / rh;
       if (i < na) {
         fTo[i * 3] = x; fTo[i * 3 + 1] = y; fTo[i * 3 + 2] = 0.004;
@@ -845,7 +851,34 @@ function init() {
   new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (visible) { last = 0; schedule(); } }, { threshold: 0.02 }).observe(sceneEl);
   document.addEventListener('visibilitychange', () => { if (!document.hidden && visible) { last = 0; schedule(); } });
   new ResizeObserver(() => { fit(); schedule(); }).observe(sceneEl);
-  window.addEventListener('scroll', schedule, { passive: true });
+  /* Швидкий скрол не проскакує опис: сторінка не йде нижче точки, де скрол відпустив останню літеру, доки всі
+     літери не долетять і не сядуть. Hero весь цей час прилиплий, тож кадр не стрибає. Лише на спуску. */
+  let lastY = window.scrollY;
+  function lettersDone() {
+    if (!letterLaunch) return true;
+    let end = 0;
+    for (let i = 0; i < letterLaunch.length; i++) {
+      if (letterOrder[i] > 1) continue;                               // перше речення — табло, воно своє
+      if (letterLaunch[i] === UNSET) return false;
+      end = Math.max(end, letterLaunch[i] + letterLand[i]);
+    }
+    return t >= end;
+  }
+  function holdForLetters() {
+    const y = window.scrollY, down = y > lastY;
+    lastY = y;
+    if (!letters || dbgP != null || !down || lettersDone()) return;
+    const gateY = Math.round(CFG.fade[1] * Math.max(1, (track ? track.offsetHeight : 0) - window.innerHeight));
+    if (y > gateY + 2) { jumpTo(gateY); lastY = gateY; }
+  }
+  /* на <html> стоїть scroll-smooth: звичайний scrollTo поїхав би плавно, а треба зупинити скрол на місці */
+  function jumpTo(y) {
+    const prev = html.style.scrollBehavior;
+    html.style.scrollBehavior = 'auto';
+    window.scrollTo(0, y);
+    html.style.scrollBehavior = prev;
+  }
+  window.addEventListener('scroll', () => { holdForLetters(); schedule(); }, { passive: true });
   const hero = sceneEl.closest('section') || sceneEl;
   if (fine) {
     hero.addEventListener('pointermove', (ev) => {
