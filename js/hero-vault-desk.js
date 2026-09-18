@@ -12,11 +12,11 @@
  *
  * ОПИС — ПРОЄКЦІЯ. Абзац «Мене звати…» складається з окремих літер точно на
  * місці абзацу в розмітці (сам <p> лишається прозорим носієм змісту). Рама
- * тексту прибита до кадру, тож камера може облітати фігуру. Перше речення
- * щойно фігура зібралась проявляється САМЕ — ефектом табло: кожна літера
- * кілька разів перекидає пластинку й зупиняється на своєму знаку. Решту
- * абзацу відпускає скрол: літери вилітають з ядра й сідають на місця, далі
- * летять за власним часом.
+ * тексту прибита до кадру, тож камера може облітати фігуру. Увесь опис —
+ * ТАБЛО: кожна літера кілька разів перекидає пластинку й зупиняється на своєму
+ * знаку. Перше речення проявляється саме, щойно фігура зʼявилась і заголовок
+ * звільнив місце; решту відкриває скрол — хвилею в порядку читання. Швидкий
+ * скрол сторінка притримує, доки табло не складеться (до ~1,5 с).
  *
  * ПОЛЕ ФОРМУЛ за фігурою: після вступу ледь тліє, а щойно починається скрол і
  * з ядра вирушають вогники — стає яскравим.
@@ -25,7 +25,7 @@
  * ?still=1 — один кадр, ?age=3 — стільки секунд «уже минуло» після вступу.
  */
 import * as THREE from 'three';
-import { figureFrame, figureProgress, getFrame as sceneFrame, introRelease, flapStart, clamp01, CFG } from './hero-vault-desk-frame.js';
+import { figureFrame, figureProgress, getFrame as sceneFrame, introRelease, flapStart, restOrder, queueLaunch, clamp01, CFG } from './hero-vault-desk-frame.js';
 
 const sceneEl = document.getElementById('vault-scene');
 const canvas = document.getElementById('vault-canvas');
@@ -207,11 +207,10 @@ function init() {
     for (let y = 0; y < ROWS; y++) writeRow(y, 11 + y * 3);
     paintGrid();
     /* літери опису могли намалюватись ще запасним шрифтом — тепер Inter готовий, перемальовуємо й перекладаємо */
-    if (letters) {
+    if (flaps) {
       const old = letterAtl.tex;
       letterAtl = letterAtlas();
-      letterMat.uniforms.uAtlas.value = letterAtl.tex; flapMat.uniforms.uAtlas.value = letterAtl.tex;
-      flapMat.uniforms.uCount.value = letterAtl.count;
+      flapMat.uniforms.uAtlas.value = letterAtl.tex; flapMat.uniforms.uCount.value = letterAtl.count;
       old.dispose();
     }
     fitLede();
@@ -474,7 +473,6 @@ function init() {
     ledeFrame.position.copy(camera.position).addScaledVector(ndcToWorld, ledeBox.D);
     ledeFrame.quaternion.copy(camera.quaternion); ledeFrame.rotateX(-ledeBox.tilt);
     ledeFrame.updateMatrixWorld();
-    if (letterMat) letterMat.uniforms.uFrame.value.copy(ledeFrame.matrixWorld);
     if (flapMat) flapMat.uniforms.uFrame.value.copy(ledeFrame.matrixWorld);
   }
   function fitLede() {
@@ -494,75 +492,19 @@ function init() {
     placeLetters(ww, parseFloat(cs.fontSize) || 18, r.width, r.height, parseFloat(cs.lineHeight) || 0);
   }
 
-  /* «ще не випущена» — окрема мітка: час запуску буває відʼємним (після перезавантаження літери ставимо як уже приземлені) */
+  /* «ще не відкрита» — окрема мітка: час старту буває відʼємним (після перезавантаження табло ставимо вже складеним) */
   const UNSET = -1e6;
-  let letterAtl = null, letters = null, letterMat = null, letterOrder = null, letterLaunch = null, letterLand = null;
-  const fract = (x) => x - Math.floor(x);
-  let flaps = null, flapMat = null;
+  let letterAtl = null, flaps = null, flapMat = null;
+  let order = null, launch = null, autoStart = null, nAuto = 0, lastStart = -1e9;
   const rnd2 = seeded(77);
-  function buildLetters() {
-    if (!ledeTokens || letters) return;
+  /* ТАБЛО для всього опису. Кожна літера — три шматки: верхня половина нового знака (відкривається позаду),
+     нижня половина старого (закривається згори) і сама пластинка на петлі посередині, що падає вниз: поки не
+     пройшла ребром — на ній верх старого знака, після — низ нового. Змішування адитивне, тож перекриття робимо
+     не глибиною, а відсіканням: що вже закрила пластинка, того не малюємо. Перше речення запускається саме за
+     розкладом від кінця вступу, решту відкриває скрол. */
+  function buildFlaps() {
+    if (!ledeTokens || flaps) return;
     letterAtl = letterAtlas();
-    /* літери, що вилітають з ядра (решта абзацу, від скролу) */
-    const geo = new THREE.InstancedBufferGeometry();
-    const quad = new THREE.PlaneGeometry(1, 1);          // не «q» — так звався б обʼєкт параметрів URL
-    geo.index = quad.index; geo.attributes.position = quad.attributes.position; geo.attributes.uv = quad.attributes.uv;
-    letterMat = new THREE.ShaderMaterial({
-      uniforms: {
-        uAtlas: { value: letterAtl.tex }, uGrid: { value: new THREE.Vector2(letterAtl.cols, letterAtl.rows) },
-        uOrigin: { value: new THREE.Vector3() }, uFrame: { value: new THREE.Matrix4() },
-        uTint: { value: new THREE.Color(0xcfe0ff) }, uTime: { value: 0 }, uOpacity: { value: 0.86 }, uAge: { value: AGE },
-      },
-      vertexShader: `attribute vec3 aTo; attribute vec2 aGlyph; attribute float aSize; attribute float aLaunch; attribute float aSeed; attribute float aRow;
-        uniform vec3 uOrigin; uniform mat4 uFrame; uniform vec2 uGrid; uniform float uTime; uniform float uAge;
-        varying vec2 vUv; varying float vFly; varying float vRow;
-        void main(){
-          /* скрол лише ВИПУСКАЄ літеру; далі вона летить за власним часом */
-          if (aLaunch < -1e5) { vFly = 0.0; gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }   // ще не випущена
-          vec3 uRight = uFrame[0].xyz, uUp = uFrame[1].xyz;
-          vec3 aToW = (uFrame * vec4(aTo, 1.0)).xyz;
-          float delay = fract(aSeed * 3.7) * 0.85;
-          float dur = 1.05 + fract(aSeed * 11.0) * 0.75;
-          float t = clamp((uTime + uAge - aLaunch - delay) / dur, 0.0, 1.0);
-          float e = t * t * (3.0 - 2.0 * t);
-          vFly = e; vRow = aRow;
-          vec3 from = uOrigin + vec3(sin(aSeed * 51.0), cos(aSeed * 37.0), sin(aSeed * 23.0)) * 0.14;
-          vec3 ctrl = mix(from, aToW, 0.45) + uRight * (sin(aSeed * 61.0) * 1.15) + uUp * (0.25 + fract(aSeed * 17.0) * 0.7);
-          vec3 mid = mix(mix(from, ctrl, e), mix(ctrl, aToW, e), e);
-          float st = clamp((t - 0.72) / 0.28, 0.0, 1.0);
-          mid += (uRight * sin(aSeed * 91.0) + uUp * cos(aSeed * 73.0)) * sin(st * 12.0) * (1.0 - st) * (1.0 - st) * 0.035;
-          float sz = aSize * mix(0.42, 1.0, e);
-          float sp = sin(aSeed * 29.0) * (1.0 - e) * 3.4;
-          vec2 rp = vec2(position.x * cos(sp) - position.y * sin(sp), position.x * sin(sp) + position.y * cos(sp));
-          vec3 w = mid + uRight * (rp.x * sz) + uUp * (rp.y * sz);
-          vUv = (aGlyph + vec2(uv.x, 1.0 - uv.y)) / uGrid;   // атлас без flipY, а uv квада рахується знизу
-          gl_Position = projectionMatrix * viewMatrix * vec4(w, 1.0);
-        }`,
-      fragmentShader: `uniform sampler2D uAtlas; uniform vec3 uTint; uniform float uOpacity; uniform float uTime;
-        varying vec2 vUv; varying float vFly; varying float vRow;
-        void main(){
-          float a = texture2D(uAtlas, vUv).a;
-          if (a < 0.01 || vFly < 0.001) discard;
-          float scan = 0.93 + 0.07 * sin(gl_FragCoord.y * 1.35);
-          float glow = 1.0 + 1.5 * (1.0 - vFly);
-          float land = exp(-pow((vFly - 0.9) * 11.0, 2.0)) * 1.6;
-          float beam = exp(-pow((fract(uTime * 0.11) - vRow) * 7.0, 2.0)) * 0.75;
-          gl_FragColor = vec4(uTint * a * uOpacity * scan * (glow + land + beam), 1.0);
-          #include <tonemapping_fragment>
-          #include <colorspace_fragment>
-          gl_FragColor.a = max(gl_FragColor.r, max(gl_FragColor.g, gl_FragColor.b));
-        }`,
-      transparent: true, depthWrite: false, depthTest: false,
-      blending: THREE.AdditiveBlending, premultipliedAlpha: true,
-    });
-    letters = new THREE.Mesh(geo, letterMat);
-    letters.frustumCulled = false; letters.renderOrder = -1;
-    scene.add(letters);
-
-    /* ТАБЛО для першого речення. Кожна літера — три шматки: верхня половина нового знака (відкривається
-       позаду), нижня половина старого (закривається згори) і сама пластинка на петлі посередині, що падає
-       вниз: поки не пройшла ребром — на ній верх старого знака, після — низ нового. Змішування адитивне,
-       тож перекриття робимо не глибиною, а відсіканням: що вже закрила пластинка, того не малюємо. */
     const fg = new THREE.InstancedBufferGeometry();
     const pos = [], part = [], idx = [];
     const piece = (y0, y1, id) => {
@@ -579,11 +521,11 @@ function init() {
     flapMat = new THREE.ShaderMaterial({
       uniforms: {
         uAtlas: { value: letterAtl.tex }, uGrid: { value: new THREE.Vector2(letterAtl.cols, letterAtl.rows) }, uCount: { value: letterAtl.count },
-        uFrame: { value: new THREE.Matrix4() }, uRest: { value: 0 }, uTime: { value: 0 },
+        uFrame: { value: new THREE.Matrix4() }, uTime: { value: 0 },
         uTint: { value: new THREE.Color(0xcfe0ff) }, uOpacity: { value: 0.86 },
       },
-      vertexShader: `attribute float aPart; attribute vec3 aTo; attribute float aIdx; attribute float aSize; attribute float aSeed; attribute float aStart; attribute float aHalf; attribute float aRow;
-        uniform mat4 uFrame; uniform vec2 uGrid; uniform float uCount; uniform float uRest;
+      vertexShader: `attribute float aPart; attribute vec3 aTo; attribute float aIdx; attribute float aSize; attribute float aSeed; attribute float aLaunch; attribute float aHalf; attribute float aRow;
+        uniform mat4 uFrame; uniform vec2 uGrid; uniform float uCount; uniform float uTime;
         varying vec2 vLocal; varying float vPart; varying float vCos; varying vec2 vCur; varying vec2 vNext; varying float vCurOn;
         varying float vCard; varying float vHalf; varying float vRow; varying float vShade;
         const float FLIPS = ${F.flips.toFixed(1)}; const float DUR = ${F.dur.toFixed(3)};
@@ -592,8 +534,9 @@ function init() {
         /* знак на j-му перекиданні: спершу випадкові, на останньому — свій */
         float glyphAt(float j){ return j >= FLIPS - 1.0 ? aIdx : floor(hash(aSeed * 91.7 + j * 17.3) * uCount); }
         void main(){
-          float s = (uRest - aStart) / DUR;                      // скільки перекидань минуло
-          if (s <= 0.0) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
+          if (aLaunch < -1e5) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }   // ще не відкрита
+          float s = (uTime - aLaunch) / DUR;                     // скільки перекидань минуло
+          if (s <= 0.0) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }        // чекає своєї черги
           float k = min(floor(s), FLIPS - 1.0);
           float f = s >= FLIPS ? 1.0 : fract(s);
           float th = 3.14159265 * f * f;                         // пластинка падає з прискоренням, як справжня
@@ -637,61 +580,39 @@ function init() {
       blending: THREE.AdditiveBlending, premultipliedAlpha: true,
     });
     flaps = new THREE.Mesh(fg, flapMat);
-    flaps.frustumCulled = false; flaps.renderOrder = -1;
+    flaps.frustumCulled = false; flaps.renderOrder = -1; flaps.visible = false;
     scene.add(flaps);
   }
-  /* розкласти літери по рамі опису: перше речення — табло, решта — вилітає з ядра від скролу */
+  /* розкласти табло по рамі опису: перше речення — за розкладом після вступу, решта — від скролу */
   function placeLetters(ww, fsCss, rw, rh, lhCss) {
-    buildLetters();
-    if (!letters) return;
+    buildFlaps();
+    if (!flaps) return;
     const lay = ledeLayout(letterAtl, fsCss, rw, lhCss);
-    const n = lay.letters.length, scale = ww / rw, na = Math.min(autoLetters, n);
+    const n = lay.letters.length, scale = ww / rw, na = Math.min(autoLetters, n), m = n - na;
     const cellW = (LCELL / LFS) * fsCss * scale;
-    const to = new Float32Array(n * 3), gl = new Float32Array(n * 2), sz = new Float32Array(n), or = new Float32Array(n), sd = new Float32Array(n), rowv = new Float32Array(n);
-    const fTo = new Float32Array(na * 3), fIdx = new Float32Array(na), fSz = new Float32Array(na), fSeed = new Float32Array(na), fStart = new Float32Array(na), fHalf = new Float32Array(na), fRow = new Float32Array(na);
-    /* перерахунок розкладки (довантажився шрифт, змінився розмір вікна) не має заново запускати вже випущені літери */
-    const prevLaunch = letterLaunch;
-    const land = new Float32Array(n); letterLand = land;
-    letterOrder = or; letterLaunch = new Float32Array(n).fill(UNSET);
-    if (prevLaunch && prevLaunch.length === n) letterLaunch.set(prevLaunch);
+    const to = new Float32Array(n * 3), idxA = new Float32Array(n), sz = new Float32Array(n), sd = new Float32Array(n), half = new Float32Array(n), rowv = new Float32Array(n);
+    /* перерахунок розкладки (довантажився шрифт, змінився розмір вікна) не скидає вже відкрите табло */
+    const prev = launch;
+    order = new Float32Array(n); autoStart = new Float32Array(n); nAuto = na;
+    launch = new Float32Array(n).fill(UNSET);
+    if (prev && prev.length === n) launch.set(prev);
     lay.letters.forEach((L, i) => {
-      const x = (L.cx - rw / 2) * scale, y = (rh / 2 - L.cy) * scale, gi = letterAtl.index[L.k];
-      to[i * 3] = x; to[i * 3 + 1] = y; to[i * 3 + 2] = 0.004;
-      gl[i * 2] = gi % letterAtl.cols; gl[i * 2 + 1] = Math.floor(gi / letterAtl.cols);
-      sz[i] = cellW;
-      /* решта абзацу: скрол відпускає літери приблизно зліва направо, але врозтіч */
-      /* поріг не нижчий за 0,04: літера ховається, коли скрол повертається нижче порогу − 0,03, — з майже
-         нульовим порогом цього не ставалося ніколи, і перші літери («н», «р» з «Я не «роблю…») лишались на екрані */
-      or[i] = i < na ? 2 : Math.min(0.92, 0.04 + ((i - na) / Math.max(1, n - na)) * 0.48 + rnd2() * 0.4);
-      sd[i] = rnd2();
-      /* коли літера сяде після запуску — ті самі затримка й тривалість, що в шейдері */
-      land[i] = fract(sd[i] * 3.7) * 0.85 + 1.05 + fract(sd[i] * 11) * 0.75;
+      to[i * 3] = (L.cx - rw / 2) * scale; to[i * 3 + 1] = (rh / 2 - L.cy) * scale; to[i * 3 + 2] = 0.004;
+      idxA[i] = letterAtl.index[L.k]; sz[i] = cellW; sd[i] = rnd2();
+      half[i] = L.adv * LFS / LCELL * 0.5 - 0.025;             // пластинка завширшки як сам знак, з тонкою щілиною до сусідньої
       rowv[i] = L.cy / rh;
-      if (i < na) {
-        fTo[i * 3] = x; fTo[i * 3 + 1] = y; fTo[i * 3 + 2] = 0.004;
-        fIdx[i] = gi; fSz[i] = cellW; fSeed[i] = sd[i]; fRow[i] = rowv[i];
-        fStart[i] = flapStart(i, na, rnd2());
-        fHalf[i] = L.adv * LFS / LCELL * 0.5 - 0.025;           // пластинка завширшки як сам знак, з тонкою щілиною до сусідньої
-      }
+      if (i < na) { order[i] = 2; autoStart[i] = flapStart(i, na, rnd2()); }
+      else order[i] = restOrder(i - na, m, rnd2());
     });
-    const g = letters.geometry;
+    const g = flaps.geometry;
     g.setAttribute('aTo', new THREE.InstancedBufferAttribute(to, 3));
-    g.setAttribute('aGlyph', new THREE.InstancedBufferAttribute(gl, 2));
+    g.setAttribute('aIdx', new THREE.InstancedBufferAttribute(idxA, 1));
     g.setAttribute('aSize', new THREE.InstancedBufferAttribute(sz, 1));
-    g.setAttribute('aLaunch', new THREE.InstancedBufferAttribute(letterLaunch, 1));
     g.setAttribute('aSeed', new THREE.InstancedBufferAttribute(sd, 1));
+    g.setAttribute('aLaunch', new THREE.InstancedBufferAttribute(launch, 1));
+    g.setAttribute('aHalf', new THREE.InstancedBufferAttribute(half, 1));
     g.setAttribute('aRow', new THREE.InstancedBufferAttribute(rowv, 1));
     g.instanceCount = n;
-    const fg = flaps.geometry;
-    fg.setAttribute('aTo', new THREE.InstancedBufferAttribute(fTo, 3));
-    fg.setAttribute('aIdx', new THREE.InstancedBufferAttribute(fIdx, 1));
-    fg.setAttribute('aSize', new THREE.InstancedBufferAttribute(fSz, 1));
-    fg.setAttribute('aSeed', new THREE.InstancedBufferAttribute(fSeed, 1));
-    fg.setAttribute('aStart', new THREE.InstancedBufferAttribute(fStart, 1));
-    fg.setAttribute('aHalf', new THREE.InstancedBufferAttribute(fHalf, 1));
-    fg.setAttribute('aRow', new THREE.InstancedBufferAttribute(fRow, 1));
-    fg.instanceCount = na;
-    letterMat.uniforms.uFrame.value.copy(ledeFrame.matrixWorld);
     flapMat.uniforms.uFrame.value.copy(ledeFrame.matrixWorld);
   }
 
@@ -791,20 +712,23 @@ function init() {
     wallMat.uniforms.uTint.value.copy(TINT_REST).lerp(TINT_LIT, fS.fade);
     wallMat.uniforms.uTime.value = tt; wallMat.uniforms.uSpot.value.copy(spot);
     wall.visible = wallMat.uniforms.uOpacity.value > 0.002;
-    if (letters) {
-      letterMat.uniforms.uTime.value = tt;
-      letterMat.uniforms.uOrigin.value.copy(outer.position);
-      /* скрол відкриває «ворота»: дійшов до порога літери — вона вилітає і далі живе своїм часом */
+    if (flaps) {
       let touched = false, any = false;
-      for (let i = 0; i < letterOrder.length; i++) {
-        if (letterLaunch[i] === UNSET && fS.fade >= letterOrder[i] && letterOrder[i] <= 1) { letterLaunch[i] = instantLand ? tt - 10 : tt; touched = true; }
-        else if (letterLaunch[i] !== UNSET && fS.fade < letterOrder[i] - 0.03) { letterLaunch[i] = UNSET; touched = true; }
-        if (letterLaunch[i] !== UNSET) any = true;
+      const m = launch.length - nAuto;
+      for (let i = 0; i < launch.length; i++) {
+        if (i < nAuto) {
+          /* перше речення: табло за розкладом від кінця вступу (restSec уже враховує ?age і перезавантаження) */
+          if (launch[i] === UNSET && fS.after) { launch[i] = tt - restSec + autoStart[i]; touched = true; }
+        } else if (launch[i] === UNSET && fS.fade >= order[i]) {
+          /* решта: скрол відпускає літеру; відпущені разом стають у чергу — табло однаково біжить хвилею */
+          lastStart = instantLand ? tt - 10 : queueLaunch(tt - AGE, lastStart, m);
+          launch[i] = lastStart; touched = true;
+        } else if (launch[i] !== UNSET && fS.fade < order[i] - 0.03) { launch[i] = UNSET; touched = true; }   // скрол назад — табло гасне
+        if (launch[i] !== UNSET) any = true;
       }
-      if (touched) letters.geometry.attributes.aLaunch.needsUpdate = true;
-      letters.visible = any;
-      flapMat.uniforms.uRest.value = restSec; flapMat.uniforms.uTime.value = tt;
-      flaps.visible = fS.after;
+      if (touched) flaps.geometry.attributes.aLaunch.needsUpdate = true;
+      flaps.visible = any;
+      flapMat.uniforms.uTime.value = tt;
       instantLand = false;
     }
     dustMat.uniforms.uTime.value = tt; nebMat.uniforms.uTime.value = tt;
@@ -855,19 +779,18 @@ function init() {
      літери не долетять і не сядуть. Hero весь цей час прилиплий, тож кадр не стрибає. Лише на спуску. */
   let lastY = window.scrollY;
   function lettersDone() {
-    if (!letterLaunch) return true;
-    let end = 0;
-    for (let i = 0; i < letterLaunch.length; i++) {
-      if (letterOrder[i] > 1) continue;                               // перше речення — табло, воно своє
-      if (letterLaunch[i] === UNSET) return false;
-      end = Math.max(end, letterLaunch[i] + letterLand[i]);
+    if (!launch) return true;
+    let end = -Infinity;
+    for (let i = nAuto; i < launch.length; i++) {
+      if (launch[i] === UNSET) return false;
+      end = Math.max(end, launch[i]);
     }
-    return t >= end;
+    return t >= end + CFG.flap.flips * CFG.flap.dur;
   }
   function holdForLetters() {
     const y = window.scrollY, down = y > lastY;
     lastY = y;
-    if (!letters || dbgP != null || !down || lettersDone()) return;
+    if (!flaps || dbgP != null || !down || lettersDone()) return;
     const gateY = Math.round(CFG.fade[1] * Math.max(1, (track ? track.offsetHeight : 0) - window.innerHeight));
     if (y > gateY + 2) { jumpTo(gateY); lastY = gateY; }
   }

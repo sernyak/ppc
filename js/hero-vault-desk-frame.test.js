@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { FIG, CFG, figureFrame, figureProgress, getFrame, introRelease, flapStart, flapDone, clamp01, smooth } from './hero-vault-desk-frame.js';
+import { FIG, CFG, figureFrame, figureProgress, getFrame, introRelease, flapStart, flapDone, restOrder, queueLaunch, maxHold, clamp01, smooth } from './hero-vault-desk-frame.js';
 
 const COUNTS = { joints: 24, inner: 36, outer: 24 };
 const near = (a, b, m) => assert.ok(Math.abs(a - b) < 1e-9, `${m}: ${a} ≠ ${b}`);
@@ -84,6 +84,27 @@ test('табло: хвиля зліва направо, і вся фраза с�
   assert.ok(flapDone() < 3, `табло зупиняється за ${flapDone()} с — перший екран не чекає довго`);
   assert.ok(CFG.flap.delay >= CFG.titleRise, 'спершу заголовок підіймається й звільняє місце, лише потім зʼявляється текст');
   assert.ok(CFG.flap.dur >= 0.1, 'пластинка перекидається не частіше ~10 разів на секунду — без мерехтіння');
+});
+
+test('решта опису: скрол відпускає літери в порядку читання, і всі встигають до кінця випуску', () => {
+  const m = 330;
+  let prev = -1;
+  for (let j = 0; j < m; j++) {
+    const o = restOrder(j, m, 0.5);
+    assert.ok(o > prev, 'хвиля в порядку читання'); prev = o;
+    assert.ok(restOrder(j, m, 0) >= CFG.order.min, 'поріг не нижчий за мінімум');
+    assert.ok(restOrder(j, m, 1) <= 0.9, 'останні літери відпускаються ще до кінця fade');
+  }
+  assert.ok(CFG.order.min >= 0.035, 'при скролі назад перша ж літера може сховатися (fade < поріг − 0,03)');
+});
+
+test('швидкий скрол: табло біжить хвилею, і сторінка тримає недовго', () => {
+  const m = 330;
+  let last = -Infinity, first = null;
+  for (let j = 0; j < m; j++) { last = queueLaunch(10, last, m); if (first == null) first = last; }
+  assert.ok(last - first <= CFG.flap.burst + 1e-9, 'уся хвиля — не довша за burst');
+  assert.equal(queueLaunch(20, 3, m), 20, 'повільний скрол черги не помічає');
+  assert.ok(maxHold() <= 1.6, `утримання не довше ${maxHold()} с`);
 });
 
 test('вхід поза межами обрізається', () => {
