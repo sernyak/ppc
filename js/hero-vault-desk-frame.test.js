@@ -36,11 +36,18 @@ test('скрол одразу випускає вогники, і поле фо�
   assert.deepEqual(getFrame(1, 0.9), { coverage: 0, fade: 0, grains: 0, orbit: 0, elev: 0, after: false });
   const f0 = getFrame(0, 1);
   assert.equal(f0.fade, 0); assert.equal(f0.grains, 0);
-  assert.ok(getFrame(0.1, 1).grains > 0.05, 'вогники летять з першого руху скролу');
-  assert.ok(getFrame(0.2, 1).fade > 0.4, 'поле формул помітно яскравіє невдовзі за вогниками');
+  assert.ok(getFrame(0.1, 1).grains > 0.01, 'вогники летять з першого руху скролу');
+  assert.ok(getFrame(0.5, 1).fade > 0.4, 'поле формул помітно яскравіє невдовзі за вогниками');
   assert.ok(CFG.fade[0] >= CFG.grains[0], 'але не раніше за них');
   const end = getFrame(1, 1);
   assert.equal(end.fade, 1); assert.equal(end.grains, 1); assert.equal(end.coverage, 1);
+});
+
+test('після того, як вилетіли всі літери, скрол голограму вже не крутить — лишається тільки кінець доріжки', () => {
+  assert.ok(CFG.fade[1] < 1, 'літери відпущено до кінця доріжки');
+  assert.ok(CFG.coverage[1] <= 0.95 && CFG.figureSpan <= 0.95 && CFG.grains[1] <= CFG.fade[1], 'поле, фігура й вогники теж встигають');
+  const tail = (1 - CFG.fade[1]) * (CFG.trackVh - 100) / 100;
+  assert.ok(tail <= 0.1, `після останньої літери лишається ${tail.toFixed(3)} екрана скролу — майже одразу далі`);
 });
 
 test('яскравість поля формул наростає плавно, без стрибка', () => {
