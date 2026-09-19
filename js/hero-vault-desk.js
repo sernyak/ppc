@@ -58,7 +58,8 @@ function init() {
   const R = 0.97;
   const cPos = new THREE.Vector3(5.0, R + 0.7, 0.6);
   const cam0 = new THREE.Vector3(0.3, cPos.y + 0.2, 8.8);
-  const target = new THREE.Vector3(3.1, cPos.y + 0.6, 0);     // центр фігури — на рівні середини опису
+  const target = new THREE.Vector3(3.1, cPos.y + 0.6, 0);     // базова точка погляду; composeCamera() зсуває її під розкладку тексту
+  const targetBase = target.clone();
   const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), tmpC = new THREE.Vector3(), tmpD = new THREE.Vector3();
   const tmpS = new THREE.Vector3(), tmpT = new THREE.Vector3();
   const UP = new THREE.Vector3(0, 1, 0), RIGHT = new THREE.Vector3(1, 0, 0), mtx = new THREE.Matrix4();
@@ -213,7 +214,7 @@ function init() {
       flapMat.uniforms.uAtlas.value = letterAtl.tex; flapMat.uniforms.uCount.value = letterAtl.count;
       old.dispose();
     }
-    fitLede();
+    fit();                                                         // зі шрифтом Inter змінились і розміри тексту
     schedule();
   });
   function writeRow(y, seed) {
@@ -621,19 +622,51 @@ function init() {
     renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.updateProjectionMatrix();
     grainMat.uniforms.uPR.value = renderer.getPixelRatio();
-    /* раму опису рахуємо з базового положення камери */
-    camera.position.set(target.x + d0 * Math.cos(el0) * Math.sin(az0), target.y + d0 * Math.sin(el0), target.z + d0 * Math.cos(el0) * Math.cos(az0));
-    camera.lookAt(target); camera.updateMatrixWorld();
+    composeCamera();
+    /* раму опису й заголовок рахуємо з базового положення камери */
     placeTitle();
     fitLede();
+  }
+  function setBaseCamera() {
+    camera.position.set(target.x + d0 * Math.cos(el0) * Math.sin(az0), target.y + d0 * Math.sin(el0), target.z + d0 * Math.cos(el0) * Math.cos(az0));
+    camera.lookAt(target); camera.updateMatrixWorld();
+  }
+  /* Фігура привʼязана до розкладки тексту, а не до вікна: її центр — на рівні середини текстового блоку
+     (від бейджа до кнопок), а по горизонталі — посередині вільного місця праворуч від колонки тексту в тому
+     самому контейнері сторінки. Інакше на широкому екрані текст і фігура розʼїжджались. Камеру просто
+     зсуваємо паралельно площині кадру: перспектива, світло й тіні не змінюються. */
+  const camRight = new THREE.Vector3(), camUp = new THREE.Vector3();
+  function composeCamera() {
+    target.copy(targetBase);
+    setBaseCamera();
+    const column = lede && lede.offsetParent, container = column && column.parentElement;
+    const badge = section && section.querySelector('.vault-rise'), buttons = lede && lede.nextElementSibling;
+    const oc = column && offsetIn(column), ok = container && offsetIn(container), ob = badge && offsetIn(badge), obt = buttons && offsetIn(buttons);
+    if (!oc || !ok || !ob || !obt) return;
+    const W = sceneEl.clientWidth, Hh = sceneEl.clientHeight;
+    const freeL = oc.x + column.offsetWidth, freeR = ok.x + container.offsetWidth;
+    const c = tmpA.copy(cPos).project(camera), xc = c.x, yc = c.y;
+    camRight.setFromMatrixColumn(camera.matrixWorld, 0); camUp.setFromMatrixColumn(camera.matrixWorld, 1);
+    const rPx = (tmpB.copy(cPos).addScaledVector(camRight, R * 1.12).project(camera).x - xc) / 2 * W;   // півширина фігури на екрані
+    let xPx = (freeL + freeR) / 2;
+    xPx = Math.min(Math.max(xPx, freeL + rPx + 70), W - rPx - 24);   // не ближче 70 px до тексту і не за край екрана
+    const yPx = (ob.y + obt.y + buttons.offsetHeight) / 2;
+    const xd = (xPx / W) * 2 - 1, yd = -((yPx / Hh) * 2 - 1);
+    const z = -tmpC.copy(cPos).applyMatrix4(camera.matrixWorldInverse).z;   // глибина фігури від камери
+    const tanH = Math.tan(camera.fov * Math.PI / 360);
+    target.addScaledVector(camRight, (xc - xd) * z * tanH * camera.aspect).addScaledVector(camUp, (yc - yd) * z * tanH);
+    setBaseCamera();
   }
   /* Поки опису ще немає, заголовок стоїть на рівні центра фігури — без порожнечі під ним. Щойно фігура
      повністю зʼявилась, він плавно відʼїжджає вгору на своє місце (перехід — у CSS, клас vault-risen),
      і лише тоді табло виводить перше речення. */
   let risen = false;
   function placeTitle() {
-    if (!titleEl || !html.classList.contains('vault-holo')) return;
-    const o = offsetIn(titleEl);
+    if (!html.classList.contains('vault-holo')) return;
+    /* до цієї миті заголовок невидимий (CSS): зʼявляється одразу на своєму місці, без руху вниз;
+       клас ставимо в будь-якому разі — навіть якщо виміряти не вдалося, заголовок не має лишитись схованим */
+    html.classList.add('vault-placed');
+    const o = titleEl && offsetIn(titleEl);
     if (!o) return;
     tmpA.copy(cPos).project(camera);
     const figY = (1 - tmpA.y) / 2 * sceneEl.clientHeight;

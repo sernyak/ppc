@@ -113,8 +113,11 @@
         @media (min-width: 1024px) { #vault-scene::before, #vault-scene::after { display: none; } }
         .vault-holo #vault-lede { opacity: 0; }
         @media (min-width: 1024px) {
-            .vault-holo .vault-rise { transform: translateY(var(--vault-drop, 185px)); transition: transform .5s ease; }
-            .vault-holo.vault-risen .vault-rise { transform: none; transition: transform var(--vault-rise-dur, 1s) cubic-bezier(.3,.1,.2,1); }
+            /* поки сцена не виміряла, де фігура, заголовок невидимий — потім зʼявляється одразу на своєму місці
+               (раніше він стояв на приблизній позиції й доїжджав униз — зайвий рух) */
+            .vault-holo .vault-rise { transform: translateY(var(--vault-drop, 185px)); opacity: 0; transition: opacity .7s ease; }
+            .vault-holo.vault-placed .vault-rise { opacity: 1; }
+            .vault-holo.vault-risen .vault-rise { transform: none; transition: transform var(--vault-rise-dur, 1s) cubic-bezier(.3,.1,.2,1), opacity .7s ease; }
             .vault-holo.vault-instant .vault-rise { transition: none; }
         }
     </style>
