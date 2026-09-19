@@ -58,6 +58,7 @@ function init() {
   /* зі скролом фігура трохи меншає, звільняючи місце опису. Не підіймається: коли hero прилипає, заголовок уже
      поза екраном, і піднята фігура ховалась би під шапкою сайту */
   const SHRINK = 0.34;
+  let pinDrop = 0, pinScale = 1 - SHRINK;                    // де стоїть фігура, коли hero прилип: зсув униз (світ) і масштаб — рахує measurePin()
   const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), tmpC = new THREE.Vector3(), tmpD = new THREE.Vector3();
   const tmpT = new THREE.Vector3();
   const UP = new THREE.Vector3(0, 1, 0), RIGHT = new THREE.Vector3(1, 0, 0), mtx = new THREE.Matrix4();
@@ -70,7 +71,7 @@ function init() {
 
   const key = new THREE.DirectionalLight(0xe8eeff, 1.5);
   key.position.set(cPos.x - 2.2, 9, cPos.z + 4.5); key.target.position.set(cPos.x, 0, cPos.z); scene.add(key.target);
-  key.castShadow = true;
+  key.castShadow = false;                                   // тіні на «підлозі» немає: на телефоні вона лягала овалом просто на рядок тексту
   key.shadow.mapSize.set(1024, 1024);
   key.shadow.camera.left = -4; key.shadow.camera.right = 4; key.shadow.camera.top = 6; key.shadow.camera.bottom = -3;
   key.shadow.camera.near = 1; key.shadow.camera.far = 30; key.shadow.bias = -0.0006; key.shadow.radius = 9;
@@ -79,6 +80,7 @@ function init() {
   const fillB = new THREE.PointLight(0x60a5fa, 3, 16, 2); fillB.position.set(cPos.x - 5, 2.5, cPos.z + 4); scene.add(fillB);
   scene.add(new THREE.HemisphereLight(0x3a4a70, 0x05070d, 0.65));
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.ShadowMaterial({ color: 0x000000, opacity: 0.24 }));
+  floor.visible = false;
   floor.rotation.x = -Math.PI / 2; floor.position.set(cPos.x, 0, cPos.z); floor.receiveShadow = true; scene.add(floor);
 
   /* ---------- фігура: побудова як на /preview/3d-v6/ (на телефоні без сяйва довкола ліній) ---------- */
@@ -343,7 +345,7 @@ function init() {
     placeLetters(ww, parseFloat(cs.fontSize) || 18, r.width, r.height, parseFloat(cs.lineHeight) || 0);
     /* віяло променів: від ядра фігури до верхньої частини опису */
     const right = new THREE.Vector3(1, 0, 0).applyQuaternion(ledeFrame.quaternion);
-    const apex = tmpA.copy(cPos);
+    const apex = tmpA.copy(cPos); apex.y -= pinDrop;          // промені йдуть від фігури в її прилиплому положенні
     const baseL = ledeFrame.localToWorld(corner.set(-ww * 0.56, hh * 0.5 - hh * 0.3, 0)).clone();
     const baseR = ledeFrame.localToWorld(corner.set(ww * 0.56, hh * 0.5 - hh * 0.3, 0)).clone();
     const apexL = apex.clone().addScaledVector(right, -R * 0.1), apexR = apex.clone().addScaledVector(right, R * 0.1);
@@ -355,7 +357,7 @@ function init() {
     }
     pos.needsUpdate = true;
     /* звідки промінь видно: нижній край фігури (вона вже трохи зменшена), у частках довжини віяла */
-    beamMat.uniforms.uStartV.value = Math.min(0.5, (R * (1 - SHRINK) * 0.9) / Math.max(0.01, apex.distanceTo(tmpB.copy(baseL).lerp(baseR, 0.5))));
+    beamMat.uniforms.uStartV.value = Math.min(0.5, (R * pinScale * 0.9) / Math.max(0.01, apex.distanceTo(tmpB.copy(baseL).lerp(baseR, 0.5))));
   }
   /* ТАБЛО: кожна літера — три шматки: верх нового знака (відкривається позаду), низ старого (його закриває
      пластинка) і сама пластинка на петлі посередині, що падає вниз: поки не пройшла ребром — на ній верх
@@ -475,15 +477,36 @@ function init() {
   svhProbe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100svh;visibility:hidden;pointer-events:none';
   document.body.appendChild(svhProbe);
   let pinStart = 0, pinLen = 1, pinEnd = 1;
+  /* Коли hero прилипає, на екрані мають бути ВОДНОЧАС уся фігура й увесь опис. Рахуємо в пікселях hero:
+     верх фігури — під шапкою сайту, низ опису — над нижнім краєм «малого» вікна (з розгорнутими панелями
+     Safari). Якщо блок не влазить, фігура за час скролу опускається ближче до тексту (промені коротшають,
+     але лишаються), а коли й цього мало — ще трохи меншає. */
+  const siteNav = document.querySelector('nav.fixed');
+  function projectY(v) { return (1 - tmpD.copy(v).project(camera).y) / 2 * sceneEl.clientHeight; }
   function measurePin() {
     const svh = svhProbe.offsetHeight || window.innerHeight;
     if (!ledeTokens || !track || !hero) { pinLen = svh; return; }
     const heroH = hero.offsetHeight;
     const lr = lede.getBoundingClientRect(), hr = hero.getBoundingClientRect();
-    const ledeBottom = lr.bottom - hr.top;
-    /* hero липне тоді, коли низ опису вже на екрані з невеликим запасом */
-    const top = Math.min(0, Math.round(svh - 28 - ledeBottom));
+    const ledeTop = lr.top - hr.top, ledeBottom = lr.bottom - hr.top;
+    /* фігура в пікселях hero: центр і радіус при масштабі 1 */
+    const cY = projectY(cPos), r0 = Math.abs(projectY(tmpC.copy(cPos).setY(cPos.y + R * 1.15)) - cY);
+    const pxPerWorld = Math.abs(projectY(tmpC.copy(cPos).setY(cPos.y + 1)) - cY);
+    const navH = siteNav && getComputedStyle(siteNav).position === 'fixed' ? siteNav.offsetHeight : 0;
+    const mTop = 10, mBot = 14, gapMin = 34;
+    const avail = svh - navH - mTop;                                  // висота, у яку має влізти блок
+    let r = r0 * (1 - SHRINK), c = cY;
+    if (ledeBottom + mBot - (c - r) > avail) c = Math.min(ledeBottom + mBot - avail + r, ledeTop - gapMin - r);   // опустити ближче до тексту
+    if (ledeBottom + mBot - (c - r) > avail) {                         // усе одно не влазить — зменшити ще
+      r = Math.max(r0 * 0.4, (avail - (ledeBottom + mBot - ledeTop + gapMin)) / 2);
+      c = ledeTop - gapMin - r;
+    }
+    pinScale = r / r0; pinDrop = Math.max(0, (c - cY) / pxPerWorld);
+    /* верх вікна в прилиплому стані — над фігурою, під шапкою сайту; якщо місця вдосталь, блок стає по центру */
+    const spare = Math.max(0, avail - (ledeBottom + mBot - (c - r)));
+    const top = Math.min(0, Math.round(-(c - r - mTop - navH - spare / 2)));
     hero.style.position = 'sticky';
+    hero.style.zIndex = '0';                                          // шапка сайту (z-50) завжди поверх прилиплого hero
     hero.style.top = top + 'px';
     pinLen = Math.round(CFG.pinScreens * svh);
     track.style.height = (heroH + pinLen) + 'px';
@@ -549,8 +572,8 @@ function init() {
     });
     spin.rotation.y = angle + fF.spin;
     outer.rotation.x = 0.22;
-    outer.position.y = cPos.y + Math.sin(tt * 0.6) * 0.03;
-    outer.scale.setScalar(1 - SHRINK * fS.pull);
+    outer.position.y = cPos.y + Math.sin(tt * 0.6) * 0.03 - pinDrop * fS.pull;
+    outer.scale.setScalar(1 + (pinScale - 1) * fS.pull);
     glint.uGlintC.value.copy(outer.position); glint.uGlintR.value = R * outer.scale.x; glint.uGlintT.value = tt;
     shade.visible = !!flaps && fS.shade > 0.002; shadeMat.uniforms.uOp.value = fS.shade * 0.62;
     if (flaps) {
