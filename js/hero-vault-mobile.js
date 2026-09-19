@@ -157,7 +157,9 @@ function init() {
         float u = vUv.x, v = vUv.y;
         float across = smoothstep(0.0, 0.3, u) * smoothstep(1.0, 0.7, u);
         /* зʼявляються одразу з-під фігури й тягнуться до тексту, мʼяко згасаючи на його перших рядках */
-        float along = smoothstep(uStartV, uStartV + 0.1, v) * (1.0 - smoothstep(0.55, 1.0, v));
+        /* віяло закінчується на верхньому краї тексту й повністю гасне ще до нього — світло підходить до опису,
+           але не лягає на літери й не пересвічує їх */
+        float along = smoothstep(uStartV, uStartV + 0.1, v) * (1.0 - smoothstep(0.62, 0.97, v));
         /* кілька ширших променів, що розходяться від ядра (віяло) й повільно перебігають */
         float s = 0.5 + 0.5 * sin(u * 11.0 + uTime * 0.35) * sin(u * 4.6 - uTime * 0.23 + 1.3);
         float shafts = 0.18 + 0.82 * pow(s, 2.0);
@@ -346,8 +348,9 @@ function init() {
     /* віяло променів: від ядра фігури до верхньої частини опису */
     const right = new THREE.Vector3(1, 0, 0).applyQuaternion(ledeFrame.quaternion);
     const apex = tmpA.copy(cPos); apex.y -= pinDrop;          // промені йдуть від фігури в її прилиплому положенні
-    const baseL = ledeFrame.localToWorld(corner.set(-ww * 0.56, hh * 0.5 - hh * 0.3, 0)).clone();
-    const baseR = ledeFrame.localToWorld(corner.set(ww * 0.56, hh * 0.5 - hh * 0.3, 0)).clone();
+    const edge = hh * 0.5 + hh * 0.02;                              // трохи над першим рядком, не всередині тексту
+    const baseL = ledeFrame.localToWorld(corner.set(-ww * 0.5, edge, 0)).clone();
+    const baseR = ledeFrame.localToWorld(corner.set(ww * 0.5, edge, 0)).clone();
     const apexL = apex.clone().addScaledVector(right, -R * 0.1), apexR = apex.clone().addScaledVector(right, R * 0.1);
     const pos = beamGeo.attributes.position;
     for (let j = 0; j <= BEAM_ROWS; j++) {
