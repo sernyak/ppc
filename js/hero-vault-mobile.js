@@ -11,8 +11,8 @@
  *  — опис — ЗВИЧАЙНИЙ текст сторінки: він просто плавно проявляється
  *    (перехід CSS), без анімації по літерах;
  *  — по металу раз на кілька секунд пробігає блік.
- * Унизу першого екрана — німий натяк, що сторінку треба гортати.
- * Історія програється один раз: назад нічого не відмотується.
+ * Унизу першого екрана — німий натяк, що сторінку треба гортати. Фігура ходить
+ * за скролом в обидва боки, а текст, який уже проявився, лишається.
  *
  * Для знімків: ?p=0.5 — прогрес скролу, ?intro=1 — вступ завершено,
  * ?still=1 — один кадр.
@@ -224,7 +224,7 @@ function init() {
 
   /* ---------- стан ---------- */
   let introMs = -300, last = 0, t = 0, angle = 0.4, frameNo = 0;
-  let pT = 0, pS = 0, latch = 0;
+  let pT = 0, pS = 0;
   let visible = false, running = false;
   const hero = sceneEl.closest('section');
   const lede = document.getElementById('vault-lede');
@@ -292,12 +292,12 @@ function init() {
     pos.needsUpdate = true;
     beamMat.uniforms.uStartV.value = Math.min(0.5, (R * (1 - SHRINK) * 0.9) / Math.max(0.01, apex.distanceTo(tmpB.copy(baseL).lerp(baseR, 0.5))));
   }
-  /* історія проходить за частку екрана скролу й НЕ відмотується назад: досягнутий стан лишається */
+  /* Фігура ходить за скролом в ОБИДВА боки: вниз — меншає й опускається до тексту, вгору — росте назад
+     на своє місце, щоб під заголовком не лишалось порожнечі. Текст, який уже проявився, лишається. */
   function progress() {
     if (dbgP != null) return dbgP;
     const svh = svhProbe.offsetHeight || window.innerHeight;
-    latch = Math.max(latch, clamp01(window.scrollY / Math.max(1, CFG.span * svh)));
-    return latch;
+    return clamp01(window.scrollY / Math.max(1, CFG.span * svh));
   }
   function placeBeam(m, a, b, d) {
     m.visible = d > 0.001;
@@ -346,7 +346,7 @@ function init() {
     return;
   }
   /* сторінку відкрито не згори (перезавантаження, перехід назад) — нічого не програється: одразу кінцевий стан */
-  if (dbgP == null && window.scrollY > 40) { introMs = CFG.introMs; latch = 1; showLede(true); hideCueForever(); }
+  if (dbgP == null && window.scrollY > 40) { introMs = CFG.introMs; pS = pT = progress(); showLede(true); hideCueForever(); }
 
   function tick(now) {
     running = false;
