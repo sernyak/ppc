@@ -112,6 +112,9 @@
         .vault-veil { background: linear-gradient(180deg, rgba(11,15,25,0) 78%, #0B0F19 100%); }
         @media (min-width: 1024px) { #vault-scene::before, #vault-scene::after { display: none; } }
         .vault-holo #vault-lede { opacity: 0; }
+        /* телефон: опис — звичайний текст, який просто плавно проявляється, щойно почався скрол */
+        .vault-holo #vault-lede.vault-lede-in { opacity: 1; transition: opacity .75s ease; }
+        .vault-holo #vault-lede.vault-lede-now { transition: none; }
         /* натяк, що сторінку треба гортати: крапка повільно стікає в капсулі; ставить і прибирає сцена */
         .vault-cue { position: fixed; left: 50%; bottom: 18px; width: 26px; height: 42px; margin-left: -13px; z-index: 40;
             border: 1.5px solid rgba(226,236,255,.34); border-radius: 13px; opacity: 0; transition: opacity .6s ease; pointer-events: none; }
@@ -131,8 +134,6 @@
     </style>
     <script>(function(){var d=document.documentElement;try{
         if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-        /* телефон: доріжку прилипання будує скрипт, тож місце прокрутки після перезавантаження відновлює він сам */
-        if(matchMedia('(max-width: 1023px)').matches&&'scrollRestoration' in history)history.scrollRestoration='manual';
         d.classList.add('vault-holo');
         setTimeout(function(){if(!d.classList.contains('vault-live'))d.classList.remove('vault-holo');},8000);
     }catch(e){}})();</script>
