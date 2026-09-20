@@ -474,6 +474,25 @@ function init() {
   }
   const textDone = () => !flaps || (released >= launch.length && t >= lastStart + CFG.flap.flips * CFG.flap.dur);
 
+  /* ---------- натяк, що треба гортати ---------- */
+  /* Німий індикатор унизу екрана: крапка повільно стікає в капсулі. Зʼявляється, коли фігура вже зібралась,
+     і зникає від першого ж руху скролу — більше не показується. */
+  const cue = document.createElement('div');
+  cue.className = 'vault-cue'; cue.setAttribute('aria-hidden', 'true');
+  cue.innerHTML = '<span></span>';
+  document.body.appendChild(cue);
+  let cueDone = false;
+  function showCue(on) {
+    if (cueDone) return;
+    if (!on) { cue.classList.remove('is-on'); return; }
+    cue.classList.add('is-on');
+  }
+  function hideCueForever() {
+    if (cueDone) return;
+    cueDone = true; cue.classList.remove('is-on');
+    setTimeout(() => cue.remove(), 700);
+  }
+
   /* ---------- прилипання hero на час табло ---------- */
   /* висота «малого» вікна (з усіма панелями браузера): не змінюється, коли Safari ховає адресний рядок */
   const svhProbe = document.createElement('div');
@@ -511,16 +530,35 @@ function init() {
     hero.style.position = 'sticky';
     hero.style.zIndex = '0';                                          // шапка сайту (z-50) завжди поверх прилиплого hero
     hero.style.top = top + 'px';
-    pinLen = Math.round(CFG.pinScreens * svh);
+    pinLen = collapsed ? 0 : Math.round(CFG.pinScreens * svh);
     track.style.height = (heroH + pinLen) + 'px';
     const trackTop = track.getBoundingClientRect().top + window.scrollY;
     pinStart = Math.max(0, trackTop - top);
     pinEnd = pinStart + pinLen;
   }
+  /* Історія програється ОДИН РАЗ: досягнутий стан замикається, назад нічого не відмотується — інакше
+     при русі вгору сцена переграє все у зворотному напрямку й скрол відчувається вʼязким. */
+  let latchPre = 0, latchPin = 0;
   function scrollParts() {
     if (dbgP != null) return [clamp01(dbgP / 0.3), clamp01((dbgP - 0.3) / 0.7)];
+    if (collapsed) return [1, 1];
     const y = window.scrollY, svh = svhProbe.offsetHeight || window.innerHeight;
-    return [clamp01(y / Math.max(pinStart, svh * 0.3)), clamp01((y - pinStart) / Math.max(1, pinLen))];
+    latchPre = Math.max(latchPre, clamp01(y / Math.max(pinStart, svh * 0.3)));
+    latchPin = Math.max(latchPin, clamp01((y - pinStart) / Math.max(1, pinLen)));
+    return [latchPre, latchPin];
+  }
+  /* Коли опис складений і людина вже нижче ділянки прилипання, сама ділянка більше не потрібна: прибираємо її
+     й на стільки ж підтягуємо прокрутку — кадр не рухається, зате назад сторінка йде вільно, без «прилипання». */
+  let collapsed = false;
+  function collapseTrack() {
+    if (collapsed || !ledeTokens || !track || !hero || dbgP != null || !textDone()) return;
+    const y = window.scrollY;
+    if (y < pinEnd + 4) return;
+    collapsed = true;
+    track.style.height = hero.offsetHeight + 'px';
+    latchPre = 1; latchPin = 1;
+    lastY = y - pinLen;
+    jumpTo(y - pinLen);
   }
   /* Якщо змах проніс сторінку за ділянку табло, а табло ще не складене, — повертаємо до кінця ділянки і
      тримаємо, доки не складеться. Hero весь цей час прилиплий, тож кадр не стрибає. Лише на спуску. */
@@ -646,6 +684,7 @@ function init() {
     [preT, pinT] = scrollParts();
     preS += (preT - preS) * 0.16; pinS += (pinT - pinS) * 0.16;
     angle += dt / 1000 * (0.2 + 0.12 * pinS);                          // фігура помітно крутиться, зі скролом — трохи швидше
+    if (introT >= 1 && window.scrollY < 8) showCue(true);          // фігура зібралась — показуємо, що треба гортати
     if (still) { preS = preT; pinS = pinT; render(...frames(preS, pinS, introT)); return; }
     if (frameNo % 2) render(...frames(preS, pinS, introT));          // 30 к/с
     if (visible && !document.hidden) schedule();
@@ -655,7 +694,7 @@ function init() {
   new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (visible) { last = 0; schedule(); } }, { threshold: 0.02 }).observe(sceneEl);
   document.addEventListener('visibilitychange', () => { if (!document.hidden && visible) { last = 0; schedule(); } });
   new ResizeObserver(() => { fit(); schedule(); }).observe(sceneEl);
-  window.addEventListener('scroll', () => { holdAtStage(); schedule(); }, { passive: true });
+  window.addEventListener('scroll', () => { if (window.scrollY > 8) hideCueForever(); holdAtStage(); collapseTrack(); schedule(); }, { passive: true });
   schedule();
 
   /* ---------- геометрія (як на /preview/3d-v6/) ---------- */

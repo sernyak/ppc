@@ -690,10 +690,26 @@ function init() {
     rise(true);
   }
   /* hero липкий на час прокрутки доріжки */
+  /* Історія програється ОДИН РАЗ: досягнутий стан замикається, назад нічого не відмотується — інакше
+     при русі вгору сцена переграє все у зворотному напрямку й скрол відчувається вʼязким. */
+  let latch = 0, collapsed = false;
   function progress() {
     if (dbgP != null) return dbgP;
+    if (collapsed) return 1;
     const span = track ? Math.max(1, track.offsetHeight - window.innerHeight) : window.innerHeight;
-    return clamp01(window.scrollY / span);
+    latch = Math.max(latch, clamp01(window.scrollY / span));
+    return latch;
+  }
+  /* Коли опис складений і людина вже нижче липкої ділянки, сама ділянка більше не потрібна: прибираємо її
+     й на стільки ж підтягуємо прокрутку — кадр не рухається, зате назад сторінка йде вільно. */
+  function collapseTrack() {
+    if (collapsed || !track || !hero || dbgP != null || !lettersDone()) return;
+    const extra = track.offsetHeight - hero.offsetHeight;
+    if (extra <= 0 || window.scrollY < extra + 4) return;
+    collapsed = true; latch = 1;
+    track.style.height = hero.offsetHeight + 'px';
+    lastY = window.scrollY - extra;
+    jumpTo(window.scrollY - extra);
   }
   function placeBeam(m, a, b, d) {
     m.visible = d > 0.001;
@@ -834,7 +850,7 @@ function init() {
     window.scrollTo(0, y);
     html.style.scrollBehavior = prev;
   }
-  window.addEventListener('scroll', () => { holdForLetters(); schedule(); }, { passive: true });
+  window.addEventListener('scroll', () => { holdForLetters(); collapseTrack(); schedule(); }, { passive: true });
   const hero = sceneEl.closest('section') || sceneEl;
   if (fine) {
     hero.addEventListener('pointermove', (ev) => {
