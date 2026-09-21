@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { FIG, CFG, ARRIVE, FIG_ARRIVE, arrivalFrame, figureFrame, figureProgress, getFrame, introRelease, flapStart, flapDone, restOrder, queueLaunch, maxHold, clamp01, smooth } from './hero-vault-desk-frame.js';
+import { FIG, CFG, DANCE, FIG_DANCE, danceFrame, danceSpeed, KICK, kickFrame, figureFrame, figureProgress, getFrame, introRelease, flapStart, flapDone, restOrder, queueLaunch, maxHold, clamp01, smooth } from './hero-vault-desk-frame.js';
 
 const COUNTS = { joints: 24, inner: 36, outer: 24 };
 const near = (a, b, m) => assert.ok(Math.abs(a - b) < 1e-9, `${m}: ${a} ≠ ${b}`);
@@ -107,31 +107,42 @@ test('швидкий скрол: табло біжить хвилею, і сто
   assert.ok(maxHold() <= 1.6, `утримання не довше ${maxHold()} с`);
 });
 
-test('фото-варіант: вузли прилітають один за одним, і лише потім зʼявляються лінії', () => {
-  const ranks = Array.from({ length: 24 }, (_, i) => i / 23);
-  const s = arrivalFrame(0, ranks);
-  assert.ok(s.every((j) => j.e === 0 && j.scale === 0 && j.glow === 0), 'на старті нічого немає');
-  const e = arrivalFrame(1, ranks);
-  assert.ok(e.every((j) => j.e === 1 && Math.abs(j.scale - 1) < 1e-9 && j.glow === 0 && j.landed), 'усі сіли, рівного розміру, не світяться');
-  /* один за одним: кожен наступний вилітає пізніше за попереднього, і прильоти не зливаються в один момент */
-  const startOf = (k) => ARRIVE.fly[0] + k * (ARRIVE.fly[1] - ARRIVE.fly[0] - ARRIVE.flyLen);
-  const gap = (startOf(1 / 23) - startOf(0)) * ARRIVE.introMs;
-  assert.ok(gap >= 45, `між вильотами ${gap.toFixed(0)} мс — видно, що летять по одному`);
-  assert.ok(FIG_ARRIVE.intro.inner[0] >= ARRIVE.fly[1] - 1e-9, 'лінії — лише після того, як сів останній вузол');
-  assert.ok(figureFrame(0, ARRIVE.fly[1] - 0.01, { joints: 1, inner: 4, outer: 4 }, FIG_ARRIVE).inner.every((v) => v === 0), 'поки вузли летять, ліній немає');
-  const mid = arrivalFrame(0.3, ranks);
-  assert.ok(mid[0].e >= mid[12].e && mid[12].e >= mid[23].e, 'хто раніше в черзі — той далі пролетів');
+test('фото-варіант, хоровод: крапки по одній стають у коло, заповнюють його рівно й лише потім сідають', () => {
+  const n = 24, jit = Array.from({ length: n }, (_, i) => (i * 7 % n) / n);
+  const s = danceFrame(0, n, jit);
+  assert.ok(s.every((d) => d.scale === 0 && d.glow === 0 && d.ride === 0), 'на старті нічого немає');
+  const e = danceFrame(1, n, jit);
+  assert.ok(e.every((d) => d.landed && d.seat === 1 && Math.abs(d.scale - 1) < 1e-9 && d.glow === 0), 'наприкінці всі на місцях');
+  /* по одній: кожна наступна заходить пізніше; у мить, коли зайшла остання, ланцюжок рівно обіймає коло */
+  const gapMs = (DANCE.enter[1] - DANCE.enter[0]) / (n - 1) * DANCE.introMs;
+  assert.ok(gapMs >= 50, `між входами ${gapMs.toFixed(0)} мс`);
+  const atFull = danceFrame(DANCE.enter[1], n, jit);
+  const step = atFull[0].ride - atFull[1].ride;
+  assert.ok(Math.abs(step * n - 2 * Math.PI * DANCE.fill * n / (n - 1)) < 1e-6, 'сусідні крапки на колі — на однаковій відстані');
+  assert.ok(atFull.every((d) => d.seat === 0), 'поки коло збирається, ніхто не сідає');
+  assert.ok(DANCE.seat[0] >= DANCE.enter[1] + DANCE.inLen - 0.04, 'сідати починають, коли в колі вже всі');
+  assert.ok(FIG_DANCE.intro.inner[0] >= DANCE.seat[1] - 1e-9, 'лінії — лише після того, як сіла остання');
+  assert.ok(danceSpeed() < 2 * Math.PI, `коло кружляє не швидше за оберт на секунду (${danceSpeed().toFixed(2)} рад/с)`);
 });
 
-test('фото-варіант: поява плавна — без стрибків розміру й світла', () => {
-  const ranks = Array.from({ length: 24 }, (_, i) => i / 23);
-  let prev = arrivalFrame(0, ranks), maxD = 0;
-  for (let i = 1; i <= 3000; i++) {
-    const f = arrivalFrame(i / 3000, ranks);
-    f.forEach((j, n) => { maxD = Math.max(maxD, Math.abs(j.scale - prev[n].scale), Math.abs(j.glow - prev[n].glow), Math.abs(j.e - prev[n].e)); });
+test('фото-варіант, хоровод: плавно — без стрибків розміру й світла', () => {
+  const n = 24, jit = Array.from({ length: n }, (_, i) => (i * 7 % n) / n);
+  let prev = danceFrame(0, n, jit), maxD = 0;
+  for (let i = 1; i <= 4000; i++) {
+    const f = danceFrame(i / 4000, n, jit);
+    f.forEach((d, k) => { maxD = Math.max(maxD, Math.abs(d.scale - prev[k].scale), Math.abs(d.glow - prev[k].glow), Math.abs(d.seat - prev[k].seat), Math.abs(d.reach - prev[k].reach)); });
     prev = f;
   }
-  assert.ok(maxD < 0.03, `найбільший стрибок за 1/3000 вступу: ${maxD}`);
+  assert.ok(maxD < 0.03, `найбільший стрибок за 1/4000 вступу: ${maxD}`);
+});
+
+test('клік по фігурі: ядро робить рівно один оберт і мʼяко зупиняється', () => {
+  assert.deepEqual(kickFrame(-1), { turn: 0, boost: 0 });
+  assert.equal(kickFrame(0).turn, 0);
+  assert.ok(Math.abs(kickFrame(KICK.dur).turn - 2 * Math.PI) < 1e-9, 'повний оберт');
+  assert.ok(Math.abs(kickFrame(KICK.dur).boost) < 1e-9 && kickFrame(KICK.dur / 2).boost > 0.99, 'світло спалахує посередині й згасає');
+  let prev = 0;
+  for (let i = 1; i <= 200; i++) { const v = kickFrame(KICK.dur * i / 200).turn; assert.ok(v >= prev, 'обертається в один бік'); prev = v; }
 });
 
 test('вхід поза межами обрізається', () => {

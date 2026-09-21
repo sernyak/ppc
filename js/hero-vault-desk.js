@@ -25,7 +25,7 @@
  * ?still=1 — один кадр, ?age=3 — стільки секунд «уже минуло» після вступу.
  */
 import * as THREE from 'three';
-import { figureFrame, figureProgress, getFrame as sceneFrame, introRelease, flapStart, restOrder, queueLaunch, arrivalFrame, arriveEase, ARRIVE, FIG_ARRIVE, FIG, clamp01, CFG } from './hero-vault-desk-frame.js';
+import { figureFrame, figureProgress, getFrame as sceneFrame, introRelease, flapStart, restOrder, queueLaunch, danceFrame, DANCE, FIG_DANCE, kickFrame, FIG, clamp01, CFG } from './hero-vault-desk-frame.js';
 
 const sceneEl = document.getElementById('vault-scene');
 const canvas = document.getElementById('vault-canvas');
@@ -46,7 +46,7 @@ function init() {
   const photoEl = photo ? sceneEl.querySelector('.vault-photo') : null;
   const glowEl = photo ? sceneEl.querySelector('.vault-deskglow') : null;
   const PHOTO = { w: 1408, h: 768, pos: [0.62, 0.5], fig: [0.71, 0.47], figR: 0.235, desk: 0.79 };
-  const INTRO_MS = photo ? ARRIVE.introMs : CFG.introMs;       // у фото вузли прилітають по одному — появі потрібно трохи більше часу
+  const INTRO_MS = photo ? DANCE.introMs : CFG.introMs;        // у фото крапки збираються хороводом — появі потрібно трохи більше часу
 
   let renderer;
   try {
@@ -133,15 +133,19 @@ function init() {
   innerLines.sort((a, b) => a.y - b.y);
   const COUNTS = { joints: joints.length, inner: innerLines.length, outer: outerBeams.length };
 
-  /* ---------- фото-варіант: вузли прилітають збоку, один за одним ---------- */
-  /* Кожен вилітає з-за правого краю кадру (з боку вікна з містом), летить своєю дугою з мʼяким світлим хвостом
-     і сідає на місце; черга — випадкова, тож фігура «збирається» по всьому обʼєму, а не шарами. */
+  /* ---------- фото-варіант: поява «хороводом» ---------- */
+  /* Крапки по одній залітають з-за правого краю й стають у коло, що кружляє довкола фігури; коли в колі всі,
+     вони по спіралі сідають на свої місця. Щоб посадка була злагодженою, крапки в колі йдуть у тому ж порядку,
+     що й їхні місця за кутом навколо осі фігури: кожній лишається пройти приблизно однаковий шлях. */
   const TRAIL = 3;                                            // скільки світлих точок у хвості
-  const arrRng = seeded(211);
-  const perm = joints.map((_, i) => i).sort(() => arrRng() - 0.5);
-  const ranks = new Array(joints.length);
-  perm.forEach((ji, n) => { ranks[ji] = n / Math.max(1, joints.length - 1); });
-  const arr = joints.map(() => ({ sy: -0.35 + arrRng() * 0.9, dz: (arrRng() - 0.5) * 2.4, cy: (arrRng() - 0.5) * 2, cz: (arrRng() - 0.5) * 1.6 }));
+  const RING = R * 1.25, FAR = R * 3.4;                       // радіус кола й звідки крапки на нього залітають
+  /* У колі кружляють світлі крапки; вузли-кульки зʼявляються лише під час посадки. Тож перед посадкою кожній
+     крапці можна віддати найзручніше місце — найближче попереду за ходом кола, — і всі сядуть однаковим рухом. */
+  const dotJoint = joints.map((_, i) => i);                    // яка крапка стане яким вузлом (призначається перед посадкою)
+  const seatTarget = new Float32Array(joints.length);
+  let assigned = false;
+  const jitRng = seeded(211);
+  const jit = joints.map(() => jitRng());                     // легкий розкид черги посадки
   let sparks = null;
   if (photo) {
     const n = joints.length * (1 + TRAIL);
@@ -151,7 +155,6 @@ function init() {
     const sz = new Float32Array(n);
     for (let i = 0; i < joints.length; i++) for (let k = 0; k <= TRAIL; k++) sz[i * (1 + TRAIL) + k] = 1 - k * 0.2;
     sGeo.setAttribute('aSize', new THREE.BufferAttribute(sz, 1));
-    sGeo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 1e4);
     const sparkMat = new THREE.ShaderMaterial({
       uniforms: { uPR: { value: renderer.getPixelRatio() }, uColor: { value: new THREE.Color(0x8fc2ff) } },
       vertexShader: `attribute float aAlpha; attribute float aSize; uniform float uPR; varying float vA;
@@ -167,56 +170,84 @@ function init() {
     });
     sparks = new THREE.Points(sGeo, sparkMat); sparks.visible = false; sparks.frustumCulled = false; spin.add(sparks);
   }
-  /* точки дуги прильоту у світі: старт — за правим краєм кадру на глибині фігури, контрольна — збоку від прямої */
-  const invSpin = new THREE.Matrix4(), aStart = new THREE.Vector3(), aCtrl = new THREE.Vector3(), aEnd = new THREE.Vector3(), aP = new THREE.Vector3();
-  const aFwd = new THREE.Vector3(), aRight = new THREE.Vector3(), aUp = new THREE.Vector3(), aRay = new THREE.Vector3();
-  function arcPoint(e, out) {
-    const k = 1 - e;
-    return out.set(0, 0, 0).addScaledVector(aStart, k * k).addScaledVector(aCtrl, 2 * k * e).addScaledVector(aEnd, e * e);
+  const invSpin = new THREE.Matrix4(), aRight = new THREE.Vector3(), aDir = new THREE.Vector3(), aP = new THREE.Vector3();
+  const TAU = Math.PI * 2, wrap0 = (a) => ((a % TAU) + TAU) % TAU;
+  /* де крапка в системі фігури: на колі (кут від точки входу справа + пройдене), підлітання ззовні, посадка */
+  function ringPos(d, phi0, out) {
+    const th = phi0 + d.ride, r = FAR + (RING - FAR) * d.reach;
+    return out.set(r * Math.cos(th), R * 0.1 * Math.sin(th * 2), r * Math.sin(th));
   }
-  function applyArrival() {
-    const A = arrivalFrame(introNow, ranks);
+  function dancePos(d, dot, phi0, out) {
+    ringPos(d, phi0, out);
+    if (d.seat <= 0 || !assigned) return out;
+    const v = joints[dotJoint[dot]].v, th = phi0 + d.ride, e = d.seat;
+    const ringR = Math.hypot(out.x, out.z), rt = Math.hypot(v.x, v.z);
+    const a = th + (seatTarget[dot] - th) * e, r = ringR + (rt - ringR) * e, y = out.y + (v.y - out.y) * e;
+    return out.set(r * Math.cos(a), y, r * Math.sin(a));
+  }
+  /* Перед посадкою: крапки й місця впорядковуємо за кутом і шукаємо такий циклічний зсув, за якого кожній лишається
+     пройти вперед якнайменше, але не менше, ніж вона ще проїде по колу до своєї черги сідати. */
+  function assignSeats(D, phi0) {
+    const n = joints.length, sec = DANCE.introMs / 1000;
+    const th = D.map((d) => phi0 + d.ride);
+    const dots = th.map((a, k) => [k, wrap0(a)]).sort((x, y) => x[1] - y[1]);
+    const seats = joints.map((j, i) => [i, wrap0(Math.atan2(j.v.z, j.v.x))]).sort((x, y) => x[1] - y[1]);
+    const w = (2 * Math.PI * DANCE.fill) / ((DANCE.enter[1] - DANCE.enter[0]) * sec);
+    const need = D.map((d, k) => {
+      const b0 = DANCE.seat[0] + clamp01(jit[k]) * (DANCE.seat[1] - DANCE.seat[0] - DANCE.seatLen);
+      return Math.max(0, (b0 - introNow) * sec * w) + 0.15;             // скільки ще проїде по колу до своєї посадки + запас
+    });
+    let best = null;
+    for (let c = 0; c < n; c++) {
+      let worst = 0;
+      const off = dots.map(([k, a], m) => { const o = need[k] + wrap0(seats[(m + c) % n][1] - a - need[k]); worst = Math.max(worst, o); return o; });
+      if (!best || worst < best.worst) best = { c, off, worst };
+    }
+    dots.forEach(([k], m) => { dotJoint[k] = seats[(m + best.c) % n][0]; seatTarget[k] = th[k] + best.off[m]; });
+    assigned = true;
+  }
+  function applyDance() {
+    const n = joints.length, D = danceFrame(introNow, n, jit);
     const sp = sparks.geometry.attributes.position, sa = sparks.geometry.attributes.aAlpha;
-    let any = false;
     outer.updateMatrixWorld(true);
     invSpin.copy(spin.matrixWorld).invert();
-    camera.getWorldDirection(aFwd);
-    aRight.setFromMatrixColumn(camera.matrixWorld, 0); aUp.setFromMatrixColumn(camera.matrixWorld, 1);
-    const zf = tmpC.copy(outer.position).sub(camera.position).dot(aFwd);           // глибина фігури вздовж погляду
-    const Rw = R * figScale;
-    joints.forEach((j, i) => {
-      const J = A[i], base = i * (1 + TRAIL);
-      j.m.scale.setScalar(Math.max(0.001, J.scale));
-      if (J.landed || J.u <= 0) {
-        j.m.position.copy(j.v);
-        for (let k = 0; k <= TRAIL; k++) sa.setX(base + k, k === 0 ? J.glow : 0);
-        sp.setXYZ(base, j.v.x, j.v.y, j.v.z);
-        if (J.glow > 0.001) any = true;
-        return;
+    aRight.setFromMatrixColumn(camera.matrixWorld, 0);
+    aDir.copy(aRight).transformDirection(invSpin);
+    const phi0 = Math.atan2(aDir.z, aDir.x);                                   // точка входу: праворуч на екрані
+    if (!assigned && introNow >= DANCE.seat[0] - 0.004) assignSeats(D, phi0);
+    if (introNow < DANCE.seat[0] - 0.02) assigned = false;
+    const tails = [1, 2, 3].map((k) => danceFrame(introNow - k * 0.012, n, jit));
+    let any = false;
+    for (let dot = 0; dot < n; dot++) {
+      const d = D[dot], j = joints[dotJoint[dot]], base = dot * (1 + TRAIL);
+      if (d.landed || d.scale <= 0) {
+        j.m.position.copy(j.v); j.m.scale.setScalar(Math.max(0.001, d.landed ? d.scale : 0));
+        sp.setXYZ(base, j.v.x, j.v.y, j.v.z); sa.setX(base, d.landed ? d.glow : 0);
+        for (let k = 1; k <= TRAIL; k++) sa.setX(base + k, 0);
+        if (d.landed && d.glow > 0.001) any = true;
+        continue;
       }
-      /* дуга: зі старту за правим краєм кадру — до місця вузла у світі */
-      aRay.set(1.12, arr[i].sy, 0.5).unproject(camera).sub(camera.position).normalize();
-      aStart.copy(camera.position).addScaledVector(aRay, (zf + arr[i].dz) / Math.max(0.2, aRay.dot(aFwd)));
-      aEnd.copy(j.v).applyMatrix4(spin.matrixWorld);
-      aCtrl.copy(aStart).lerp(aEnd, 0.5).addScaledVector(aUp, arr[i].cy * Rw * 1.4).addScaledVector(aFwd, arr[i].cz * Rw);
-      arcPoint(J.e, aP).applyMatrix4(invSpin);
-      j.m.position.copy(aP);
-      sp.setXYZ(base, aP.x, aP.y, aP.z); sa.setX(base, J.glow);
-      for (let k = 1; k <= TRAIL; k++) {                                              // хвіст — ті самі точки дуги трохи позаду
-        const uk = J.u - k * 0.045;
-        arcPoint(arriveEase(uk), aP).applyMatrix4(invSpin);
+      dancePos(d, dot, phi0, aP);
+      /* кулька-вузол проявляється лише під час посадки; до того в колі кружляє світла крапка */
+      j.m.position.copy(aP); j.m.scale.setScalar(Math.max(0.001, assigned ? d.scale * smoothstep01(d.seat / 0.35) : 0));
+      sp.setXYZ(base, aP.x, aP.y, aP.z); sa.setX(base, d.glow);
+      for (let k = 1; k <= TRAIL; k++) {                                       // хвіст — де крапка була мить тому
+        const dk = tails[k - 1][dot];
+        dancePos(dk, dot, phi0, aP);
         sp.setXYZ(base + k, aP.x, aP.y, aP.z);
-        sa.setX(base + k, uk > 0 ? J.glow * [0, 0.5, 0.3, 0.15][k] : 0);
+        sa.setX(base + k, dk.scale > 0 && dk.seat < 1 ? d.glow * [0, 0.5, 0.3, 0.15][k] : 0);
       }
       any = true;
-    });
+    }
     sp.needsUpdate = true; sa.needsUpdate = true;
     sparks.visible = any;
   }
+  const smoothstep01 = (x) => { const k = clamp01(x); return k * k * (3 - 2 * k); };
 
   /* ---------- поле формул: невидима похила площина збоку за фігурою ---------- */
   const H = 7.5, WW = 19;
   const wallC = new THREE.Vector3(9.3, H / 2, -1.8);
+  if (photo) wallC.addScaledVector(tmpA.subVectors(wallC, cam0).normalize(), 5.5);   // у фото голограма — дальший план, за вікном
   const wallRot = -Math.PI / 2 + 0.62;
   const wallN = new THREE.Vector3(-Math.cos(wallRot + Math.PI / 2), 0, Math.sin(wallRot + Math.PI / 2));
   const wallU = new THREE.Vector3(Math.cos(wallRot), 0, -Math.sin(wallRot));
@@ -729,7 +760,7 @@ function init() {
      самому контейнері сторінки. Інакше на широкому екрані текст і фігура розʼїжджались. Камеру просто
      зсуваємо паралельно площині кадру: перспектива, світло й тіні не змінюються. */
   const camRight = new THREE.Vector3(), camUp = new THREE.Vector3();
-  let figScale = 1;
+  let figScale = 1, figRadiusPx = 0, kickAt = -99;
   /* прямокутник, який фото займає на екрані (у пікселях сцени, без паралаксу) */
   function photoRect() {
     const cw = photoEl.offsetWidth, ch = photoEl.offsetHeight;
@@ -755,6 +786,7 @@ function init() {
       xPx = P.x + PHOTO.fig[0] * P.w; yPx = P.y + PHOTO.fig[1] * P.h;
       figScale = (PHOTO.figR * P.h) / Math.max(1, rPx);
       rNow = rPx * figScale;
+      figRadiusPx = PHOTO.figR * P.h;
     }
     xPx = Math.min(Math.max(xPx, freeL + rNow + 70), W - rNow - 24);   // не ближче 70 px до тексту і не за край екрана
     const xd = (xPx / W) * 2 - 1, yd = -((yPx / Hh) * 2 - 1);
@@ -800,25 +832,28 @@ function init() {
   for (const ev of ['wheel', 'touchstart', 'keydown', 'pointerdown']) window.addEventListener(ev, () => { userInput = true; }, { passive: true });
   function enterInstant() {
     introMs = INTRO_MS; restSec = 99;
-    pTarget = pSmooth = progress();
+    pTarget = pSmooth = progress(); pText = latch;
     instantLand = true;
     rise(true);
   }
   /* hero липкий на час прокрутки доріжки */
   /* Історія програється ОДИН РАЗ: досягнутий стан замикається, назад нічого не відмотується — інакше
      при русі вгору сцена переграє все у зворотному напрямку й скрол відчувається вʼязким. */
-  let latch = 0, collapsed = false;
+  /* У фото-варіанті фігура й голограма йдуть за скролом в ОБИДВА боки: скрол назад відкручує їх до початкового
+     стану (прохання власника). Опис при цьому лишається — для нього прогрес так само замикається (pText). */
+  let latch = 0, collapsed = false, pText = 0;
   function progress() {
     if (dbgP != null) return dbgP;
     if (collapsed) return 1;
     const span = track ? Math.max(1, track.offsetHeight - window.innerHeight) : window.innerHeight;
-    latch = Math.max(latch, clamp01(window.scrollY / span));
-    return latch;
+    const live = clamp01(window.scrollY / span);
+    latch = Math.max(latch, live);
+    return photo ? live : latch;
   }
   /* Коли опис складений і людина вже нижче липкої ділянки, сама ділянка більше не потрібна: прибираємо її
      й на стільки ж підтягуємо прокрутку — кадр не рухається, зате назад сторінка йде вільно. */
   function collapseTrack() {
-    if (collapsed || !track || !hero || dbgP != null || !lettersDone()) return;
+    if (photo || collapsed || !track || !hero || dbgP != null || !lettersDone()) return;   // у фото липка ділянка лишається: назад по ній сцена відкручується
     const extra = track.offsetHeight - hero.offsetHeight;
     if (extra <= 0 || window.scrollY < extra + 4) return;
     collapsed = true; latch = 1;
@@ -845,14 +880,16 @@ function init() {
     /* фігура — як на /preview/3d-v6/, тільки каркас не розсувається */
     if (!photo) joints.forEach((j, i) => j.m.scale.setScalar(Math.max(0.001, fF.joints[i])));
     outerBeams.forEach((b, i) => placeBeam(b.m, VO[b.i], VO[b.j], fF.outer[i]));
-    innerGrp.rotation.y = fF.swivel;
+    const kick = photo ? kickFrame(tt - kickAt) : { turn: 0, boost: 0 };   // клік по фігурі — ядро робить повний оберт
+    const swivel = fF.swivel + kick.turn;
+    innerGrp.rotation.y = swivel;
     innerLines.forEach((L, i) => {
       const d = fF.inner[i];
       let a = L.a, b = L.b;
-      if (L.spoke >= 0) { a = VO[L.spoke]; b = tmpT.copy(VI[L.spoke]).applyAxisAngle(UP, fF.swivel); }   // спиця тягнеться за ґраткою
+      if (L.spoke >= 0) { a = VO[L.spoke]; b = tmpT.copy(VI[L.spoke]).applyAxisAngle(UP, swivel); }   // спиця тягнеться за ґраткою
       placeBeam(L.bar, a, b, d); placeBeam(L.strip, a, b, d); placeBeam(L.glow, a, b, d);
       const wv = 0.5 + 0.5 * Math.sin(L.k - tt * (0.5 + 1.1 * fF.pulseSpeed));
-      const br = fF.light * (0.45 + 0.55 * (1 - fF.wave + fF.wave * wv));
+      const br = Math.min(1.25, fF.light * (0.45 + 0.55 * (1 - fF.wave + fF.wave * wv)) * (1 + 0.9 * kick.boost));
       L.lightMat.color.copy(LIGHT).multiplyScalar(0.2 + 1.35 * br);
       L.glow.material.opacity = 0.03 + 0.16 * br;
     });
@@ -872,7 +909,7 @@ function init() {
       camera.position.copy(camPos); camera.lookAt(lookPt);
     } else { camera.position.copy(camPos); camera.lookAt(target); }
     camera.updateMatrixWorld(); camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
-    if (photo) applyArrival();
+    if (photo) applyDance();
     placeLedeFrame();
     /* поле формул: у спокої тліє тьмяним сірим, від скролу розгоряється до яскравого */
     const rest = introRelease(restSec);
@@ -881,7 +918,7 @@ function init() {
     let far = 0;
     for (const c of wallCorners) far = Math.max(far, c.distanceTo(wallOrigin));
     wallMat.uniforms.uRadius.value = Math.max(fS.coverage, rest.cover) * far;
-    wallMat.uniforms.uOpacity.value = Math.max(fS.fade, rest.wall) * (photo ? 0.72 : 1);   // на фото голограма — проєкція на скло вікна, трохи тихіша
+    wallMat.uniforms.uOpacity.value = Math.max(fS.fade, rest.wall) * (photo ? 0.66 : 1);   // на фото голограма — дальший план, трохи тихіша
     wallMat.uniforms.uTint.value.copy(TINT_REST).lerp(TINT_LIT, fS.fade);
     wallMat.uniforms.uTime.value = tt; wallMat.uniforms.uSpot.value.copy(spot);
     wall.visible = wallMat.uniforms.uOpacity.value > 0.002;
@@ -892,11 +929,11 @@ function init() {
         if (i < nAuto) {
           /* перше речення: табло за розкладом від кінця вступу (restSec уже враховує ?age і перезавантаження) */
           if (launch[i] === UNSET && fS.after) { launch[i] = tt - restSec + autoStart[i]; touched = true; }
-        } else if (launch[i] === UNSET && fS.fade >= order[i]) {
+        } else if (launch[i] === UNSET && textFade >= order[i]) {
           /* решта: скрол відпускає літеру; відпущені разом стають у чергу — табло однаково біжить хвилею */
           lastStart = instantLand ? tt - 10 : queueLaunch(tt - AGE, lastStart, m);
           launch[i] = lastStart; touched = true;
-        } else if (launch[i] !== UNSET && fS.fade < order[i] - 0.03) { launch[i] = UNSET; touched = true; }   // скрол назад — табло гасне
+        } else if (launch[i] !== UNSET && textFade < order[i] - 0.03) { launch[i] = UNSET; touched = true; }   // скрол назад — табло гасне (у фото — ні: опис лишається)
         if (launch[i] !== UNSET) any = true;
       }
       if (touched) flaps.geometry.attributes.aLaunch.needsUpdate = true;
@@ -919,7 +956,13 @@ function init() {
       photoEl.style.transform = `translate3d(${px.toFixed(1)}px, ${py.toFixed(1)}px, 0)`;
     }
   }
-  const frames = (p, introT) => { introNow = introT; return [figureFrame(figureProgress(p), introT, COUNTS, photo ? FIG_ARRIVE : FIG), sceneFrame(p, introT)]; };
+  const frames = (p, introT) => {
+    introNow = introT;
+    const fS = sceneFrame(p, introT);
+    textFade = photo ? sceneFrame(dbgP != null ? p : pText, introT).fade : fS.fade;
+    return [figureFrame(figureProgress(p), introT, COUNTS, photo ? FIG_DANCE : FIG), fS];
+  };
+  let textFade = 0;
   let introNow = 0, glowCur = 0;
   function render(fF, fS) { apply(fF, fS, t); renderer.render(scene, camera); }
 
@@ -947,11 +990,12 @@ function init() {
     if (!risen && introT >= 1) rise(dbgIntro != null);   // фігура повністю зʼявилась — заголовок звільняє місце опису
     pTarget = progress();
     pSmooth += (pTarget - pSmooth) * 0.16;
+    pText += (latch - pText) * 0.16;
     mx += (tmx - mx) * 0.08; my += (tmy - my) * 0.08;
     spot.lerp(tspot, 0.12);
     stepGrid(Math.min(dt / 1000, 0.05));
     angle += dt / 1000 * (0.1 + 0.08 * pSmooth);                         // обертання: повільне у спокої, трохи швидше зі скролом
-    if (still) { pSmooth = pTarget; render(...frames(pSmooth, introT)); return; }
+    if (still) { pSmooth = pTarget; pText = latch; render(...frames(pSmooth, introT)); return; }
     render(...frames(pSmooth, introT));
     if (visible && !document.hidden) schedule();
   }
@@ -998,9 +1042,22 @@ function init() {
       ndc.set(((ev.clientX - cr.left) / cr.width) * 2 - 1, -((ev.clientY - cr.top) / cr.height) * 2 + 1);
       raycaster.setFromCamera(ndc, camera);
       if (!raycaster.ray.intersectPlane(wallPlane, tspot)) tspot.set(0, -50, 0);
+      if (photo) sceneEl.style.cursor = overFigure(ev) ? 'pointer' : '';      // над фігурою — «рука»: її можна клацнути
       schedule();
     });
     hero.addEventListener('pointerleave', () => { tmx = 0; tmy = 0; tspot.set(0, -50, 0); schedule(); });
+    /* клік по фігурі — ядро робить повний оберт (якщо попередній ще не скінчився, чекаємо на нього) */
+    if (photo) canvas.addEventListener('click', (ev) => {
+      if (!overFigure(ev) || introMs < INTRO_MS || t - kickAt < 1.6) return;
+      kickAt = t; schedule();
+    });
+  }
+  /* чи вказівник над фігурою: відстань до її центру на екрані менша за її екранний радіус */
+  function overFigure(ev) {
+    const cr = canvas.getBoundingClientRect();
+    tmpD.copy(outer.position).project(camera);
+    const x = cr.left + (tmpD.x + 1) / 2 * cr.width, y = cr.top + (1 - tmpD.y) / 2 * cr.height;
+    return Math.hypot(ev.clientX - x, ev.clientY - y) < figRadiusPx * 1.05;
   }
   schedule();
 

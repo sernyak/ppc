@@ -145,41 +145,66 @@ export function queueLaunch(now, lastStart, m, cfg = CFG) {
 export function maxHold(cfg = CFG) { return cfg.flap.burst + cfg.flap.flips * cfg.flap.dur; }
 
 /*
- * Поява у фото-варіанті — вузли ПРИЛІТАЮТЬ ЗБОКУ, один за одним. Кожен вилітає з-за правого краю кадру
- * (з боку вікна з нічним містом), летить своєю дугою з легким світлим хвостом, сповільнюється й мʼяко
- * спалахує в мить посадки. Лише коли сів останній, між ними проростають лінії.
+ * Поява у фото-варіанті — «ХОРОВОД». Крапки по одній залітають з-за правого краю й стають у коло, яке
+ * кружляє довкола фігури: кожна нова приєднується в тому ж місці, тож коло заповнюється рівно, як люди,
+ * що беруться за руки. Коли в колі всі, крапки по спіралі (не зупиняючи кружляння) сідають на свої місця,
+ * і лише тоді між ними проростають лінії.
  */
-export const ARRIVE = {
-  introMs: 3200,            // появі у фото потрібно трохи більше часу, щоб прильоти читались по одному
-  fly: [0.03, 0.6],         // вікно, у якому вузли прилітають
-  flyLen: 0.14,             // скільки летить кожен
-  land: 0.12,               // мʼякий спалах після посадки
+export const DANCE = {
+  introMs: 3600,
+  enter: [0.03, 0.4],       // вікно, у якому крапки по одній залітають у коло
+  inLen: 0.07,              // скільки кожна підлітає до кола
+  seat: [0.44, 0.62],       // крапки сідають на місця (з легким розкидом у черзі)
+  seatLen: 0.13,
+  land: 0.1,                // мʼякий спалах після посадки
+  fill: 0.96,               // яку частку кола займає ланцюжок, коли зайшла остання
 };
-/** Фігура для фото-варіанта: лінії проростають лише після того, як сів останній вузол. */
-export const FIG_ARRIVE = { ...FIG, intro: { ...FIG.intro, inner: [0.6, 0.82], innerLen: 0.09, outer: [0.68, 0.97], outerLen: 0.11, light: [0.84, 1.0] } };
+/** Фігура для фото-варіанта: лінії проростають лише після того, як сіла остання крапка. */
+export const FIG_DANCE = { ...FIG, intro: { ...FIG.intro, inner: [0.62, 0.84], innerLen: 0.09, outer: [0.7, 0.97], outerLen: 0.11, light: [0.86, 1.0] } };
 
-/** Сповільнення в кінці польоту: вузол підлітає й «сідає». */
-export function arriveEase(u) { const v = 1 - clamp01(u); return 1 - v * v * v; }
+/** Кутова швидкість кола, рад/с: за вікно входу ланцюжок обходить частку fill повного кола. */
+export function danceSpeed(cfg = DANCE) { return (2 * Math.PI * cfg.fill) / ((cfg.enter[1] - cfg.enter[0]) * cfg.introMs / 1000); }
 
 /**
  * @param {number} introT — прогрес вступу 0…1
- * @param {number[]} ranks — черга кожного вузла 0…1 (менше — прилітає раніше)
- * @returns {{u: number, e: number, scale: number, glow: number, landed: boolean}[]}
- *   u — прогрес польоту, e — пройдена частка дуги, scale — розмір, glow — світіння іскри на вузлі
+ * @param {number} n — скільки крапок
+ * @param {number[]} jit — розкид черги посадки кожної 0…1
+ * @returns {{ride: number, reach: number, seat: number, scale: number, glow: number, landed: boolean}[]}
+ *   ride — кут, який крапка вже пройшла по колу (рад), reach — наскільки підлетіла до кола (0…1),
+ *   seat — наскільки опустилась на своє місце (0…1), scale, glow — розмір і світіння іскри
  */
-export function arrivalFrame(introT, ranks, cfg = ARRIVE) {
-  const t = clamp01(introT), w = cfg.fly[1] - cfg.fly[0] - cfg.flyLen;
-  return ranks.map((k) => {
-    const s0 = cfg.fly[0] + clamp01(k) * w, u = clamp01((t - s0) / cfg.flyLen);
-    const landed = t >= s0 + cfg.flyLen, after = clamp01((t - s0 - cfg.flyLen) / cfg.land);
-    const bump = landed ? Math.sin(Math.PI * after) : 0;          // мʼякий спалах: 0 → пік → 0
-    return {
-      u, landed,
-      e: landed ? 1 : arriveEase(u),
-      scale: smooth(0, 0.18, u) * (0.6 + 0.4 * smooth(0.6, 1, u)) * (1 + 0.28 * bump),
-      glow: !landed ? smooth(0, 0.18, u) * (0.6 + 0.4 * u) : 1 - smooth(0, 1, after),
-    };
-  });
+export function danceFrame(introT, n, jit, cfg = DANCE) {
+  const t = clamp01(introT), sec = cfg.introMs / 1000, w = danceSpeed(cfg);
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const s0 = cfg.enter[0] + (n > 1 ? i / (n - 1) : 0) * (cfg.enter[1] - cfg.enter[0]);
+    const b0 = cfg.seat[0] + clamp01(jit[i] || 0) * (cfg.seat[1] - cfg.seat[0] - cfg.seatLen);
+    const started = t > s0, seatP = smooth(b0, b0 + cfg.seatLen, t);
+    const landed = t >= b0 + cfg.seatLen, after = clamp01((t - b0 - cfg.seatLen) / cfg.land);
+    const bump = landed ? Math.sin(Math.PI * after) : 0;
+    const appear = smooth(s0, s0 + cfg.inLen * 0.6, t);
+    out.push({
+      ride: started ? w * (t - s0) * sec : 0,
+      reach: smooth(s0, s0 + cfg.inLen, t),
+      seat: seatP,
+      landed,
+      scale: appear * (0.55 + 0.45 * seatP) * (1 + 0.28 * bump),
+      glow: !landed ? appear * (0.75 + 0.25 * seatP) : 1 - smooth(0, 1, after),
+    });
+  }
+  return out;
+}
+
+/*
+ * Клік по фігурі: ядро (внутрішня ґратка) робить повний оберт — розганяється й мʼяко зупиняється,
+ * а світло ліній на цей час яскравішає. Кубооктаедр після оберту збігається сам із собою.
+ */
+export const KICK = { dur: 1.6 };
+export function kickFrame(since, cfg = KICK) {
+  if (!(since >= 0)) return { turn: 0, boost: 0 };
+  const x = clamp01(since / cfg.dur);
+  const e = x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;   // розгін і гальмування
+  return { turn: 2 * Math.PI * e, boost: Math.sin(Math.PI * x) };
 }
 
 /** Коли табло цілком зупиниться: остання літера + усі її перекидання. */
