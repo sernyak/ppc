@@ -145,42 +145,41 @@ export function queueLaunch(now, lastStart, m, cfg = CFG) {
 export function maxHold(cfg = CFG) { return cfg.flap.burst + cfg.flap.flips * cfg.flap.dur; }
 
 /*
- * Поява у фото-варіанті — «вибух із ядра». Спершу в центрі розгоряється іскра, тоді всі 24 вузли вилітають
- * із неї на свої місця (внутрішні — першими, у них коротший шлях) з легким перельотом, світяться в польоті й
- * мʼяко спалахують у мить посадки; лише потім між ними проростають лінії. Один рух, без мерехтіння.
+ * Поява у фото-варіанті — вузли ПРИЛІТАЮТЬ ЗБОКУ, один за одним. Кожен вилітає з-за правого краю кадру
+ * (з боку вікна з нічним містом), летить своєю дугою з легким світлим хвостом, сповільнюється й мʼяко
+ * спалахує в мить посадки. Лише коли сів останній, між ними проростають лінії.
  */
-export const BURST = {
-  core: [0.0, 0.16],        // іскра в центрі розгоряється
-  fly: [0.12, 0.46],        // вікно, у якому вузли вилітають
-  flyLen: 0.2,              // скільки летить кожен
-  land: 0.14,               // спалах після посадки й згасання
+export const ARRIVE = {
+  introMs: 3200,            // появі у фото потрібно трохи більше часу, щоб прильоти читались по одному
+  fly: [0.03, 0.6],         // вікно, у якому вузли прилітають
+  flyLen: 0.14,             // скільки летить кожен
+  land: 0.12,               // мʼякий спалах після посадки
 };
-/** Фігура для фото-варіанта: лінії проростають лише після того, як вузли сіли. */
-export const FIG_BURST = { ...FIG, intro: { ...FIG.intro, inner: [0.46, 0.76], innerLen: 0.1, outer: [0.58, 0.97], outerLen: 0.12, light: [0.8, 1.0] } };
+/** Фігура для фото-варіанта: лінії проростають лише після того, як сів останній вузол. */
+export const FIG_ARRIVE = { ...FIG, intro: { ...FIG.intro, inner: [0.6, 0.82], innerLen: 0.09, outer: [0.68, 0.97], outerLen: 0.11, light: [0.84, 1.0] } };
 
-function easeOutBack(u) { const c1 = 1.25, c3 = c1 + 1; return 1 + c3 * Math.pow(u - 1, 3) + c1 * Math.pow(u - 1, 2); }
+/** Сповільнення в кінці польоту: вузол підлітає й «сідає». */
+export function arriveEase(u) { const v = 1 - clamp01(u); return 1 - v * v * v; }
 
 /**
  * @param {number} introT — прогрес вступу 0…1
- * @param {number[]} ranks — черга кожного вузла 0…1 (менше — вилітає раніше)
- * @returns {{core: number, joints: {pos: number, scale: number, glow: number}[]}}
- *   pos — частка шляху від центру до місця вузла (з перельотом), scale — розмір, glow — світіння іскри
+ * @param {number[]} ranks — черга кожного вузла 0…1 (менше — прилітає раніше)
+ * @returns {{u: number, e: number, scale: number, glow: number, landed: boolean}[]}
+ *   u — прогрес польоту, e — пройдена частка дуги, scale — розмір, glow — світіння іскри на вузлі
  */
-export function burstFrame(introT, ranks, cfg = BURST) {
+export function arrivalFrame(introT, ranks, cfg = ARRIVE) {
   const t = clamp01(introT), w = cfg.fly[1] - cfg.fly[0] - cfg.flyLen;
-  const joints = ranks.map((k) => {
+  return ranks.map((k) => {
     const s0 = cfg.fly[0] + clamp01(k) * w, u = clamp01((t - s0) / cfg.flyLen);
-    const after = clamp01((t - s0 - cfg.flyLen) / cfg.land);
-    const landed = t >= s0 + cfg.flyLen;
+    const landed = t >= s0 + cfg.flyLen, after = clamp01((t - s0 - cfg.flyLen) / cfg.land);
     const bump = landed ? Math.sin(Math.PI * after) : 0;          // мʼякий спалах: 0 → пік → 0
     return {
-      pos: landed ? 1 : u <= 0 ? 0 : easeOutBack(u),
-      scale: smooth(0, 0.35, u) * (1 + 0.28 * bump),
-      glow: !landed ? smooth(0, 0.25, u) * (0.5 + 0.5 * u) : 1 - smooth(0, 1, after),   // займається плавно, не стрибком
+      u, landed,
+      e: landed ? 1 : arriveEase(u),
+      scale: smooth(0, 0.18, u) * (0.6 + 0.4 * smooth(0.6, 1, u)) * (1 + 0.28 * bump),
+      glow: !landed ? smooth(0, 0.18, u) * (0.6 + 0.4 * u) : 1 - smooth(0, 1, after),
     };
   });
-  const core = smooth(cfg.core[0], cfg.core[1], t) * (1 - smooth(cfg.fly[0] + 0.04, cfg.fly[0] + 0.22, t));
-  return { core, joints };
 }
 
 /** Коли табло цілком зупиниться: остання літера + усі її перекидання. */

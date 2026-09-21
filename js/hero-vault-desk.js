@@ -25,7 +25,7 @@
  * ?still=1 — один кадр, ?age=3 — стільки секунд «уже минуло» після вступу.
  */
 import * as THREE from 'three';
-import { figureFrame, figureProgress, getFrame as sceneFrame, introRelease, flapStart, restOrder, queueLaunch, burstFrame, FIG_BURST, FIG, clamp01, CFG } from './hero-vault-desk-frame.js';
+import { figureFrame, figureProgress, getFrame as sceneFrame, introRelease, flapStart, restOrder, queueLaunch, arrivalFrame, arriveEase, ARRIVE, FIG_ARRIVE, FIG, clamp01, CFG } from './hero-vault-desk-frame.js';
 
 const sceneEl = document.getElementById('vault-scene');
 const canvas = document.getElementById('vault-canvas');
@@ -46,6 +46,7 @@ function init() {
   const photoEl = photo ? sceneEl.querySelector('.vault-photo') : null;
   const glowEl = photo ? sceneEl.querySelector('.vault-deskglow') : null;
   const PHOTO = { w: 1408, h: 768, pos: [0.62, 0.5], fig: [0.71, 0.47], figR: 0.235, desk: 0.79 };
+  const INTRO_MS = photo ? ARRIVE.introMs : CFG.introMs;       // у фото вузли прилітають по одному — появі потрібно трохи більше часу
 
   let renderer;
   try {
@@ -112,8 +113,8 @@ function init() {
 
   /* усі 24 вузли — зовнішні й внутрішні разом — виринають знизу вгору */
   const joints = [];
-  VO.forEach((v) => joints.push({ m: joint(v, thO * 0.74, metalOuter, spin), v, outer: true }));
-  VI.forEach((v) => joints.push({ m: joint(v, thI * 0.8, metalInner, innerGrp), v, outer: false }));
+  VO.forEach((v) => joints.push({ m: joint(v, thO * 0.74, metalOuter, spin), v }));
+  VI.forEach((v) => joints.push({ m: joint(v, thI * 0.8, metalInner, innerGrp), v }));
   joints.sort((a, b) => a.v.y - b.v.y);
   const outerBeams = C.E.map((e) => ({ m: beam(VO[e[0]], VO[e[1]], thO, metalOuter, 0, spin), i: e[0], j: e[1], y: Math.min(VO[e[0]].y, VO[e[1]].y) }));
   outerBeams.sort((a, b) => a.y - b.y);
@@ -132,19 +133,26 @@ function init() {
   innerLines.sort((a, b) => a.y - b.y);
   const COUNTS = { joints: joints.length, inner: innerLines.length, outer: outerBeams.length };
 
-  /* ---------- фото-варіант: поява «вибух із ядра» ---------- */
-  /* Черга вильоту: внутрішні вузли — першими (у них коротший шлях), зовнішні — слідом, з перекриттям. Кожен вузол
-     на льоту несе мʼяку іскру; у центрі перед вильотом розгоряється ядро. */
-  const burstRng = seeded(211);
-  const ranks = joints.map((j) => (j.outer ? 0.38 + burstRng() * 0.62 : burstRng() * 0.5));
-  let sparks = null, sparkMat = null;
+  /* ---------- фото-варіант: вузли прилітають збоку, один за одним ---------- */
+  /* Кожен вилітає з-за правого краю кадру (з боку вікна з містом), летить своєю дугою з мʼяким світлим хвостом
+     і сідає на місце; черга — випадкова, тож фігура «збирається» по всьому обʼєму, а не шарами. */
+  const TRAIL = 3;                                            // скільки світлих точок у хвості
+  const arrRng = seeded(211);
+  const perm = joints.map((_, i) => i).sort(() => arrRng() - 0.5);
+  const ranks = new Array(joints.length);
+  perm.forEach((ji, n) => { ranks[ji] = n / Math.max(1, joints.length - 1); });
+  const arr = joints.map(() => ({ sy: -0.35 + arrRng() * 0.9, dz: (arrRng() - 0.5) * 2.4, cy: (arrRng() - 0.5) * 2, cz: (arrRng() - 0.5) * 1.6 }));
+  let sparks = null;
   if (photo) {
+    const n = joints.length * (1 + TRAIL);
     const sGeo = new THREE.BufferGeometry();
-    sGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array((joints.length + 1) * 3), 3));
-    sGeo.setAttribute('aAlpha', new THREE.BufferAttribute(new Float32Array(joints.length + 1), 1));
-    sGeo.setAttribute('aSize', new THREE.BufferAttribute(new Float32Array(joints.map((j) => (j.outer ? 1 : 0.8)).concat([2.4])), 1));
-    sGeo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), R * 3);
-    sparkMat = new THREE.ShaderMaterial({
+    sGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3));
+    sGeo.setAttribute('aAlpha', new THREE.BufferAttribute(new Float32Array(n), 1));
+    const sz = new Float32Array(n);
+    for (let i = 0; i < joints.length; i++) for (let k = 0; k <= TRAIL; k++) sz[i * (1 + TRAIL) + k] = 1 - k * 0.2;
+    sGeo.setAttribute('aSize', new THREE.BufferAttribute(sz, 1));
+    sGeo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 1e4);
+    const sparkMat = new THREE.ShaderMaterial({
       uniforms: { uPR: { value: renderer.getPixelRatio() }, uColor: { value: new THREE.Color(0x8fc2ff) } },
       vertexShader: `attribute float aAlpha; attribute float aSize; uniform float uPR; varying float vA;
         void main(){ vA = aAlpha; vec4 mv = modelViewMatrix * vec4(position, 1.0);
@@ -157,15 +165,57 @@ function init() {
           gl_FragColor.a = max(gl_FragColor.r, max(gl_FragColor.g, gl_FragColor.b)); }`,
       transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, premultipliedAlpha: true,
     });
-    sparks = new THREE.Points(sGeo, sparkMat); sparks.visible = false; spin.add(sparks);
+    sparks = new THREE.Points(sGeo, sparkMat); sparks.visible = false; sparks.frustumCulled = false; spin.add(sparks);
+  }
+  /* точки дуги прильоту у світі: старт — за правим краєм кадру на глибині фігури, контрольна — збоку від прямої */
+  const invSpin = new THREE.Matrix4(), aStart = new THREE.Vector3(), aCtrl = new THREE.Vector3(), aEnd = new THREE.Vector3(), aP = new THREE.Vector3();
+  const aFwd = new THREE.Vector3(), aRight = new THREE.Vector3(), aUp = new THREE.Vector3(), aRay = new THREE.Vector3();
+  function arcPoint(e, out) {
+    const k = 1 - e;
+    return out.set(0, 0, 0).addScaledVector(aStart, k * k).addScaledVector(aCtrl, 2 * k * e).addScaledVector(aEnd, e * e);
+  }
+  function applyArrival() {
+    const A = arrivalFrame(introNow, ranks);
+    const sp = sparks.geometry.attributes.position, sa = sparks.geometry.attributes.aAlpha;
+    let any = false;
+    outer.updateMatrixWorld(true);
+    invSpin.copy(spin.matrixWorld).invert();
+    camera.getWorldDirection(aFwd);
+    aRight.setFromMatrixColumn(camera.matrixWorld, 0); aUp.setFromMatrixColumn(camera.matrixWorld, 1);
+    const zf = tmpC.copy(outer.position).sub(camera.position).dot(aFwd);           // глибина фігури вздовж погляду
+    const Rw = R * figScale;
+    joints.forEach((j, i) => {
+      const J = A[i], base = i * (1 + TRAIL);
+      j.m.scale.setScalar(Math.max(0.001, J.scale));
+      if (J.landed || J.u <= 0) {
+        j.m.position.copy(j.v);
+        for (let k = 0; k <= TRAIL; k++) sa.setX(base + k, k === 0 ? J.glow : 0);
+        sp.setXYZ(base, j.v.x, j.v.y, j.v.z);
+        if (J.glow > 0.001) any = true;
+        return;
+      }
+      /* дуга: зі старту за правим краєм кадру — до місця вузла у світі */
+      aRay.set(1.12, arr[i].sy, 0.5).unproject(camera).sub(camera.position).normalize();
+      aStart.copy(camera.position).addScaledVector(aRay, (zf + arr[i].dz) / Math.max(0.2, aRay.dot(aFwd)));
+      aEnd.copy(j.v).applyMatrix4(spin.matrixWorld);
+      aCtrl.copy(aStart).lerp(aEnd, 0.5).addScaledVector(aUp, arr[i].cy * Rw * 1.4).addScaledVector(aFwd, arr[i].cz * Rw);
+      arcPoint(J.e, aP).applyMatrix4(invSpin);
+      j.m.position.copy(aP);
+      sp.setXYZ(base, aP.x, aP.y, aP.z); sa.setX(base, J.glow);
+      for (let k = 1; k <= TRAIL; k++) {                                              // хвіст — ті самі точки дуги трохи позаду
+        const uk = J.u - k * 0.045;
+        arcPoint(arriveEase(uk), aP).applyMatrix4(invSpin);
+        sp.setXYZ(base + k, aP.x, aP.y, aP.z);
+        sa.setX(base + k, uk > 0 ? J.glow * [0, 0.5, 0.3, 0.15][k] : 0);
+      }
+      any = true;
+    });
+    sp.needsUpdate = true; sa.needsUpdate = true;
+    sparks.visible = any;
   }
 
   /* ---------- поле формул: невидима похила площина збоку за фігурою ---------- */
-  /* у фото голограма лягає на СКЛО вікна: прямокутник шибки в частках кадру, стійка рами (на ній проєкції немає)
-     і глибина, на якій стоїть шибка (далі за фігуру — фігура її закриває) */
-  const PANE = { u: [0.70, 1.0], v: [0.07, 0.655], mull: [0.906, 0.938], D: 14 };
-  const PANE_ASPECT = ((PANE.u[1] - PANE.u[0]) * PHOTO.w) / ((PANE.v[1] - PANE.v[0]) * PHOTO.h);
-  const H = 7.5, WW = photo ? H * PANE_ASPECT : 19;
+  const H = 7.5, WW = 19;
   const wallC = new THREE.Vector3(9.3, H / 2, -1.8);
   const wallRot = -Math.PI / 2 + 0.62;
   const wallN = new THREE.Vector3(-Math.cos(wallRot + Math.PI / 2), 0, Math.sin(wallRot + Math.PI / 2));
@@ -183,28 +233,23 @@ function init() {
       uAtlas: { value: blankTexture() }, uGrid: { value: blankData() }, uCell: { value: new THREE.Vector2(1, 1) }, uAt: { value: new THREE.Vector2(1, 1) },
       uTint: { value: TINT_REST.clone() }, uOpacity: { value: 0 },
       uOrigin: { value: wallOrigin }, uRadius: { value: 0 }, uSoft: { value: 2.0 },
-      uSpot: { value: new THREE.Vector3(0, -50, 0) }, uSpotR: { value: 3.0 }, uSpotK: { value: fine && !photo ? 0.7 : 0 }, uTime: { value: 0 },
-      uEdge: { value: photo ? 0.025 : 0.2 },
-      uGlass: { value: photo ? 1 : 0 },
-      uMull: { value: new THREE.Vector2((PANE.mull[0] - PANE.u[0]) / (PANE.u[1] - PANE.u[0]), (PANE.mull[1] - PANE.u[0]) / (PANE.u[1] - PANE.u[0])) },
+      uSpot: { value: new THREE.Vector3(0, -50, 0) }, uSpotR: { value: 3.0 }, uSpotK: { value: fine ? 0.7 : 0 }, uTime: { value: 0 },
+      uEdge: { value: 0.2 },
     },
     vertexShader: `varying vec2 vUv; varying vec3 vW;
       void main(){ vUv = uv; vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }`,
     fragmentShader: `uniform sampler2D uAtlas; uniform sampler2D uGrid; uniform vec2 uCell; uniform vec2 uAt; uniform vec3 uTint; uniform float uOpacity; uniform vec3 uOrigin; uniform float uRadius; uniform float uSoft;
-      uniform vec3 uSpot; uniform float uSpotR; uniform float uSpotK; uniform float uTime; uniform float uEdge; uniform float uGlass; uniform vec2 uMull;
+      uniform vec3 uSpot; uniform float uSpotR; uniform float uSpotK; uniform float uTime; uniform float uEdge;
       varying vec2 vUv; varying vec3 vW;
-      /* сітка знаків: у uGrid для кожної комірки — номер гліфа (R), яскравість (G), середина слота в частках знака (B), скільки слотів він займає (A) */
-      float glyphA(vec2 uv){
-        vec2 cp = vec2(uv.x, 1.0 - uv.y) * uCell;
+      void main(){
+        /* сітка знаків: у uGrid для кожної комірки — номер гліфа (R), яскравість (G), середина слота в частках знака (B), скільки слотів він займає (A) */
+        vec2 cp = vec2(vUv.x, 1.0 - vUv.y) * uCell;
         vec2 ci = floor(cp), f = fract(cp);
         vec4 cellData = texture2D(uGrid, (ci + 0.5) / uCell);
         float gi = floor(cellData.r * 255.0 + 0.5);
         vec2 gp = vec2(mod(gi, uAt.x), floor(gi / uAt.x));
         float lx = cellData.b + (f.x - 0.5) / max(1.0, cellData.a * 255.0);
-        return texture2D(uAtlas, (gp + vec2(lx, f.y)) / uAt).a * cellData.g * 1.35;
-      }
-      void main(){
-        vec4 t = vec4(1.0, 1.0, 1.0, glyphA(vUv));
+        vec4 t = texture2D(uAtlas, (gp + vec2(lx, f.y)) / uAt); t.a *= cellData.g * 1.35;
         float d = distance(vW, uOrigin);
         float m = 1.0 - smoothstep(uRadius - uSoft, uRadius + uSoft * 0.25, d);
         float fall = 1.0 / (1.0 + d * d * 0.014);
@@ -212,17 +257,7 @@ function init() {
         float spot = 1.0 + uSpotK * (1.0 - smoothstep(0.0, uSpotR, distance(vW, uSpot)));
         float breathe = 0.92 + 0.08 * sin(uTime * 0.45 + vW.z * 0.7 + vW.y * 0.9);
         float lit = uOpacity * m * edge * (0.35 + 0.65 * fall) * spot * breathe;
-        float sheen = 0.0;
-        if (uGlass > 0.5) {
-          /* На склі: друге, слабше відображення (у скла дві поверхні), стійка рами, на яку проєкція не лягає,
-             і мʼякий відблиск, що раз на ~30 с повільно ковзає по шибці. */
-          t.a = max(t.a, glyphA(vUv + vec2(-0.0035, 0.0055)) * 0.28);
-          float mull = smoothstep(uMull.x - 0.012, uMull.x, vUv.x) * (1.0 - smoothstep(uMull.y, uMull.y + 0.012, vUv.x));
-          lit *= 1.0 - mull;
-          float sweep = fract(uTime * 0.033) * 2.6 - 0.8;
-          sheen = exp(-pow((vUv.x * 0.8 + (1.0 - vUv.y) * 0.6 - sweep) * 5.0, 2.0)) * (1.0 - mull) * edge * (0.4 + 0.6 * uOpacity);
-        }
-        gl_FragColor = vec4(uTint * t.rgb * t.a * lit + uTint * sheen * 0.045, 1.0);
+        gl_FragColor = vec4(uTint * t.rgb * t.a * lit, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
         /* полотно прозоре з premultiplied alpha: альфа = яскравість пікселя, інакше браузер гасить світло */
@@ -341,8 +376,7 @@ function init() {
   const N = 2600;
   const gTo = [], gPhase = [], gSpeed = [], gPos = new Float32Array(N * 3);
   for (let i = 0; i < N; i++) {
-    /* у фото ціль вогника — точка на шибці в її власних координатах (шибка щокадру стоїть за кадром фото) */
-    const p = photo ? new THREE.Vector3((rnd() - 0.5) * WW * 0.92, (rnd() - 0.5) * H * 0.9, 0) : wallPoint((rnd() - 0.5) * (WW - 3), (rnd() - 0.5) * (H - 2));
+    const p = wallPoint((rnd() - 0.5) * (WW - 3), (rnd() - 0.5) * (H - 2));
     gTo.push(p.x, p.y, p.z); gPhase.push(rnd()); gSpeed.push(0.035 + rnd() * 0.055);
   }
   const gGeo = new THREE.BufferGeometry();
@@ -353,15 +387,14 @@ function init() {
   gGeo.boundingSphere = new THREE.Sphere(cPos.clone(), 30);
   const grainMat = new THREE.ShaderMaterial({
     uniforms: { uTime: { value: 0 }, uOrigin: { value: cPos.clone() }, uStart: { value: R * 0.12 }, uSpread: { value: 0 }, uSize: { value: 8 }, uPR: { value: renderer.getPixelRatio() }, uColorA: { value: new THREE.Color(0x60a5fa) }, uColorB: { value: new THREE.Color(0xa78bfa) },
-      uWave: wallMat.uniforms.uOrigin, uReach: { value: 0 }, uSoft: wallMat.uniforms.uSoft, uPane: { value: new THREE.Matrix4() } },
+      uWave: wallMat.uniforms.uOrigin, uReach: { value: 0 }, uSoft: wallMat.uniforms.uSoft },
     vertexShader: `attribute vec3 aTo; attribute float aPhase; attribute float aSpeed;
-      uniform float uTime; uniform vec3 uOrigin; uniform vec3 uWave; uniform float uReach; uniform float uSoft; uniform mat4 uPane;
+      uniform float uTime; uniform vec3 uOrigin; uniform vec3 uWave; uniform float uReach; uniform float uSoft;
       uniform float uStart; uniform float uSpread; uniform float uSize; uniform float uPR; varying float vA; varying float vK;
       void main(){ float u = fract(aPhase + uTime * aSpeed);
-        vec3 to = (uPane * vec4(aTo, 1.0)).xyz;
-        vec3 d = to - uOrigin; float maxD = length(d); vec3 p = uOrigin + d / max(maxD, 0.001) * mix(uStart, maxD, u);
+        vec3 d = aTo - uOrigin; float maxD = length(d); vec3 p = uOrigin + d / max(maxD, 0.001) * mix(uStart, maxD, u);
         /* власний, швидший фронт: вогники випереджають яскравість поля */
-        float lit = 1.0 - smoothstep(uReach + uSoft * 0.6, uReach + uSoft * 2.4, distance(to, uWave));
+        float lit = 1.0 - smoothstep(uReach + uSoft * 0.6, uReach + uSoft * 2.4, distance(aTo, uWave));
         vA = smoothstep(0.0, 0.16, u) * (1.0 - smoothstep(0.55, 0.88, u)) * lit * smoothstep(0.0, 0.12, uSpread); vK = aPhase;
         vec4 mv = modelViewMatrix * vec4(p, 1.0); gl_PointSize = min(uSize * uPR * (6.0 / -mv.z), 9.0 * uPR); gl_Position = projectionMatrix * mv; }`,
     fragmentShader: `uniform vec3 uColorA; uniform vec3 uColorB; varying float vA; varying float vK;
@@ -698,19 +731,6 @@ function init() {
   const camRight = new THREE.Vector3(), camUp = new THREE.Vector3();
   let figScale = 1;
   /* прямокутник, який фото займає на екрані (у пікселях сцени, без паралаксу) */
-  /* поставити площину голограми рівно за шибкою вікна на фото: на глибині PANE.D, обличчям до камери */
-  const paneRay = new THREE.Vector3(), camFwd = new THREE.Vector3();
-  function placePane(ox, oy) {
-    const P = photoRect(), W = sceneEl.clientWidth, Hh = sceneEl.clientHeight;
-    const x0 = P.x + PANE.u[0] * P.w + ox, x1 = P.x + PANE.u[1] * P.w + ox;
-    const y0 = P.y + PANE.v[0] * P.h + oy, y1 = P.y + PANE.v[1] * P.h + oy;
-    paneRay.set(((x0 + x1) / 2 / W) * 2 - 1, -(((y0 + y1) / 2 / Hh) * 2 - 1), 0.5).unproject(camera).sub(camera.position).normalize();
-    camera.getWorldDirection(camFwd);
-    wall.position.copy(camera.position).addScaledVector(paneRay, PANE.D / Math.max(0.2, paneRay.dot(camFwd)));   // саме на глибині D
-    wall.quaternion.copy(camera.quaternion);
-    wall.scale.setScalar((2 * PANE.D * Math.tan(camera.fov * Math.PI / 360) * ((y1 - y0) / Hh)) / H);
-    wall.updateMatrixWorld();
-  }
   function photoRect() {
     const cw = photoEl.offsetWidth, ch = photoEl.offsetHeight;
     const k = Math.max(cw / PHOTO.w, ch / PHOTO.h), dw = PHOTO.w * k, dh = PHOTO.h * k;
@@ -751,7 +771,7 @@ function init() {
     }
   }
   const glowBase = { w: 0, h: 0, y: 0 };
-  const smoothRamp = (x) => { const k = clamp01((x - 0.1) / 0.9); return k * k * (3 - 2 * k); };   // відблиск наростає впродовж усієї появи фігури
+  const smoothRamp = (x) => { const k = clamp01((x - 0.15) / 0.85); return k * k * (3 - 2 * k); };
   /* Поки опису ще немає, заголовок стоїть на рівні центра фігури — без порожнечі під ним. Щойно фігура
      повністю зʼявилась, він плавно відʼїжджає вгору на своє місце (перехід — у CSS, клас vault-risen),
      і лише тоді табло виводить перше речення. */
@@ -779,7 +799,7 @@ function init() {
   let userInput = false, instantLand = false;
   for (const ev of ['wheel', 'touchstart', 'keydown', 'pointerdown']) window.addEventListener(ev, () => { userInput = true; }, { passive: true });
   function enterInstant() {
-    introMs = CFG.introMs; restSec = 99;
+    introMs = INTRO_MS; restSec = 99;
     pTarget = pSmooth = progress();
     instantLand = true;
     rise(true);
@@ -823,22 +843,7 @@ function init() {
   const rotAround = (v, c, a) => { const x = v.x - c.x, z = v.z - c.z, cs = Math.cos(a), sn = Math.sin(a); v.x = c.x + x * cs + z * sn; v.z = c.z - x * sn + z * cs; return v; };
   function apply(fF, fS, tt) {
     /* фігура — як на /preview/3d-v6/, тільки каркас не розсувається */
-    if (photo) {
-      /* вузли вилітають з центру на свої місця, на льоту несуть іскру й мʼяко спалахують у мить посадки */
-      const b = burstFrame(introNow, ranks);
-      const sp = sparks.geometry.attributes.position, sa = sparks.geometry.attributes.aAlpha;
-      let anyGlow = b.core > 0.001;
-      joints.forEach((j, i) => {
-        const J = b.joints[i];
-        j.m.position.copy(j.v).multiplyScalar(J.pos);
-        j.m.scale.setScalar(Math.max(0.001, J.scale));
-        sp.setXYZ(i, j.m.position.x, j.m.position.y, j.m.position.z); sa.setX(i, J.glow);
-        if (J.glow > 0.001) anyGlow = true;
-      });
-      sp.setXYZ(joints.length, 0, 0, 0); sa.setX(joints.length, b.core);
-      sp.needsUpdate = true; sa.needsUpdate = true;
-      sparks.visible = anyGlow;
-    } else joints.forEach((j, i) => j.m.scale.setScalar(Math.max(0.001, fF.joints[i])));
+    if (!photo) joints.forEach((j, i) => j.m.scale.setScalar(Math.max(0.001, fF.joints[i])));
     outerBeams.forEach((b, i) => placeBeam(b.m, VO[b.i], VO[b.j], fF.outer[i]));
     innerGrp.rotation.y = fF.swivel;
     innerLines.forEach((L, i) => {
@@ -867,22 +872,12 @@ function init() {
       camera.position.copy(camPos); camera.lookAt(lookPt);
     } else { camera.position.copy(camPos); camera.lookAt(target); }
     camera.updateMatrixWorld(); camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
+    if (photo) applyArrival();
     placeLedeFrame();
     /* поле формул: у спокої тліє тьмяним сірим, від скролу розгоряється до яскравого */
     const rest = introRelease(restSec);
-    const px = -mx * 10, py = -my * 6;                               // паралакс фото
-    if (photo) {
-      /* шибка стоїть рівно за вікном на фото (разом із його паралаксом) і повернута до камери — проєкція
-         лежить на склі, а не висить у повітрі; хвиля тексту заходить з боку фігури, з лівого краю шибки */
-      placePane(px, py);
-      wall.localToWorld(wallOrigin.set(-WW / 2 - 0.4, 0.4, 0));
-      wallCorners.length = 0;
-      for (const sx of [-1, 1]) for (const sy of [-1, 1]) wallCorners.push(wall.localToWorld(new THREE.Vector3(sx * WW / 2, sy * H / 2, 0)));
-      grainMat.uniforms.uPane.value.copy(wall.matrixWorld);
-    } else {
-      figRay.origin.copy(camera.position); figRay.direction.copy(outer.position).sub(camera.position).normalize();
-      if (!figRay.intersectPlane(wallPlane, wallOrigin)) wallOrigin.copy(wallC);
-    }
+    figRay.origin.copy(camera.position); figRay.direction.copy(outer.position).sub(camera.position).normalize();
+    if (!figRay.intersectPlane(wallPlane, wallOrigin)) wallOrigin.copy(wallC);
     let far = 0;
     for (const c of wallCorners) far = Math.max(far, c.distanceTo(wallOrigin));
     wallMat.uniforms.uRadius.value = Math.max(fS.coverage, rest.cover) * far;
@@ -915,18 +910,16 @@ function init() {
     if (glowEl) {
       /* відблиск іде за фігурою (паралакс миші теж) і дихає разом із її світлом */
       tmpA.copy(outer.position).project(camera);
-      const gx = (tmpA.x + 1) / 2 * sceneEl.clientWidth;
+      const gx = (tmpA.x + 1) / 2 * sceneEl.clientWidth, px = -mx * 10, py = -my * 6;
       glowEl.style.transform = `translate3d(${(gx - glowBase.w / 2 + px * 0.4).toFixed(1)}px, ${(glowBase.y - glowBase.h / 2 + py).toFixed(1)}px, 0)`;
-      /* наростає разом із появою фігури: спершу ледь від іскри в центрі, далі — зі світлом ліній; і ще мʼяко
-         згладжується в часі, тож ніде не вмикається стрибком */
-      const core = burstFrame(introNow, ranks).core;
-      const want = Math.min(1, 0.3 * core + smoothRamp(introNow) * (0.35 + 0.65 * fF.light)) * (0.92 + 0.08 * Math.sin(tt * 1.4));
+      /* наростає впродовж усієї появи фігури разом зі світлом ліній і ще мʼяко згладжується в часі — без стрибків */
+      const want = smoothRamp(introNow) * (0.35 + 0.65 * fF.light) * (0.92 + 0.08 * Math.sin(tt * 1.4));
       glowCur += (want - glowCur) * 0.06;
       glowEl.style.opacity = glowCur.toFixed(3);
       photoEl.style.transform = `translate3d(${px.toFixed(1)}px, ${py.toFixed(1)}px, 0)`;
     }
   }
-  const frames = (p, introT) => { introNow = introT; return [figureFrame(figureProgress(p), introT, COUNTS, photo ? FIG_BURST : FIG), sceneFrame(p, introT)]; };
+  const frames = (p, introT) => { introNow = introT; return [figureFrame(figureProgress(p), introT, COUNTS, photo ? FIG_ARRIVE : FIG), sceneFrame(p, introT)]; };
   let introNow = 0, glowCur = 0;
   function render(fF, fS) { apply(fF, fS, t); renderer.render(scene, camera); }
 
@@ -947,7 +940,7 @@ function init() {
     const dt = Math.min(last ? now - last : 16, 50); last = now;
     t += dt / 1000;
     if (dbgIntro == null) introMs += dt;
-    const introT = dbgIntro != null ? dbgIntro : clamp01(introMs / CFG.introMs);
+    const introT = dbgIntro != null ? dbgIntro : clamp01(introMs / INTRO_MS);
     restSec = introT >= 1 ? restSec + dt / 1000 : AGE;
     /* браузер міг повернути прокрутку трохи пізніше за старт сцени — ловимо це в перші миті, якщо людина ще нічого не торкалась */
     if (!instantLand && !userInput && dbgP == null && t < 0.8 && introT < 1 && window.scrollY > 40) enterInstant();
