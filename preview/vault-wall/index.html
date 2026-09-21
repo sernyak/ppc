@@ -100,7 +100,7 @@
             }
             .js .reveal { opacity: 1; transform: none; }
         }
-        /* Перший екран: «Сховище» */
+        /* vault:start — перший екран «Сховище»; вставляє build-vault-page.mjs, руками не правити */
         body { overflow-x: clip; }                 /* hidden ламає position: sticky */
         #vault-canvas { display: block; width: 100%; height: 100%; touch-action: pan-y; }
         #vault-scene.vault-nogl { background: radial-gradient(60% 60% at 50% 55%, rgba(59,130,246,.22), rgba(11,15,25,0) 70%); }
@@ -111,6 +111,7 @@
            інакше вона гасила б саме ті літери, які треба читати; лишився тільки перехід у сторінку внизу */
         .vault-veil { background: linear-gradient(180deg, rgba(11,15,25,0) 78%, #0B0F19 100%); }
         @media (min-width: 1024px) { #vault-scene::before, #vault-scene::after { display: none; } }
+        /* vault:end */
     </style>
 </head>
 
