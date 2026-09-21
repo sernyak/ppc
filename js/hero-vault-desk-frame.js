@@ -144,6 +144,45 @@ export function queueLaunch(now, lastStart, m, cfg = CFG) {
 /** Найдовше, скільки сторінка тримає швидкий скрол, поки табло решти опису складається. */
 export function maxHold(cfg = CFG) { return cfg.flap.burst + cfg.flap.flips * cfg.flap.dur; }
 
+/*
+ * Поява у фото-варіанті — «вибух із ядра». Спершу в центрі розгоряється іскра, тоді всі 24 вузли вилітають
+ * із неї на свої місця (внутрішні — першими, у них коротший шлях) з легким перельотом, світяться в польоті й
+ * мʼяко спалахують у мить посадки; лише потім між ними проростають лінії. Один рух, без мерехтіння.
+ */
+export const BURST = {
+  core: [0.0, 0.16],        // іскра в центрі розгоряється
+  fly: [0.12, 0.46],        // вікно, у якому вузли вилітають
+  flyLen: 0.2,              // скільки летить кожен
+  land: 0.14,               // спалах після посадки й згасання
+};
+/** Фігура для фото-варіанта: лінії проростають лише після того, як вузли сіли. */
+export const FIG_BURST = { ...FIG, intro: { ...FIG.intro, inner: [0.46, 0.76], innerLen: 0.1, outer: [0.58, 0.97], outerLen: 0.12, light: [0.8, 1.0] } };
+
+function easeOutBack(u) { const c1 = 1.25, c3 = c1 + 1; return 1 + c3 * Math.pow(u - 1, 3) + c1 * Math.pow(u - 1, 2); }
+
+/**
+ * @param {number} introT — прогрес вступу 0…1
+ * @param {number[]} ranks — черга кожного вузла 0…1 (менше — вилітає раніше)
+ * @returns {{core: number, joints: {pos: number, scale: number, glow: number}[]}}
+ *   pos — частка шляху від центру до місця вузла (з перельотом), scale — розмір, glow — світіння іскри
+ */
+export function burstFrame(introT, ranks, cfg = BURST) {
+  const t = clamp01(introT), w = cfg.fly[1] - cfg.fly[0] - cfg.flyLen;
+  const joints = ranks.map((k) => {
+    const s0 = cfg.fly[0] + clamp01(k) * w, u = clamp01((t - s0) / cfg.flyLen);
+    const after = clamp01((t - s0 - cfg.flyLen) / cfg.land);
+    const landed = t >= s0 + cfg.flyLen;
+    const bump = landed ? Math.sin(Math.PI * after) : 0;          // мʼякий спалах: 0 → пік → 0
+    return {
+      pos: landed ? 1 : u <= 0 ? 0 : easeOutBack(u),
+      scale: smooth(0, 0.35, u) * (1 + 0.28 * bump),
+      glow: !landed ? smooth(0, 0.25, u) * (0.5 + 0.5 * u) : 1 - smooth(0, 1, after),   // займається плавно, не стрибком
+    };
+  });
+  const core = smooth(cfg.core[0], cfg.core[1], t) * (1 - smooth(cfg.fly[0] + 0.04, cfg.fly[0] + 0.22, t));
+  return { core, joints };
+}
+
 /** Коли табло цілком зупиниться: остання літера + усі її перекидання. */
 export function flapDone(cfg = CFG) {
   const F = cfg.flap;

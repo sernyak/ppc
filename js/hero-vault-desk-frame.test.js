@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { FIG, CFG, figureFrame, figureProgress, getFrame, introRelease, flapStart, flapDone, restOrder, queueLaunch, maxHold, clamp01, smooth } from './hero-vault-desk-frame.js';
+import { FIG, CFG, BURST, FIG_BURST, burstFrame, figureFrame, figureProgress, getFrame, introRelease, flapStart, flapDone, restOrder, queueLaunch, maxHold, clamp01, smooth } from './hero-vault-desk-frame.js';
 
 const COUNTS = { joints: 24, inner: 36, outer: 24 };
 const near = (a, b, m) => assert.ok(Math.abs(a - b) < 1e-9, `${m}: ${a} ≠ ${b}`);
@@ -105,6 +105,35 @@ test('швидкий скрол: табло біжить хвилею, і сто
   assert.ok(last - first <= CFG.flap.burst + 1e-9, 'уся хвиля — не довша за burst');
   assert.equal(queueLaunch(20, 3, m), 20, 'повільний скрол черги не помічає');
   assert.ok(maxHold() <= 1.6, `утримання не довше ${maxHold()} с`);
+});
+
+test('фото-варіант: вузли вилітають з ядра, сідають, і лише потім зʼявляються лінії', () => {
+  const ranks = [0, 0.2, 0.5, 0.8, 1];
+  const s = burstFrame(0, ranks);
+  assert.ok(s.joints.every((j) => j.pos === 0 && j.scale === 0 && j.glow === 0), 'на старті нічого немає');
+  assert.ok(burstFrame(BURST.core[1], ranks).core > 0.9, 'спершу розгоряється іскра в центрі');
+  const e = burstFrame(1, ranks);
+  assert.equal(e.core, 0, 'наприкінці іскри вже немає');
+  assert.ok(e.joints.every((j) => j.pos === 1 && Math.abs(j.scale - 1) < 1e-9 && j.glow === 0), 'усі вузли на місцях, рівного розміру, не світяться');
+  const lastLand = BURST.fly[1] + BURST.land;
+  assert.ok(lastLand <= FIG_BURST.intro.inner[0] + 0.15, 'лінії починаються, коли вузли вже сідають');
+  assert.ok(figureFrame(0, BURST.fly[1] - 0.01, { joints: 1, inner: 4, outer: 4 }, FIG_BURST).inner.every((v) => v === 0), 'поки вузли летять, ліній немає');
+  const mid = burstFrame(0.25, ranks);
+  assert.ok(mid.joints[0].pos > mid.joints[4].pos, 'хто раніше в черзі — той далі пролетів');
+});
+
+test('фото-варіант: поява плавна — без стрибків розміру й світла', () => {
+  const ranks = Array.from({ length: 24 }, (_, i) => i / 23);
+  let prev = burstFrame(0, ranks), maxD = 0;
+  for (let i = 1; i <= 2000; i++) {
+    const f = burstFrame(i / 2000, ranks);
+    f.joints.forEach((j, n) => { maxD = Math.max(maxD, Math.abs(j.scale - prev.joints[n].scale), Math.abs(j.glow - prev.joints[n].glow)); });
+    maxD = Math.max(maxD, Math.abs(f.core - prev.core));
+    prev = f;
+  }
+  assert.ok(maxD < 0.03, `найбільший стрибок за 1/2000 вступу: ${maxD}`);
+  const peak = Math.max(...Array.from({ length: 401 }, (_, i) => Math.max(...burstFrame(i / 400, ranks).joints.map((j) => j.pos))));
+  assert.ok(peak > 1 && peak < 1.15, `легкий переліт ${peak}`);
 });
 
 test('вхід поза межами обрізається', () => {
