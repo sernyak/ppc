@@ -756,7 +756,8 @@ function init() {
     m.scale.y = Math.max(0.001, d * len / m.userData.len0);
     m.position.copy(a).addScaledVector(dir, len * d / 2).addScaledVector(z, m.userData.off);
   }
-  const camPos = new THREE.Vector3();
+  const camPos = new THREE.Vector3(), lookPt = new THREE.Vector3();
+  const rotAround = (v, c, a) => { const x = v.x - c.x, z = v.z - c.z, cs = Math.cos(a), sn = Math.sin(a); v.x = c.x + x * cs + z * sn; v.z = c.z - x * sn + z * cs; return v; };
   function apply(fF, fS, tt) {
     /* фігура — як на /preview/3d-v6/, тільки каркас не розсувається */
     joints.forEach((j, i) => j.m.scale.setScalar(Math.max(0.001, fF.joints[i])));
@@ -779,7 +780,14 @@ function init() {
     /* камера: обліт від скролу + паралакс від миші */
     const az = az0 + (photo ? 0 : fS.orbit) + mx * (photo ? 0.06 : 0.14), el = el0 + (photo ? 0 : fS.elev) + my * (photo ? 0.03 : 0.07);
     camPos.set(target.x + d0 * Math.cos(el) * Math.sin(az), target.y + d0 * Math.sin(el), target.z + d0 * Math.cos(el) * Math.cos(az));
-    camera.position.copy(camPos); camera.lookAt(target);
+    if (photo) {
+      /* На фото фігура мусить стояти над своїм місцем на столі, тож обліт робимо навколо НЕЇ: уся «установка»
+         камери обертається довкола вертикалі через центр фігури. Фігура лишається в тій самій точці кадру, ми
+         бачимо її з інших боків, а голограма й пил за нею пливуть — глибина проти нерухомого фото. */
+      const ang = fS.orbit;
+      rotAround(camPos, cPos, ang); rotAround(lookPt.copy(target), cPos, ang);
+      camera.position.copy(camPos); camera.lookAt(lookPt);
+    } else { camera.position.copy(camPos); camera.lookAt(target); }
     camera.updateMatrixWorld(); camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
     placeLedeFrame();
     /* поле формул: у спокої тліє тьмяним сірим, від скролу розгоряється до яскравого */
@@ -789,10 +797,10 @@ function init() {
     let far = 0;
     for (const c of wallCorners) far = Math.max(far, c.distanceTo(wallOrigin));
     wallMat.uniforms.uRadius.value = Math.max(fS.coverage, rest.cover) * far;
-    wallMat.uniforms.uOpacity.value = Math.max(fS.fade, rest.wall);
+    wallMat.uniforms.uOpacity.value = Math.max(fS.fade, rest.wall) * (photo ? 0.72 : 1);   // на фото голограма — проєкція на скло вікна, трохи тихіша
     wallMat.uniforms.uTint.value.copy(TINT_REST).lerp(TINT_LIT, fS.fade);
     wallMat.uniforms.uTime.value = tt; wallMat.uniforms.uSpot.value.copy(spot);
-    wall.visible = !photo && wallMat.uniforms.uOpacity.value > 0.002;   // у фото поле формул не потрібне: дані вже на моніторах
+    wall.visible = wallMat.uniforms.uOpacity.value > 0.002;
     if (flaps) {
       let touched = false, any = false;
       const m = launch.length - nAuto;
@@ -814,7 +822,7 @@ function init() {
     }
     dustMat.uniforms.uTime.value = tt; nebMat.uniforms.uTime.value = tt;
     grainMat.uniforms.uTime.value = tt; grainMat.uniforms.uSpread.value = fS.grains;
-    grainMat.uniforms.uReach.value = fS.grains * far; grains.visible = !photo && fS.grains > 0.001;
+    grainMat.uniforms.uReach.value = fS.grains * far; grains.visible = fS.grains > 0.001;
     if (glowEl) {
       /* відблиск іде за фігурою (паралакс миші теж) і дихає разом із її світлом */
       tmpA.copy(outer.position).project(camera);
