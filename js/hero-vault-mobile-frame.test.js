@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { FIG, CFG, figureFrame, getFrame, clamp01, smooth } from './hero-vault-mobile-frame.js';
+import { FIG, CFG, KICK, figureFrame, getFrame, kickFrame, clamp01, smooth } from './hero-vault-mobile-frame.js';
 
 const COUNTS = { joints: 24, inner: 36, outer: 24 };
 const near = (a, b, m) => assert.ok(Math.abs(a - b) < 1e-9, `${m}: ${a} ≠ ${b}`);
@@ -42,4 +42,11 @@ test('усе монотонно зростає зі скролом', () => {
     prev = f;
   }
   assert.equal(clamp01(-1), 0); assert.equal(smooth(0, 1, 1), 1);
+});
+
+test('дотик до фігури: ядро робить рівно один оберт і мʼяко зупиняється', () => {
+  assert.deepEqual(kickFrame(-1), { turn: 0, boost: 0 });
+  assert.ok(Math.abs(kickFrame(KICK.dur).turn - 2 * Math.PI) < 1e-9 && Math.abs(kickFrame(KICK.dur).boost) < 1e-9);
+  let prev = 0;
+  for (let i = 1; i <= 200; i++) { const v = kickFrame(KICK.dur * i / 200).turn; assert.ok(v >= prev); prev = v; }
 });

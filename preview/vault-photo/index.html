@@ -133,6 +133,18 @@
         }
         /* варіант «фото»: шар знімка й відблиск на столі лежать у сцені ПІД полотном */
         .vault-photo, .vault-deskglow { display: none; }
+        /* телефон: кадр лежить під фігурою, його розмір і місце ставить сцена; краї розчиняються в тло сторінки */
+        @media (max-width: 1023px) {
+            #vault-scene[data-variant="photo"] #vault-canvas { position: relative; }
+            /* текст — над фото й сценою (інакше абсолютний шар сцени лягає поверх заголовка й опису) */
+            #vault-hero .vault-rise, #vault-hero #vault-lede, #vault-hero .order-5 { position: relative; z-index: 1; }
+            .vault-photo { display: block; position: absolute; background: url(/ai/vault-bg-desk.webp) 0 0 / 100% 100% no-repeat;
+                -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 24%, #000 60%, transparent 90%);
+                        mask-image: linear-gradient(180deg, transparent 0%, #000 24%, #000 60%, transparent 90%); }
+            .vault-deskglow { display: block; position: absolute; left: 0; top: 0; border-radius: 50%; pointer-events: none; opacity: 0;
+                background: radial-gradient(closest-side, rgba(120,178,255,.85), rgba(71,160,255,.32) 50%, rgba(71,160,255,0));
+                mix-blend-mode: screen; will-change: transform, opacity; }
+        }
         @media (min-width: 1024px) {
             #vault-scene[data-variant="photo"] #vault-canvas { position: relative; }   /* інакше абсолютний шар фото малювався б поверх полотна */
             .vault-photo { display: block; position: absolute; left: -2%; top: -2%; width: 104%; height: 104%;
@@ -154,7 +166,7 @@
         setTimeout(function(){if(!d.classList.contains('vault-live'))d.classList.remove('vault-holo');},8000);
     }catch(e){}})();</script>
     <!-- /vault:head -->
-    <link rel="preload" as="image" href="/ai/vault-bg-desk.webp" media="(min-width: 1024px)">
+    <link rel="preload" as="image" href="/ai/vault-bg-desk.webp">
 </head>
 
 <body class="antialiased selection:bg-brand-accent selection:text-white">

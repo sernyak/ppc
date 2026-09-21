@@ -18,7 +18,7 @@
  * ?still=1 — один кадр.
  */
 import * as THREE from 'three';
-import { figureFrame, getFrame as sceneFrame, clamp01, CFG } from './hero-vault-mobile-frame.js';
+import { figureFrame, getFrame as sceneFrame, kickFrame, KICK, clamp01, CFG } from './hero-vault-mobile-frame.js';
 
 const sceneEl = document.getElementById('vault-scene');
 const canvas = document.getElementById('vault-canvas');
@@ -30,6 +30,13 @@ function init() {
   const dbgIntro = q.has('intro') ? clamp01(parseFloat(q.get('intro'))) : null;
   const still = q.has('still');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* Фото-варіант (/preview/vault-photo/): фон — той самий знімок нічного робочого місця, що й на компʼютері.
+     Вертикального кадру поки немає, тож показуємо вертикальну смугу горизонтального довкола місця фігури:
+     точка PHOTO.fig кадру стає під центр фігури, висота кадру — PHOTO.k радіусів фігури. */
+  const photo = sceneEl.dataset.variant === 'photo';
+  const photoEl = photo ? sceneEl.querySelector('.vault-photo') : null;
+  const glowEl = photo ? sceneEl.querySelector('.vault-deskglow') : null;
+  const PHOTO = { w: 1408, h: 768, fig: [0.72, 0.46], k: 4.3, desk: 0.79 };
 
   let renderer;
   try {
@@ -257,6 +264,8 @@ function init() {
   }
 
   /* ---------- розкладка: фігура й промені відносно місця опису ---------- */
+  const photoRect = { x: 0, y: 0, w: 0, h: 0 };
+  let kickAt = -99, glowCur = 0;
   function projectY(v) { return (1 - tmpD.copy(v).project(camera).y) / 2 * sceneEl.clientHeight; }
   function fitScene() {
     const w = Math.max(1, sceneEl.clientWidth), h = Math.max(1, sceneEl.clientHeight);
@@ -271,6 +280,13 @@ function init() {
        просто над описом — промені між ними виходять короткі, і разом вони читаються як одне ціле. */
     const cY = projectY(cPos), r0 = Math.abs(projectY(tmpC.copy(cPos).setY(cPos.y + R * 1.15)) - cY);
     const pxPerWorld = Math.abs(projectY(tmpC.copy(cPos).setY(cPos.y + 1)) - cY);
+    if (photoEl) {
+      /* кадр: висота — k радіусів фігури, точка fig — під центром фігури; краї розчиняються в тло (маска в CSS) */
+      const fh = r0 * PHOTO.k, fw = fh * PHOTO.w / PHOTO.h;
+      photoRect.x = w / 2 - PHOTO.fig[0] * fw; photoRect.y = cY - PHOTO.fig[1] * fh; photoRect.w = fw; photoRect.h = fh;
+      Object.assign(photoEl.style, { left: photoRect.x + 'px', top: photoRect.y + 'px', width: fw + 'px', height: fh + 'px' });
+      if (glowEl) { glowEl.style.width = fh * 0.62 + 'px'; glowEl.style.height = fh * 0.13 + 'px'; }
+    }
     const r = r0 * (1 - SHRINK), gap = 44;
     figDrop = Math.max(0, (ledeTop - gap - r - cY) / pxPerWorld);
     /* віяло: від ядра фігури (у кінцевому положенні) до верхнього краю опису, на ширину тексту */
@@ -315,20 +331,29 @@ function init() {
   function apply(fF, fS, tt) {
     joints.forEach((j, i) => j.m.scale.setScalar(Math.max(0.001, fF.joints[i])));
     outerBeams.forEach((b, i) => placeBeam(b.m, VO[b.i], VO[b.j], fF.outer[i]));
-    innerGrp.rotation.y = fF.swivel;
+    const kick = photo ? kickFrame(tt - kickAt) : { turn: 0, boost: 0 };   // дотик до фігури — ядро робить повний оберт
+    const swivel = fF.swivel + kick.turn;
+    innerGrp.rotation.y = swivel;
     innerLines.forEach((L, i) => {
       const d = fF.inner[i];
       let a = L.a, b = L.b;
-      if (L.spoke >= 0) { a = VO[L.spoke]; b = tmpT.copy(VI[L.spoke]).applyAxisAngle(UP, fF.swivel); }
+      if (L.spoke >= 0) { a = VO[L.spoke]; b = tmpT.copy(VI[L.spoke]).applyAxisAngle(UP, swivel); }
       placeBeam(L.bar, a, b, d); placeBeam(L.strip, a, b, d);
       const wv = 0.5 + 0.5 * Math.sin(L.k - tt * (0.5 + 1.1 * fF.pulseSpeed));
-      const br = fF.light * (0.45 + 0.55 * (1 - fF.wave + fF.wave * wv));
+      const br = Math.min(1.25, fF.light * (0.45 + 0.55 * (1 - fF.wave + fF.wave * wv)) * (1 + 0.9 * kick.boost));
       L.lightMat.color.copy(LIGHT).multiplyScalar(0.2 + 1.35 * br);
     });
     spin.rotation.y = angle + fF.spin;
     outer.rotation.x = 0.22;
     outer.position.y = cPos.y + Math.sin(tt * 0.6) * 0.03 - figDrop * fS.pull;
     outer.scale.setScalar(1 - SHRINK * fS.pull);
+    if (glowEl) {
+      const gw = parseFloat(glowEl.style.width) || 0, gh = parseFloat(glowEl.style.height) || 0;
+      glowEl.style.transform = `translate3d(${(sceneEl.clientWidth / 2 - gw / 2).toFixed(1)}px, ${(photoRect.y + PHOTO.desk * photoRect.h - gh / 2).toFixed(1)}px, 0)`;
+      const want = fF.light * (0.4 + 0.6 * fF.light) * (1 - fS.pull) * (0.92 + 0.08 * Math.sin(tt * 1.4));
+      glowCur += (want - glowCur) * 0.08;
+      glowEl.style.opacity = glowCur.toFixed(3);
+    }
     glint.uGlintC.value.copy(outer.position); glint.uGlintR.value = R * outer.scale.x; glint.uGlintT.value = tt;
     if (fS.lede) showLede(false);
     dustMat.uniforms.uTime.value = tt; nebMat.uniforms.uTime.value = tt;
@@ -368,6 +393,17 @@ function init() {
   document.addEventListener('visibilitychange', () => { if (!document.hidden && visible) { last = 0; schedule(); } });
   new ResizeObserver(() => { fitScene(); schedule(); }).observe(sceneEl);
   window.addEventListener('scroll', () => { if (window.scrollY > 8) hideCueForever(); schedule(); }, { passive: true });
+  /* дотик до фігури — ядро робить повний оберт (наступний — коли скінчився попередній). Сцена на телефоні
+     пропускає дотики крізь себе (кнопки й прокрутка), тож слухаємо весь hero і перевіряємо, чи влучили у фігуру */
+  if (photo && hero) hero.addEventListener('click', (ev) => {
+    if (ev.target.closest && ev.target.closest('a, button')) return;
+    const cr = canvas.getBoundingClientRect();
+    tmpD.copy(outer.position).project(camera);
+    const x = cr.left + (tmpD.x + 1) / 2 * cr.width, y = cr.top + (1 - tmpD.y) / 2 * cr.height;
+    const rPx = Math.abs(projectY(tmpC.copy(outer.position).setY(outer.position.y + R * 1.15 * outer.scale.x)) - projectY(outer.position));
+    if (Math.hypot(ev.clientX - x, ev.clientY - y) > rPx * 1.1 || introMs < CFG.introMs || t - kickAt < KICK.dur) return;
+    kickAt = t; schedule();
+  });
   schedule();
 
   /* ---------- геометрія (як на /preview/3d-v6/) ---------- */

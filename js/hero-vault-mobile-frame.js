@@ -81,3 +81,15 @@ export function getFrame(p, introT, cfg = CFG) {
     after,
   };
 }
+
+/*
+ * Дотик до фігури (фото-варіант): ядро робить повний оберт — розганяється й мʼяко зупиняється, світло
+ * ліній на цей час яскравішає. Кубооктаедр після оберту збігається сам із собою.
+ */
+export const KICK = { dur: 1.6 };
+export function kickFrame(since, cfg = KICK) {
+  if (!(since >= 0)) return { turn: 0, boost: 0 };
+  const x = clamp01(since / cfg.dur);
+  const e = x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  return { turn: 2 * Math.PI * e, boost: Math.sin(Math.PI * x) };
+}
