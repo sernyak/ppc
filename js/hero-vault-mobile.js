@@ -18,7 +18,7 @@
  * ?still=1 — один кадр.
  */
 import * as THREE from 'three';
-import { figureFrame, getFrame as sceneFrame, kickFrame, KICK, clamp01, CFG } from './hero-vault-mobile-frame.js';
+import { figureFrame, getFrame as sceneFrame, kickFrame, KICK, danceFrame, DANCE, FIG_DANCE, FIG, clamp01, CFG } from './hero-vault-mobile-frame.js';
 
 const sceneEl = document.getElementById('vault-scene');
 const canvas = document.getElementById('vault-canvas');
@@ -30,13 +30,14 @@ function init() {
   const dbgIntro = q.has('intro') ? clamp01(parseFloat(q.get('intro'))) : null;
   const still = q.has('still');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  /* Фото-варіант (/preview/vault-photo/): фон — той самий знімок нічного робочого місця, що й на компʼютері.
-     Вертикального кадру поки немає, тож показуємо вертикальну смугу горизонтального довкола місця фігури:
-     точка PHOTO.fig кадру стає під центр фігури, висота кадру — PHOTO.k радіусів фігури. */
+  /* Фото-варіант (/preview/vault-photo/): фон — вертикальний кадр того самого нічного робочого місця
+     (ai/vault-bg-phone.webp, 768×1376) на всю ширину екрана. Кадр привʼязаний до заголовка: яскраві монітори
+     починаються трохи нижче нього, а заголовок лежить на темній стіні. Фігура висить перед екранами. */
   const photo = sceneEl.dataset.variant === 'photo';
   const photoEl = photo ? sceneEl.querySelector('.vault-photo') : null;
   const glowEl = photo ? sceneEl.querySelector('.vault-deskglow') : null;
-  const PHOTO = { w: 1408, h: 768, fig: [0.72, 0.46], k: 4.3, desk: 0.79 };
+  const PHOTO = { w: 768, h: 1376, screens: 0.32, gap: 18, wide: 1.0, desk: 0.69 };   // screens — де в кадрі починаються монітори
+  const INTRO_MS = photo ? DANCE.introMs : INTRO_MS;       // хоровод триває довше за звичайну появу
 
   let renderer;
   try {
@@ -102,6 +103,118 @@ function init() {
   });
   innerLines.sort((a, b) => a.y - b.y);
   const COUNTS = { joints: joints.length, inner: innerLines.length, outer: outerBeams.length };
+  let introNow = 0;
+  /* ---------- фото-варіант: поява «хороводом» — так само, як на компʼютері ---------- */
+  /* Крапки по одній залітають з-за правого краю й стають у коло, що кружляє довкола фігури; коли в колі всі,
+     вони по спіралі сідають на свої місця. Щоб посадка була злагодженою, крапки в колі йдуть у тому ж порядку,
+     що й їхні місця за кутом навколо осі фігури: кожній лишається пройти приблизно однаковий шлях. */
+  const TRAIL = 3;                                            // скільки світлих точок у хвості
+  const RING = R * 1.25, FAR = R * 3.4;                       // радіус кола й звідки крапки на нього залітають
+  /* У колі кружляють світлі крапки; вузли-кульки зʼявляються лише під час посадки. Тож перед посадкою кожній
+     крапці можна віддати найзручніше місце — найближче попереду за ходом кола, — і всі сядуть однаковим рухом. */
+  const dotJoint = joints.map((_, i) => i);                    // яка крапка стане яким вузлом (призначається перед посадкою)
+  const seatTarget = new Float32Array(joints.length);
+  let assigned = false;
+  const jitRng = seeded(211);
+  const jit = joints.map(() => jitRng());                     // легкий розкид черги посадки
+  let sparks = null;
+  if (photo) {
+    const n = joints.length * (1 + TRAIL);
+    const sGeo = new THREE.BufferGeometry();
+    sGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3));
+    sGeo.setAttribute('aAlpha', new THREE.BufferAttribute(new Float32Array(n), 1));
+    const sz = new Float32Array(n);
+    for (let i = 0; i < joints.length; i++) for (let k = 0; k <= TRAIL; k++) sz[i * (1 + TRAIL) + k] = 1 - k * 0.2;
+    sGeo.setAttribute('aSize', new THREE.BufferAttribute(sz, 1));
+    const sparkMat = new THREE.ShaderMaterial({
+      uniforms: { uPR: { value: renderer.getPixelRatio() }, uColor: { value: new THREE.Color(0x8fc2ff) } },
+      vertexShader: `attribute float aAlpha; attribute float aSize; uniform float uPR; varying float vA;
+        void main(){ vA = aAlpha; vec4 mv = modelViewMatrix * vec4(position, 1.0);
+          gl_PointSize = aSize * uPR * 170.0 / -mv.z; gl_Position = projectionMatrix * mv; }`,
+      fragmentShader: `uniform vec3 uColor; varying float vA;
+        void main(){ float d = length(gl_PointCoord - 0.5); float a = smoothstep(0.5, 0.0, d); a *= a;
+          gl_FragColor = vec4(uColor * a * vA * 1.8, 1.0);
+          #include <tonemapping_fragment>
+          #include <colorspace_fragment>
+          gl_FragColor.a = max(gl_FragColor.r, max(gl_FragColor.g, gl_FragColor.b)); }`,
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, premultipliedAlpha: true,
+    });
+    sparks = new THREE.Points(sGeo, sparkMat); sparks.visible = false; sparks.frustumCulled = false; spin.add(sparks);
+  }
+  const invSpin = new THREE.Matrix4(), aRight = new THREE.Vector3(), aDir = new THREE.Vector3(), aP = new THREE.Vector3();
+  const TAU = Math.PI * 2, wrap0 = (a) => ((a % TAU) + TAU) % TAU;
+  /* де крапка в системі фігури: на колі (кут від точки входу справа + пройдене), підлітання ззовні, посадка */
+  function ringPos(d, phi0, out) {
+    const th = phi0 + d.ride, r = FAR + (RING - FAR) * d.reach;
+    return out.set(r * Math.cos(th), R * 0.1 * Math.sin(th * 2), r * Math.sin(th));
+  }
+  function dancePos(d, dot, phi0, out) {
+    ringPos(d, phi0, out);
+    if (d.seat <= 0 || !assigned) return out;
+    const v = joints[dotJoint[dot]].v, th = phi0 + d.ride, e = d.seat;
+    const ringR = Math.hypot(out.x, out.z), rt = Math.hypot(v.x, v.z);
+    const a = th + (seatTarget[dot] - th) * e, r = ringR + (rt - ringR) * e, y = out.y + (v.y - out.y) * e;
+    return out.set(r * Math.cos(a), y, r * Math.sin(a));
+  }
+  /* Перед посадкою: крапки й місця впорядковуємо за кутом і шукаємо такий циклічний зсув, за якого кожній лишається
+     пройти вперед якнайменше, але не менше, ніж вона ще проїде по колу до своєї черги сідати. */
+  function assignSeats(D, phi0) {
+    const n = joints.length, sec = DANCE.introMs / 1000;
+    const th = D.map((d) => phi0 + d.ride);
+    const dots = th.map((a, k) => [k, wrap0(a)]).sort((x, y) => x[1] - y[1]);
+    const seats = joints.map((j, i) => [i, wrap0(Math.atan2(j.v.z, j.v.x))]).sort((x, y) => x[1] - y[1]);
+    const w = (2 * Math.PI * DANCE.fill) / ((DANCE.enter[1] - DANCE.enter[0]) * sec);
+    const need = D.map((d, k) => {
+      const b0 = DANCE.seat[0] + clamp01(jit[k]) * (DANCE.seat[1] - DANCE.seat[0] - DANCE.seatLen);
+      return Math.max(0, (b0 - introNow) * sec * w) + 0.15;             // скільки ще проїде по колу до своєї посадки + запас
+    });
+    let best = null;
+    for (let c = 0; c < n; c++) {
+      let worst = 0;
+      const off = dots.map(([k, a], m) => { const o = need[k] + wrap0(seats[(m + c) % n][1] - a - need[k]); worst = Math.max(worst, o); return o; });
+      if (!best || worst < best.worst) best = { c, off, worst };
+    }
+    dots.forEach(([k], m) => { dotJoint[k] = seats[(m + best.c) % n][0]; seatTarget[k] = th[k] + best.off[m]; });
+    assigned = true;
+  }
+  function applyDance() {
+    const n = joints.length, D = danceFrame(introNow, n, jit);
+    const sp = sparks.geometry.attributes.position, sa = sparks.geometry.attributes.aAlpha;
+    outer.updateMatrixWorld(true);
+    invSpin.copy(spin.matrixWorld).invert();
+    aRight.setFromMatrixColumn(camera.matrixWorld, 0);
+    aDir.copy(aRight).transformDirection(invSpin);
+    const phi0 = Math.atan2(aDir.z, aDir.x);                                   // точка входу: праворуч на екрані
+    if (!assigned && introNow >= DANCE.seat[0] - 0.004) assignSeats(D, phi0);
+    if (introNow < DANCE.seat[0] - 0.02) assigned = false;
+    const tails = [1, 2, 3].map((k) => danceFrame(introNow - k * 0.012, n, jit));
+    let any = false;
+    for (let dot = 0; dot < n; dot++) {
+      const d = D[dot], j = joints[dotJoint[dot]], base = dot * (1 + TRAIL);
+      if (d.landed || d.scale <= 0) {
+        j.m.position.copy(j.v); j.m.scale.setScalar(Math.max(0.001, d.landed ? d.scale : 0));
+        sp.setXYZ(base, j.v.x, j.v.y, j.v.z); sa.setX(base, d.landed ? d.glow : 0);
+        for (let k = 1; k <= TRAIL; k++) sa.setX(base + k, 0);
+        if (d.landed && d.glow > 0.001) any = true;
+        continue;
+      }
+      dancePos(d, dot, phi0, aP);
+      /* кулька-вузол проявляється лише під час посадки; до того в колі кружляє світла крапка */
+      j.m.position.copy(aP); j.m.scale.setScalar(Math.max(0.001, assigned ? d.scale * smoothstep01(d.seat / 0.35) : 0));
+      sp.setXYZ(base, aP.x, aP.y, aP.z); sa.setX(base, d.glow);
+      for (let k = 1; k <= TRAIL; k++) {                                       // хвіст — де крапка була мить тому
+        const dk = tails[k - 1][dot];
+        dancePos(dk, dot, phi0, aP);
+        sp.setXYZ(base + k, aP.x, aP.y, aP.z);
+        sa.setX(base + k, dk.scale > 0 && dk.seat < 1 ? d.glow * [0, 0.5, 0.3, 0.15][k] : 0);
+      }
+      any = true;
+    }
+    sp.needsUpdate = true; sa.needsUpdate = true;
+    sparks.visible = any;
+  }
+  const smoothstep01 = (x) => { const k = clamp01(x); return k * k * (3 - 2 * k); };
+
 
   /* ---------- блік, що пробігає по металу ---------- */
   /* Раз на кілька секунд по фігурі наскрізь проходить мʼяка світла смуга — вздовж однієї діагоналі у світі,
@@ -281,11 +394,13 @@ function init() {
     const cY = projectY(cPos), r0 = Math.abs(projectY(tmpC.copy(cPos).setY(cPos.y + R * 1.15)) - cY);
     const pxPerWorld = Math.abs(projectY(tmpC.copy(cPos).setY(cPos.y + 1)) - cY);
     if (photoEl) {
-      /* кадр: висота — k радіусів фігури, точка fig — під центром фігури; краї розчиняються в тло (маска в CSS) */
-      const fh = r0 * PHOTO.k, fw = fh * PHOTO.w / PHOTO.h;
-      photoRect.x = w / 2 - PHOTO.fig[0] * fw; photoRect.y = cY - PHOTO.fig[1] * fh; photoRect.w = fw; photoRect.h = fh;
+      /* кадр на всю ширину екрана; монітори — на PHOTO.gap нижче заголовка; краї розчиняються в тло (маска в CSS) */
+      const fw = w * PHOTO.wide, fh = fw * PHOTO.h / PHOTO.w;
+      const h1 = hero.querySelector('h1'), sr = sceneEl.getBoundingClientRect();
+      const titleBottom = h1 ? h1.getBoundingClientRect().bottom - sr.top : cY - r0;
+      photoRect.x = (w - fw) / 2; photoRect.y = titleBottom + PHOTO.gap - PHOTO.screens * fh; photoRect.w = fw; photoRect.h = fh;
       Object.assign(photoEl.style, { left: photoRect.x + 'px', top: photoRect.y + 'px', width: fw + 'px', height: fh + 'px' });
-      if (glowEl) { glowEl.style.width = fh * 0.62 + 'px'; glowEl.style.height = fh * 0.13 + 'px'; }
+      if (glowEl) { glowEl.style.width = fw * 0.8 + 'px'; glowEl.style.height = fw * 0.17 + 'px'; }
     }
     const r = r0 * (1 - SHRINK), gap = 44;
     figDrop = Math.max(0, (ledeTop - gap - r - cY) / pxPerWorld);
@@ -329,7 +444,7 @@ function init() {
     m.position.copy(a).addScaledVector(dir, len * d / 2).addScaledVector(z, m.userData.off);
   }
   function apply(fF, fS, tt) {
-    joints.forEach((j, i) => j.m.scale.setScalar(Math.max(0.001, fF.joints[i])));
+    if (!photo) joints.forEach((j, i) => j.m.scale.setScalar(Math.max(0.001, fF.joints[i])));
     outerBeams.forEach((b, i) => placeBeam(b.m, VO[b.i], VO[b.j], fF.outer[i]));
     const kick = photo ? kickFrame(tt - kickAt) : { turn: 0, boost: 0 };   // дотик до фігури — ядро робить повний оберт
     const swivel = fF.swivel + kick.turn;
@@ -355,11 +470,12 @@ function init() {
       glowEl.style.opacity = glowCur.toFixed(3);
     }
     glint.uGlintC.value.copy(outer.position); glint.uGlintR.value = R * outer.scale.x; glint.uGlintT.value = tt;
+    if (photo) { camera.updateMatrixWorld(); applyDance(); }
     if (fS.lede) showLede(false);
     dustMat.uniforms.uTime.value = tt; nebMat.uniforms.uTime.value = tt;
     beamMat.uniforms.uTime.value = tt; beamMat.uniforms.uOp.value = fS.beams; beams.visible = fS.beams > 0.002;
   }
-  const frames = (p, introT) => { const fS = sceneFrame(p, introT); return [figureFrame(fS.story, introT, COUNTS), fS]; };
+  const frames = (p, introT) => { introNow = introT; const fS = sceneFrame(p, introT); return [figureFrame(fS.story, introT, COUNTS, photo ? FIG_DANCE : FIG), fS]; };
   function render(fF, fS) { apply(fF, fS, t); renderer.render(scene, camera); }
 
   fitScene();
@@ -371,14 +487,14 @@ function init() {
     return;
   }
   /* сторінку відкрито не згори (перезавантаження, перехід назад) — нічого не програється: одразу кінцевий стан */
-  if (dbgP == null && window.scrollY > 40) { introMs = CFG.introMs; pS = pT = progress(); showLede(true); hideCueForever(); }
+  if (dbgP == null && window.scrollY > 40) { introMs = INTRO_MS; pS = pT = progress(); showLede(true); hideCueForever(); }
 
   function tick(now) {
     running = false;
     const dt = Math.min(last ? now - last : 16, 50); last = now;      // покадрово, крок ≤ 50 мс (iOS присипляє цикл)
     t += dt / 1000; frameNo++;
     if (dbgIntro == null) introMs += dt;
-    const introT = dbgIntro != null ? dbgIntro : clamp01(introMs / CFG.introMs);
+    const introT = dbgIntro != null ? dbgIntro : clamp01(introMs / INTRO_MS);
     pT = progress();
     pS += (pT - pS) * 0.16;
     angle += dt / 1000 * (0.2 + 0.12 * pS);                           // фігура помітно крутиться, зі скролом — трохи швидше
@@ -401,7 +517,7 @@ function init() {
     tmpD.copy(outer.position).project(camera);
     const x = cr.left + (tmpD.x + 1) / 2 * cr.width, y = cr.top + (1 - tmpD.y) / 2 * cr.height;
     const rPx = Math.abs(projectY(tmpC.copy(outer.position).setY(outer.position.y + R * 1.15 * outer.scale.x)) - projectY(outer.position));
-    if (Math.hypot(ev.clientX - x, ev.clientY - y) > rPx * 1.1 || introMs < CFG.introMs || t - kickAt < KICK.dur) return;
+    if (Math.hypot(ev.clientX - x, ev.clientY - y) > rPx * 1.1 || introMs < INTRO_MS || t - kickAt < KICK.dur) return;
     kickAt = t; schedule();
   });
   schedule();

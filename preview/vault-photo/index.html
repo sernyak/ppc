@@ -138,9 +138,9 @@
             #vault-scene[data-variant="photo"] #vault-canvas { position: relative; }
             /* текст — над фото й сценою (інакше абсолютний шар сцени лягає поверх заголовка й опису) */
             #vault-hero .vault-rise, #vault-hero #vault-lede, #vault-hero .order-5 { position: relative; z-index: 1; }
-            .vault-photo { display: block; position: absolute; background: url(/ai/vault-bg-desk.webp) 0 0 / 100% 100% no-repeat;
-                -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 24%, #000 60%, transparent 90%);
-                        mask-image: linear-gradient(180deg, transparent 0%, #000 24%, #000 60%, transparent 90%); }
+            .vault-photo { display: block; position: absolute; background: url(/ai/vault-bg-phone.webp) 0 0 / 100% 100% no-repeat;
+                -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 74%, transparent 97%);
+                        mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 74%, transparent 97%); }
             .vault-deskglow { display: block; position: absolute; left: 0; top: 0; border-radius: 50%; pointer-events: none; opacity: 0;
                 background: radial-gradient(closest-side, rgba(120,178,255,.85), rgba(71,160,255,.32) 50%, rgba(71,160,255,0));
                 mix-blend-mode: screen; will-change: transform, opacity; }
@@ -166,7 +166,8 @@
         setTimeout(function(){if(!d.classList.contains('vault-live'))d.classList.remove('vault-holo');},8000);
     }catch(e){}})();</script>
     <!-- /vault:head -->
-    <link rel="preload" as="image" href="/ai/vault-bg-desk.webp">
+    <link rel="preload" as="image" href="/ai/vault-bg-desk.webp" media="(min-width: 1024px)">
+    <link rel="preload" as="image" href="/ai/vault-bg-phone.webp" media="(max-width: 1023px)">
 </head>
 
 <body class="antialiased selection:bg-brand-accent selection:text-white">

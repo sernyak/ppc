@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { FIG, CFG, KICK, figureFrame, getFrame, kickFrame, clamp01, smooth } from './hero-vault-mobile-frame.js';
+import { FIG, CFG, KICK, DANCE, FIG_DANCE, figureFrame, getFrame, kickFrame, danceFrame, danceSpeed, clamp01, smooth } from './hero-vault-mobile-frame.js';
 
 const COUNTS = { joints: 24, inner: 36, outer: 24 };
 const near = (a, b, m) => assert.ok(Math.abs(a - b) < 1e-9, `${m}: ${a} ≠ ${b}`);
@@ -49,4 +49,21 @@ test('дотик до фігури: ядро робить рівно один о
   assert.ok(Math.abs(kickFrame(KICK.dur).turn - 2 * Math.PI) < 1e-9 && Math.abs(kickFrame(KICK.dur).boost) < 1e-9);
   let prev = 0;
   for (let i = 1; i <= 200; i++) { const v = kickFrame(KICK.dur * i / 200).turn; assert.ok(v >= prev); prev = v; }
+});
+
+test('фото-варіант, телефон: хоровод — по одній у коло, рівно, лише потім посадка й лінії', () => {
+  const n = 24, jit = Array.from({ length: n }, (_, i) => (i * 7 % n) / n);
+  assert.ok(danceFrame(0, n, jit).every((d) => d.scale === 0 && d.glow === 0));
+  assert.ok(danceFrame(1, n, jit).every((d) => d.landed && d.seat === 1 && Math.abs(d.scale - 1) < 1e-9));
+  const atFull = danceFrame(DANCE.enter[1], n, jit);
+  assert.ok(atFull.every((d) => d.seat === 0), 'поки коло збирається, ніхто не сідає');
+  assert.ok(FIG_DANCE.intro.inner[0] >= DANCE.seat[1] - 1e-9, 'лінії — після останньої посадки');
+  assert.ok(danceSpeed() < 2 * Math.PI);
+  let prev = danceFrame(0, n, jit), maxD = 0;
+  for (let i = 1; i <= 4000; i++) {
+    const f = danceFrame(i / 4000, n, jit);
+    f.forEach((d, k) => { maxD = Math.max(maxD, Math.abs(d.scale - prev[k].scale), Math.abs(d.glow - prev[k].glow), Math.abs(d.seat - prev[k].seat)); });
+    prev = f;
+  }
+  assert.ok(maxD < 0.03, `стрибок ${maxD}`);
 });
