@@ -39,6 +39,13 @@ function init() {
   const AGE = q.has('age') ? parseFloat(q.get('age')) : 0;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  /* Варіант «фото» (/preview/vault-photo/): фон — знімок нічного робочого місця, а фігура — та сама жива 3D,
+     що стоїть над стільницею на фото. PHOTO — розмір кадру, позиція background-position і точки в частках кадру:
+     центр фігури, її радіус (частка висоти кадру) і місце відблиску на столі. */
+  const photo = sceneEl.dataset.variant === 'photo';
+  const photoEl = photo ? sceneEl.querySelector('.vault-photo') : null;
+  const glowEl = photo ? sceneEl.querySelector('.vault-deskglow') : null;
+  const PHOTO = { w: 1408, h: 768, pos: [0.62, 0.5], fig: [0.71, 0.47], figR: 0.235, desk: 0.79 };
 
   let renderer;
   try {
@@ -80,11 +87,14 @@ function init() {
   key.shadow.camera.near = 1; key.shadow.camera.far = 30; key.shadow.bias = -0.0006; key.shadow.radius = 9;
   scene.add(key);
   const fillA = new THREE.PointLight(0xb9b0f0, 2.4, 16, 2); fillA.position.set(cPos.x + 5, 3.5, cPos.z - 3); scene.add(fillA);
+  /* на фото бузкове світло йде від моніторів ліворуч-позаду фігури — ставимо контрове світло туди ж */
+  if (photo) { fillA.color.set(0xa48cff); fillA.intensity = 3.2; fillA.position.set(cPos.x - 4, 3, cPos.z - 4); }
   const fillB = new THREE.PointLight(0x60a5fa, 3, 16, 2); fillB.position.set(cPos.x - 5, 2.5, cPos.z + 4); scene.add(fillB);
   scene.add(new THREE.HemisphereLight(0x3a4a70, 0x05070d, 0.65));
 
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.ShadowMaterial({ color: 0x000000, opacity: 0.24 }));
   floor.rotation.x = -Math.PI / 2; floor.position.set(cPos.x, 0, cPos.z); floor.receiveShadow = true; scene.add(floor);
+  floor.visible = !photo;                                     // на фото тінь лягала б не на стіл — її замінює відблиск
 
   /* ---------- фігура: побудова як на /preview/3d-v6/ ---------- */
   const outer = new THREE.Group(); outer.rotation.set(0.22, 0, 0.12); outer.position.copy(cPos);
@@ -382,6 +392,7 @@ function init() {
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, premultipliedAlpha: true,
   });
   const nebula = new THREE.Points(nGeo, nebMat); nebula.renderOrder = -4; scene.add(nebula);
+  nebula.visible = !photo;                                    // глибину дає саме фото
 
   /* ---------- стан ---------- */
   let w = 1, h = 1;
@@ -636,6 +647,13 @@ function init() {
      самому контейнері сторінки. Інакше на широкому екрані текст і фігура розʼїжджались. Камеру просто
      зсуваємо паралельно площині кадру: перспектива, світло й тіні не змінюються. */
   const camRight = new THREE.Vector3(), camUp = new THREE.Vector3();
+  let figScale = 1;
+  /* прямокутник, який фото займає на екрані (у пікселях сцени, без паралаксу) */
+  function photoRect() {
+    const cw = photoEl.offsetWidth, ch = photoEl.offsetHeight;
+    const k = Math.max(cw / PHOTO.w, ch / PHOTO.h), dw = PHOTO.w * k, dh = PHOTO.h * k;
+    return { x: photoEl.offsetLeft + (cw - dw) * PHOTO.pos[0], y: photoEl.offsetTop + (ch - dh) * PHOTO.pos[1], w: dw, h: dh };
+  }
   function composeCamera() {
     target.copy(targetBase);
     setBaseCamera();
@@ -648,15 +666,29 @@ function init() {
     const c = tmpA.copy(cPos).project(camera), xc = c.x, yc = c.y;
     camRight.setFromMatrixColumn(camera.matrixWorld, 0); camUp.setFromMatrixColumn(camera.matrixWorld, 1);
     const rPx = (tmpB.copy(cPos).addScaledVector(camRight, R * 1.12).project(camera).x - xc) / 2 * W;   // півширина фігури на екрані
-    let xPx = (freeL + freeR) / 2;
-    xPx = Math.min(Math.max(xPx, freeL + rPx + 70), W - rPx - 24);   // не ближче 70 px до тексту і не за край екрана
-    const yPx = (ob.y + obt.y + buttons.offsetHeight) / 2;
+    let xPx = (freeL + freeR) / 2, yPx = (ob.y + obt.y + buttons.offsetHeight) / 2, rNow = rPx;
+    if (photo && photoEl) {
+      /* фігура стоїть над стільницею на фото: точка й розмір — у частках показаного кадру (background: cover) */
+      const P = photoRect();
+      xPx = P.x + PHOTO.fig[0] * P.w; yPx = P.y + PHOTO.fig[1] * P.h;
+      figScale = (PHOTO.figR * P.h) / Math.max(1, rPx);
+      rNow = rPx * figScale;
+    }
+    xPx = Math.min(Math.max(xPx, freeL + rNow + 70), W - rNow - 24);   // не ближче 70 px до тексту і не за край екрана
     const xd = (xPx / W) * 2 - 1, yd = -((yPx / Hh) * 2 - 1);
     const z = -tmpC.copy(cPos).applyMatrix4(camera.matrixWorldInverse).z;   // глибина фігури від камери
     const tanH = Math.tan(camera.fov * Math.PI / 360);
     target.addScaledVector(camRight, (xc - xd) * z * tanH * camera.aspect).addScaledVector(camUp, (yc - yd) * z * tanH);
     setBaseCamera();
+    outer.scale.setScalar(figScale);
+    if (glowEl) {
+      /* відблиск на стільниці: під фігурою, на висоті столу на фото; розмір — від висоти кадру */
+      const P = photoRect();
+      glowBase.w = P.h * 0.62; glowBase.h = P.h * 0.13; glowBase.y = P.y + PHOTO.desk * P.h;
+      glowEl.style.width = glowBase.w + 'px'; glowEl.style.height = glowBase.h + 'px';
+    }
   }
+  const glowBase = { w: 0, h: 0, y: 0 };
   /* Поки опису ще немає, заголовок стоїть на рівні центра фігури — без порожнечі під ним. Щойно фігура
      повністю зʼявилась, він плавно відʼїжджає вгору на своє місце (перехід — у CSS, клас vault-risen),
      і лише тоді табло виводить перше речення. */
@@ -745,7 +777,7 @@ function init() {
     outer.position.y = cPos.y + Math.sin(tt * 0.6) * 0.03;
     grainMat.uniforms.uOrigin.value.copy(outer.position);
     /* камера: обліт від скролу + паралакс від миші */
-    const az = az0 + fS.orbit + mx * 0.14, el = el0 + fS.elev + my * 0.07;
+    const az = az0 + (photo ? 0 : fS.orbit) + mx * (photo ? 0.06 : 0.14), el = el0 + (photo ? 0 : fS.elev) + my * (photo ? 0.03 : 0.07);
     camPos.set(target.x + d0 * Math.cos(el) * Math.sin(az), target.y + d0 * Math.sin(el), target.z + d0 * Math.cos(el) * Math.cos(az));
     camera.position.copy(camPos); camera.lookAt(target);
     camera.updateMatrixWorld(); camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
@@ -760,7 +792,7 @@ function init() {
     wallMat.uniforms.uOpacity.value = Math.max(fS.fade, rest.wall);
     wallMat.uniforms.uTint.value.copy(TINT_REST).lerp(TINT_LIT, fS.fade);
     wallMat.uniforms.uTime.value = tt; wallMat.uniforms.uSpot.value.copy(spot);
-    wall.visible = wallMat.uniforms.uOpacity.value > 0.002;
+    wall.visible = !photo && wallMat.uniforms.uOpacity.value > 0.002;   // у фото поле формул не потрібне: дані вже на моніторах
     if (flaps) {
       let touched = false, any = false;
       const m = launch.length - nAuto;
@@ -782,7 +814,15 @@ function init() {
     }
     dustMat.uniforms.uTime.value = tt; nebMat.uniforms.uTime.value = tt;
     grainMat.uniforms.uTime.value = tt; grainMat.uniforms.uSpread.value = fS.grains;
-    grainMat.uniforms.uReach.value = fS.grains * far; grains.visible = fS.grains > 0.001;
+    grainMat.uniforms.uReach.value = fS.grains * far; grains.visible = !photo && fS.grains > 0.001;
+    if (glowEl) {
+      /* відблиск іде за фігурою (паралакс миші теж) і дихає разом із її світлом */
+      tmpA.copy(outer.position).project(camera);
+      const gx = (tmpA.x + 1) / 2 * sceneEl.clientWidth, px = -mx * 10, py = -my * 6;
+      glowEl.style.transform = `translate3d(${(gx - glowBase.w / 2 + px * 0.4).toFixed(1)}px, ${(glowBase.y - glowBase.h / 2 + py).toFixed(1)}px, 0)`;
+      glowEl.style.opacity = (Math.min(1, 0.25 + 0.75 * fF.light) * (0.9 + 0.1 * Math.sin(tt * 1.4)) * (fF.light > 0 ? 1 : 0)).toFixed(3);
+      photoEl.style.transform = `translate3d(${px.toFixed(1)}px, ${py.toFixed(1)}px, 0)`;
+    }
   }
   const frames = (p, introT) => [figureFrame(figureProgress(p), introT, COUNTS), sceneFrame(p, introT)];
   function render(fF, fS) { apply(fF, fS, t); renderer.render(scene, camera); }
