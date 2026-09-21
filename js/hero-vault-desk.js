@@ -263,6 +263,9 @@ function init() {
   const wallOrigin = wallC.clone(), figRay = new THREE.Ray();
   /* у спокої поле тьмяне й сіре; від скролу розгоряється до яскравого — як у ранніх версіях */
   const TINT_REST = new THREE.Color(0x62728d), TINT_LIT = new THREE.Color(0xbcd3ff);
+  /* у фото голограма не має заходити на ноутбук і монітор ліворуч від фігури: мʼяка межа, привʼязана до кадру фото
+     (у частках його ширини), тож на будь-якому екрані ліва частина кадру лишається чистою. (−2, −1) — без межі */
+  const MASK = { value: new THREE.Vector2(-2, -1) }, MASK_U = [0.63, 0.69];
   const wallMat = new THREE.ShaderMaterial({
     uniforms: {
       uAtlas: { value: blankTexture() }, uGrid: { value: blankData() }, uCell: { value: new THREE.Vector2(1, 1) }, uAt: { value: new THREE.Vector2(1, 1) },
@@ -270,11 +273,12 @@ function init() {
       uOrigin: { value: wallOrigin }, uRadius: { value: 0 }, uSoft: { value: 2.0 },
       uSpot: { value: new THREE.Vector3(0, -50, 0) }, uSpotR: { value: 3.0 }, uSpotK: { value: fine ? 0.7 : 0 }, uTime: { value: 0 },
       uEdge: { value: 0.2 },
+      uMask: MASK,
     },
     vertexShader: `varying vec2 vUv; varying vec3 vW;
       void main(){ vUv = uv; vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }`,
     fragmentShader: `uniform sampler2D uAtlas; uniform sampler2D uGrid; uniform vec2 uCell; uniform vec2 uAt; uniform vec3 uTint; uniform float uOpacity; uniform vec3 uOrigin; uniform float uRadius; uniform float uSoft;
-      uniform vec3 uSpot; uniform float uSpotR; uniform float uSpotK; uniform float uTime; uniform float uEdge;
+      uniform vec3 uSpot; uniform float uSpotR; uniform float uSpotK; uniform float uTime; uniform float uEdge; uniform vec2 uMask;
       varying vec2 vUv; varying vec3 vW;
       void main(){
         /* сітка знаків: у uGrid для кожної комірки — номер гліфа (R), яскравість (G), середина слота в частках знака (B), скільки слотів він займає (A) */
@@ -291,7 +295,7 @@ function init() {
         float edge = smoothstep(0.0, uEdge, vUv.x) * smoothstep(1.0, 1.0 - uEdge, vUv.x) * smoothstep(0.0, uEdge, vUv.y) * smoothstep(1.0, 1.0 - uEdge, vUv.y);
         float spot = 1.0 + uSpotK * (1.0 - smoothstep(0.0, uSpotR, distance(vW, uSpot)));
         float breathe = 0.92 + 0.08 * sin(uTime * 0.45 + vW.z * 0.7 + vW.y * 0.9);
-        float lit = uOpacity * m * edge * (0.35 + 0.65 * fall) * spot * breathe;
+        float lit = uOpacity * m * edge * (0.35 + 0.65 * fall) * spot * breathe * smoothstep(uMask.x, uMask.y, gl_FragCoord.x);
         gl_FragColor = vec4(uTint * t.rgb * t.a * lit, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
@@ -423,7 +427,7 @@ function init() {
   gGeo.boundingSphere = new THREE.Sphere(cPos.clone(), 30);
   const grainMat = new THREE.ShaderMaterial({
     uniforms: { uTime: { value: 0 }, uOrigin: { value: cPos.clone() }, uStart: { value: R * 0.12 }, uSpread: { value: 0 }, uSize: { value: 8 }, uPR: { value: renderer.getPixelRatio() }, uColorA: { value: new THREE.Color(0x60a5fa) }, uColorB: { value: new THREE.Color(0xa78bfa) },
-      uWave: wallMat.uniforms.uOrigin, uReach: { value: 0 }, uSoft: wallMat.uniforms.uSoft, uPane: { value: new THREE.Matrix4() } },
+      uWave: wallMat.uniforms.uOrigin, uReach: { value: 0 }, uSoft: wallMat.uniforms.uSoft, uPane: { value: new THREE.Matrix4() }, uMask: MASK },
     vertexShader: `attribute vec3 aTo; attribute float aPhase; attribute float aSpeed;
       uniform float uTime; uniform vec3 uOrigin; uniform vec3 uWave; uniform float uReach; uniform float uSoft; uniform mat4 uPane;
       uniform float uStart; uniform float uSpread; uniform float uSize; uniform float uPR; varying float vA; varying float vK;
@@ -434,9 +438,9 @@ function init() {
         float lit = 1.0 - smoothstep(uReach + uSoft * 0.6, uReach + uSoft * 2.4, distance(to, uWave));
         vA = smoothstep(0.0, 0.16, u) * (1.0 - smoothstep(0.55, 0.88, u)) * lit * smoothstep(0.0, 0.12, uSpread); vK = aPhase;
         vec4 mv = modelViewMatrix * vec4(p, 1.0); gl_PointSize = min(uSize * uPR * (6.0 / -mv.z), 9.0 * uPR); gl_Position = projectionMatrix * mv; }`,
-    fragmentShader: `uniform vec3 uColorA; uniform vec3 uColorB; varying float vA; varying float vK;
+    fragmentShader: `uniform vec3 uColorA; uniform vec3 uColorB; uniform vec2 uMask; varying float vA; varying float vK;
       void main(){ vec2 c = gl_PointCoord - 0.5; float a = smoothstep(0.5, 0.08, length(c)); vec3 col = mix(uColorA, uColorB, vK);
-        gl_FragColor = vec4(col * a * vA * 0.85, 1.0);
+        gl_FragColor = vec4(col * a * vA * 0.85 * smoothstep(uMask.x, uMask.y, gl_FragCoord.x), 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
         gl_FragColor.a = max(gl_FragColor.r, max(gl_FragColor.g, gl_FragColor.b)); }`,
@@ -801,6 +805,10 @@ function init() {
     target.addScaledVector(camRight, (xc - xd) * z * tanH * camera.aspect).addScaledVector(camUp, (yc - yd) * z * tanH);
     setBaseCamera();
     outer.scale.setScalar(figScale);
+    if (photo && photoEl) {
+      const P = photoRect(), pr = renderer.getPixelRatio();
+      MASK.value.set((P.x + MASK_U[0] * P.w) * pr, (P.x + MASK_U[1] * P.w) * pr);
+    }
     if (glowEl) {
       /* відблиск на стільниці: під фігурою, на висоті столу на фото; розмір — від висоти кадру */
       const P = photoRect();
@@ -933,8 +941,8 @@ function init() {
     for (const c of wallCorners) far = Math.max(far, c.distanceTo(wallOrigin));
     /* у фото площина далі й дрібніша, тож у спокої написи треба помітніші, ніж на /ai, — інакше їх не видно */
     wallMat.uniforms.uRadius.value = Math.max(fS.coverage, rest.cover * (photo ? 1.45 : 1)) * far;
-    wallMat.uniforms.uOpacity.value = Math.max(fS.fade, rest.wall * (photo ? 3.4 : 1)) * (photo ? 0.66 : 1);
-    wallMat.uniforms.uTint.value.copy(TINT_REST).lerp(TINT_LIT, photo ? Math.max(fS.fade, 0.4) : fS.fade);   // у фото написи у спокої світліші — на темному вікні сірі губились
+    wallMat.uniforms.uOpacity.value = Math.max(fS.fade, rest.wall * (photo ? 2.5 : 1)) * (photo ? 0.66 : 1);
+    wallMat.uniforms.uTint.value.copy(TINT_REST).lerp(TINT_LIT, photo ? Math.max(fS.fade, 0.28) : fS.fade);   // у фото написи у спокої світліші — на темному вікні сірі губились
     wallMat.uniforms.uTime.value = tt; wallMat.uniforms.uSpot.value.copy(spot);
     wall.visible = wallMat.uniforms.uOpacity.value > 0.002;
     if (flaps) {
