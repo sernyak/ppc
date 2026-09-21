@@ -251,6 +251,10 @@ function init() {
   const wallRot = -Math.PI / 2 + 0.62;
   const wallN = new THREE.Vector3(-Math.cos(wallRot + Math.PI / 2), 0, Math.sin(wallRot + Math.PI / 2));
   const wallU = new THREE.Vector3(Math.cos(wallRot), 0, -Math.sin(wallRot));
+  /* у фото камера облітає фігуру, і далека площина їхала б аж у правий кут. Тож площина стоїть лівіше й
+     обертається разом з установкою камери на частку WALL_FOLLOW: трохи пливе (жива), але хід утричі менший */
+  const WALL_FOLLOW = 0.68;
+  if (photo) wallC.addScaledVector(wallU, -3.2);
   const wallPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(wallN, wallC);
   const wallPoint = (a, b) => wallC.clone().addScaledVector(wallU, a).add(new THREE.Vector3(0, b, 0));
   const wallCorners = [];
@@ -407,7 +411,8 @@ function init() {
   const N = 2600;
   const gTo = [], gPhase = [], gSpeed = [], gPos = new Float32Array(N * 3);
   for (let i = 0; i < N; i++) {
-    const p = wallPoint((rnd() - 0.5) * (WW - 3), (rnd() - 0.5) * (H - 2));
+    /* у фото ціль вогника — точка на площині в її власних координатах: площина рухається з камерою (uPane) */
+    const p = photo ? new THREE.Vector3((rnd() - 0.5) * (WW - 3), (rnd() - 0.5) * (H - 2), 0) : wallPoint((rnd() - 0.5) * (WW - 3), (rnd() - 0.5) * (H - 2));
     gTo.push(p.x, p.y, p.z); gPhase.push(rnd()); gSpeed.push(0.035 + rnd() * 0.055);
   }
   const gGeo = new THREE.BufferGeometry();
@@ -418,14 +423,15 @@ function init() {
   gGeo.boundingSphere = new THREE.Sphere(cPos.clone(), 30);
   const grainMat = new THREE.ShaderMaterial({
     uniforms: { uTime: { value: 0 }, uOrigin: { value: cPos.clone() }, uStart: { value: R * 0.12 }, uSpread: { value: 0 }, uSize: { value: 8 }, uPR: { value: renderer.getPixelRatio() }, uColorA: { value: new THREE.Color(0x60a5fa) }, uColorB: { value: new THREE.Color(0xa78bfa) },
-      uWave: wallMat.uniforms.uOrigin, uReach: { value: 0 }, uSoft: wallMat.uniforms.uSoft },
+      uWave: wallMat.uniforms.uOrigin, uReach: { value: 0 }, uSoft: wallMat.uniforms.uSoft, uPane: { value: new THREE.Matrix4() } },
     vertexShader: `attribute vec3 aTo; attribute float aPhase; attribute float aSpeed;
-      uniform float uTime; uniform vec3 uOrigin; uniform vec3 uWave; uniform float uReach; uniform float uSoft;
+      uniform float uTime; uniform vec3 uOrigin; uniform vec3 uWave; uniform float uReach; uniform float uSoft; uniform mat4 uPane;
       uniform float uStart; uniform float uSpread; uniform float uSize; uniform float uPR; varying float vA; varying float vK;
       void main(){ float u = fract(aPhase + uTime * aSpeed);
-        vec3 d = aTo - uOrigin; float maxD = length(d); vec3 p = uOrigin + d / max(maxD, 0.001) * mix(uStart, maxD, u);
+        vec3 to = (uPane * vec4(aTo, 1.0)).xyz;                     // у фото — з координат площини, інакше uPane одинична
+        vec3 d = to - uOrigin; float maxD = length(d); vec3 p = uOrigin + d / max(maxD, 0.001) * mix(uStart, maxD, u);
         /* власний, швидший фронт: вогники випереджають яскравість поля */
-        float lit = 1.0 - smoothstep(uReach + uSoft * 0.6, uReach + uSoft * 2.4, distance(aTo, uWave));
+        float lit = 1.0 - smoothstep(uReach + uSoft * 0.6, uReach + uSoft * 2.4, distance(to, uWave));
         vA = smoothstep(0.0, 0.16, u) * (1.0 - smoothstep(0.55, 0.88, u)) * lit * smoothstep(0.0, 0.12, uSpread); vK = aPhase;
         vec4 mv = modelViewMatrix * vec4(p, 1.0); gl_PointSize = min(uSize * uPR * (6.0 / -mv.z), 9.0 * uPR); gl_Position = projectionMatrix * mv; }`,
     fragmentShader: `uniform vec3 uColorA; uniform vec3 uColorB; varying float vA; varying float vK;
@@ -913,13 +919,22 @@ function init() {
     placeLedeFrame();
     /* поле формул: у спокої тліє тьмяним сірим, від скролу розгоряється до яскравого */
     const rest = introRelease(restSec);
+    if (photo) {
+      const a = fS.orbit * WALL_FOLLOW;
+      rotAround(wall.position.copy(wallC), cPos, a); wall.rotation.y = wallRot + a; wall.updateMatrixWorld();
+      wallPlane.setFromNormalAndCoplanarPoint(tmpB.copy(wallN).applyAxisAngle(UP, a), wall.position);
+      let c = 0;
+      for (const sx of [-1, 1]) for (const sy of [-1, 1]) wall.localToWorld(wallCorners[c++].set(sx * WW / 2, sy * H / 2, 0));
+      grainMat.uniforms.uPane.value.copy(wall.matrixWorld);
+    }
     figRay.origin.copy(camera.position); figRay.direction.copy(outer.position).sub(camera.position).normalize();
-    if (!figRay.intersectPlane(wallPlane, wallOrigin)) wallOrigin.copy(wallC);
+    if (!figRay.intersectPlane(wallPlane, wallOrigin)) wallOrigin.copy(wall.position);
     let far = 0;
     for (const c of wallCorners) far = Math.max(far, c.distanceTo(wallOrigin));
-    wallMat.uniforms.uRadius.value = Math.max(fS.coverage, rest.cover) * far;
-    wallMat.uniforms.uOpacity.value = Math.max(fS.fade, rest.wall) * (photo ? 0.66 : 1);   // на фото голограма — дальший план, трохи тихіша
-    wallMat.uniforms.uTint.value.copy(TINT_REST).lerp(TINT_LIT, fS.fade);
+    /* у фото площина далі й дрібніша, тож у спокої написи треба помітніші, ніж на /ai, — інакше їх не видно */
+    wallMat.uniforms.uRadius.value = Math.max(fS.coverage, rest.cover * (photo ? 1.45 : 1)) * far;
+    wallMat.uniforms.uOpacity.value = Math.max(fS.fade, rest.wall * (photo ? 3.4 : 1)) * (photo ? 0.66 : 1);
+    wallMat.uniforms.uTint.value.copy(TINT_REST).lerp(TINT_LIT, photo ? Math.max(fS.fade, 0.4) : fS.fade);   // у фото написи у спокої світліші — на темному вікні сірі губились
     wallMat.uniforms.uTime.value = tt; wallMat.uniforms.uSpot.value.copy(spot);
     wall.visible = wallMat.uniforms.uOpacity.value > 0.002;
     if (flaps) {
