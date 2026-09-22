@@ -43,6 +43,13 @@ function init() {
      що стоїть над стільницею на фото. PHOTO — розмір кадру, позиція background-position і точки в частках кадру:
      центр фігури, її радіус (частка висоти кадру) і місце відблиску на столі. */
   const photo = sceneEl.dataset.variant === 'photo';
+  /* звук (лише на сторінці з data-sound="1", поки це прев'ю /preview/vault-sound/): модуль вантажиться окремо,
+     тож на решті сторінок сцена поводиться як без нього */
+  let snd = null;
+  if (sceneEl.dataset.sound === '1' && !reduced) import('./hero-vault-sound.js').then((m) => {
+    snd = m.createSound();
+    m.soundButton(snd, sceneEl.closest('section'), { onEnable: replayIntro });
+  }).catch(() => { /* без звуку сторінка працює як завжди */ });
   const photoEl = photo ? sceneEl.querySelector('.vault-photo') : null;
   const glowEl = photo ? sceneEl.querySelector('.vault-deskglow') : null;
   const PHOTO = { w: 1408, h: 768, pos: [0.62, 0.5], fig: [0.71, 0.47], figR: 0.235, desk: 0.79 };
@@ -241,6 +248,15 @@ function init() {
     }
     sp.needsUpdate = true; sa.needsUpdate = true;
     sparks.visible = any;
+    if (snd) soundDance(D);
+  }
+  const heardJoin = new Uint8Array(joints.length), heardLand = new Uint8Array(joints.length);
+  function soundDance(D) {
+    if (introNow < DANCE.enter[0]) { heardJoin.fill(0); heardLand.fill(0); return; }
+    for (let k = 0; k < D.length; k++) {
+      if (!heardJoin[k] && D[k].reach >= 0.9) { heardJoin[k] = 1; snd.chime(k); }
+      if (!heardLand[k] && D[k].landed) { heardLand[k] = 1; snd.tick(); }
+    }
   }
   const smoothstep01 = (x) => { const k = clamp01(x); return k * k * (3 - 2 * k); };
 
@@ -632,7 +648,7 @@ function init() {
 
   /* «ще не відкрита» — окрема мітка: час старту буває відʼємним (після перезавантаження табло ставимо вже складеним) */
   const UNSET = -1e6;
-  let letterAtl = null, flaps = null, flapMat = null;
+  let letterAtl = null, flaps = null, flapMat = null, flipSeen = null;
   let order = null, launch = null, autoStart = null, nAuto = 0, lastStart = -1e9;
   const rnd2 = seeded(77);
   /* ТАБЛО для всього опису. Кожна літера — три шматки: верхня половина нового знака (відкривається позаду),
@@ -853,6 +869,14 @@ function init() {
     instantLand = true;
     rise(true);
   }
+  /* Людина ввімкнула звук угорі сторінки — програємо появу ще раз, щоб вона почула хоровод і табло з самого
+     початку. Заголовок лишається на місці; перше речення гасне й складається знову; решта опису не чіпається. */
+  function replayIntro() {
+    if (window.scrollY > 40 || dbgIntro != null || introMs < INTRO_MS) return;
+    introMs = 0;
+    if (launch) { for (let i = 0; i < nAuto; i++) launch[i] = UNSET; flaps.geometry.attributes.aLaunch.needsUpdate = true; }
+    last = 0; schedule();
+  }
   /* hero липкий на час прокрутки доріжки */
   /* Історія програється ОДИН РАЗ: досягнутий стан замикається, назад нічого не відмотується — інакше
      при русі вгору сцена переграє все у зворотному напрямку й скрол відчувається вʼязким. */
@@ -966,12 +990,28 @@ function init() {
       }
       if (touched) flaps.geometry.attributes.aLaunch.needsUpdate = true;
       flaps.visible = any;
+      if (snd) {
+        if (!flipSeen || flipSeen.length !== launch.length) flipSeen = new Uint8Array(launch.length);
+        for (let i = 0; i < launch.length; i++) {
+          if (launch[i] === UNSET) { flipSeen[i] = 0; continue; }
+          const since = tt - launch[i], k = Math.min(CFG.flap.flips, Math.floor(since / CFG.flap.dur));
+          if (since > CFG.flap.flips * CFG.flap.dur + 0.5) { flipSeen[i] = CFG.flap.flips; continue; }   // уже складене (перезавантаження) — без звуку
+          if (k > flipSeen[i]) { flipSeen[i] = k; snd.flap(); }
+        }
+      }
       flapMat.uniforms.uTime.value = tt;
       instantLand = false;
     }
     dustMat.uniforms.uTime.value = tt; nebMat.uniforms.uTime.value = tt;
     grainMat.uniforms.uTime.value = tt; grainMat.uniforms.uSpread.value = fS.grains;
     grainMat.uniforms.uReach.value = fS.grains * far; grains.visible = fS.grains > 0.001;
+    if (snd) {
+      /* гул наростає, поки проростають лінії, далі — ледь чутний фон; шелест — від яскравості голограми */
+      let lines = 0; for (let i = 0; i < fF.inner.length; i++) lines += fF.inner[i];
+      lines /= Math.max(1, fF.inner.length);
+      snd.drone(introNow < 1 ? Math.sin(Math.PI * Math.min(1, lines)) * 0.9 + 0.25 * fF.light : 0.22 + 0.5 * fS.fade);
+      snd.shimmer(wallMat.uniforms.uOpacity.value * 1.4);
+    }
     if (glowEl) {
       /* відблиск іде за фігурою (паралакс миші теж) і дихає разом із її світлом */
       tmpA.copy(outer.position).project(camera);
@@ -1029,8 +1069,8 @@ function init() {
   }
   function schedule() { if (!running) { running = true; requestAnimationFrame(tick); } }
 
-  new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (visible) { last = 0; schedule(); } }, { threshold: 0.02 }).observe(sceneEl);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && visible) { last = 0; schedule(); } });
+  new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (visible) { last = 0; schedule(); } else if (snd) snd.silence(); }, { threshold: 0.02 }).observe(sceneEl);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) { if (snd) snd.silence(); } else if (visible) { last = 0; schedule(); } });
   new ResizeObserver(() => { fit(); schedule(); }).observe(sceneEl);
   /* Швидкий скрол не проскакує опис: сторінка не йде нижче точки, де скрол відпустив останню літеру, доки всі
      літери не долетять і не сядуть. Hero весь цей час прилиплий, тож кадр не стрибає. Лише на спуску. */
@@ -1078,6 +1118,7 @@ function init() {
     if (photo) canvas.addEventListener('click', (ev) => {
       if (!overFigure(ev) || introMs < INTRO_MS || t - kickAt < 1.6) return;
       kickAt = t; schedule();
+      if (snd) snd.whoosh(1.6);
     });
   }
   /* чи вказівник над фігурою: відстань до її центру на екрані менша за її екранний радіус */

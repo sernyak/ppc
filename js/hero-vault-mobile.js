@@ -34,6 +34,12 @@ function init() {
      (ai/vault-bg-phone.webp, 768×1376) на всю ширину екрана. Кадр привʼязаний до заголовка: яскраві монітори
      починаються трохи нижче нього, а заголовок лежить на темній стіні. Фігура висить перед екранами. */
   const photo = sceneEl.dataset.variant === 'photo';
+  /* звук (лише на сторінці з data-sound="1", поки це прев'ю /preview/vault-sound/): модуль вантажиться окремо */
+  let snd = null;
+  if (sceneEl.dataset.sound === '1' && !reduced) import('./hero-vault-sound.js').then((m) => {
+    snd = m.createSound();
+    m.soundButton(snd, sceneEl.closest('section'), { onEnable: replayIntro });
+  }).catch(() => { /* без звуку сторінка працює як завжди */ });
   const photoEl = photo ? sceneEl.querySelector('.vault-photo') : null;
   const glowEl = photo ? sceneEl.querySelector('.vault-deskglow') : null;
   const PHOTO = { w: 768, h: 1376, screens: 0.32, gap: 18, wide: 1.0, desk: 0.69 };   // screens — де в кадрі починаються монітори
@@ -212,6 +218,15 @@ function init() {
     }
     sp.needsUpdate = true; sa.needsUpdate = true;
     sparks.visible = any;
+    if (snd) soundDance(D);
+  }
+  const heardJoin = new Uint8Array(joints.length), heardLand = new Uint8Array(joints.length);
+  function soundDance(D) {
+    if (introNow < DANCE.enter[0]) { heardJoin.fill(0); heardLand.fill(0); return; }
+    for (let k = 0; k < D.length; k++) {
+      if (!heardJoin[k] && D[k].reach >= 0.9) { heardJoin[k] = 1; snd.chime(k); }
+      if (!heardLand[k] && D[k].landed) { heardLand[k] = 1; snd.tick(); }
+    }
   }
   const smoothstep01 = (x) => { const k = clamp01(x); return k * k * (3 - 2 * k); };
 
@@ -356,6 +371,7 @@ function init() {
     ledeShown = true;
     if (instant) lede.classList.add('vault-lede-now');
     lede.classList.add('vault-lede-in');
+    if (!instant && snd) snd.chime(2);                        // опис проявився — тихий дзвін
   }
   /* висота «малого» вікна (з усіма панелями браузера): не змінюється, коли Safari ховає адресний рядок */
   const svhProbe = document.createElement('div');
@@ -474,6 +490,13 @@ function init() {
     if (fS.lede) showLede(false);
     dustMat.uniforms.uTime.value = tt; nebMat.uniforms.uTime.value = tt;
     beamMat.uniforms.uTime.value = tt; beamMat.uniforms.uOp.value = fS.beams; beams.visible = fS.beams > 0.002;
+    if (snd) {
+      /* гул наростає, поки проростають лінії, далі — ледь чутний фон; шелест — від променів */
+      let lines = 0; for (let i = 0; i < fF.inner.length; i++) lines += fF.inner[i];
+      lines /= Math.max(1, fF.inner.length);
+      snd.drone(introNow < 1 ? Math.sin(Math.PI * Math.min(1, lines)) * 0.9 + 0.25 * fF.light : 0.18 + 0.35 * fS.beams);
+      snd.shimmer(fS.beams * 0.8);
+    }
   }
   const frames = (p, introT) => { introNow = introT; const fS = sceneFrame(p, introT); return [figureFrame(fS.story, introT, COUNTS, photo ? FIG_DANCE : FIG), fS]; };
   function render(fF, fS) { apply(fF, fS, t); renderer.render(scene, camera); }
@@ -505,8 +528,13 @@ function init() {
   }
   function schedule() { if (!running) { running = true; requestAnimationFrame(tick); } }
 
-  new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (visible) { last = 0; schedule(); } }, { threshold: 0.02 }).observe(sceneEl);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && visible) { last = 0; schedule(); } });
+  new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (visible) { last = 0; schedule(); } else if (snd) snd.silence(); }, { threshold: 0.02 }).observe(sceneEl);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) { if (snd) snd.silence(); } else if (visible) { last = 0; schedule(); } });
+  /* людина ввімкнула звук угорі сторінки — програємо появу фігури ще раз, щоб почула хоровод з самого початку */
+  function replayIntro() {
+    if (window.scrollY > 40 || dbgIntro != null || introMs < INTRO_MS) return;
+    introMs = 0; last = 0; schedule();
+  }
   new ResizeObserver(() => { fitScene(); schedule(); }).observe(sceneEl);
   window.addEventListener('scroll', () => { if (window.scrollY > 8) hideCueForever(); schedule(); }, { passive: true });
   /* дотик до фігури — ядро робить повний оберт (наступний — коли скінчився попередній). Сцена на телефоні
@@ -519,6 +547,7 @@ function init() {
     const rPx = Math.abs(projectY(tmpC.copy(outer.position).setY(outer.position.y + R * 1.15 * outer.scale.x)) - projectY(outer.position));
     if (Math.hypot(ev.clientX - x, ev.clientY - y) > rPx * 1.1 || introMs < INTRO_MS || t - kickAt < KICK.dur) return;
     kickAt = t; schedule();
+    if (snd) snd.whoosh(1.6);
   });
   schedule();
 
