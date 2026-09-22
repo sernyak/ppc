@@ -496,10 +496,11 @@ function init() {
     dustMat.uniforms.uTime.value = tt; nebMat.uniforms.uTime.value = tt;
     beamMat.uniforms.uTime.value = tt; beamMat.uniforms.uOp.value = fS.beams; beams.visible = fS.beams > 0.002;
     if (snd) {
-      /* гул наростає, поки проростають лінії, далі — ледь чутний фон; шелест — від променів */
+      /* гул наростає, поки проростають лінії, далі — рівний ледь чутний фон (від скролу не гучнішає: при русі
+         вниз звук стихає через presence у модулі звуку); шелест — від променів */
       let lines = 0; for (let i = 0; i < fF.inner.length; i++) lines += fF.inner[i];
       lines /= Math.max(1, fF.inner.length);
-      snd.drone(introNow < 1 ? Math.sin(Math.PI * Math.min(1, lines)) * 0.9 + 0.25 * fF.light : 0.18 + 0.35 * fS.beams);
+      snd.drone(introNow < 1 ? Math.sin(Math.PI * Math.min(1, lines)) * 0.9 + 0.25 * fF.light : 0.18);
       snd.shimmer(fS.beams * 0.8);
     }
   }

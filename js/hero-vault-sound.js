@@ -17,7 +17,8 @@
  * Решта голосів:
  *   lede()    — на телефоні проявився опис: мʼякий повітряний «вууш»;
  *   flap()    — клацання пластинки табло (щільність обмежена, тож хвиля пластинок — шелест, а не тріск);
- *   drone(x)  — низький гул: наростає, поки проростають лінії, далі — ледь чутний фон;
+ *   drone(x)  — низький гул: наростає, поки проростають лінії, далі — рівний ледь чутний фон;
+ *   presence(x) — яка частка першого екрана ще у вікні: звук є лише там і стихає, поки людина йде вниз;
  *   shimmer(x) — тихий електронний шелест голограми, гучність — від її яскравості;
  *   whoosh()  — оберт ядра від кліку: «вууш» і легкий дзвін наприкінці.
  */
@@ -27,7 +28,8 @@ const VARIANTS = ['mix', 'whoosh', 'roll', 'chime'];
 export function createSound() {
   let ctx = null, master = null, wet = null, noiseBuf = null, drone = null, shim = null;
   let rollBus = null, rumble = null, panL = null, panR = null;
-  let on = false, lastFlap = 0, lastIn = 0, lastClack = 0, ringX = 0, nextGrain = 0, ringIdle = 0;
+  let on = false, pres = 1, lastFlap = 0, lastIn = 0, lastClack = 0, ringX = 0, nextGrain = 0, ringIdle = 0;
+  const LEVEL = 0.42;
   const want = (() => { try { return localStorage.getItem(KEY) === '1'; } catch (e) { return false; } })();
   const variant = (() => { try { const v = new URLSearchParams(location.search).get('snd'); return VARIANTS.includes(v) ? v : 'mix'; } catch (e) { return 'mix'; } })();
   const flies = variant === 'whoosh' || variant === 'mix', rolls = variant === 'roll' || variant === 'mix';
@@ -94,11 +96,13 @@ export function createSound() {
     const b = ctx.createBufferSource(); b.buffer = ctx.createBuffer(1, 1, ctx.sampleRate); b.connect(ctx.destination); b.start();   // iOS: «розморожує» вивід
     return true;
   }
+  /* загальна гучність = увімкнено × присутність першого екрана (звук живе лише на ньому, див. presence) */
+  function level(tc) { if (ctx) master.gain.setTargetAtTime(on ? LEVEL * pres : 0, ctx.currentTime, tc); }
   function setOn(v) {
     on = v;
     try { localStorage.setItem(KEY, v ? '1' : '0'); } catch (e) { /* без сховища просто не запамʼятаємо */ }
-    if (v) { if (!unlock()) { on = false; return false; } master.gain.setTargetAtTime(0.42, ctx.currentTime, 0.08); }
-    else if (ctx) master.gain.setTargetAtTime(0, ctx.currentTime, 0.05);
+    if (v && !unlock()) { on = false; return false; }
+    level(v ? 0.08 : 0.05);
     if (api.onToggle) api.onToggle(on);
     return on;
   }
@@ -111,7 +115,7 @@ export function createSound() {
     };
     for (const e of ['pointerdown', 'keydown', 'touchend']) window.addEventListener(e, first, true);
   }
-  const live = () => on && ctx && ctx.state === 'running';
+  const live = () => on && pres > 0.01 && ctx && ctx.state === 'running';
 
   function tone(freq, t0, dur, gain, type = 'sine', toWet = true) {
     const o = ctx.createOscillator(), g = ctx.createGain();
@@ -245,7 +249,13 @@ export function createSound() {
       noise(now, 0.028, 0.05 + Math.random() * 0.035, 2600 + Math.random() * 1600, 1.6);
       tone(170 + Math.random() * 40, now, 0.03, 0.035, 'triangle', false);
     },
-    drone(x) { if (ctx && drone) drone.gain.setTargetAtTime(on ? 0.16 * Math.max(0, Math.min(1, x)) : 0, ctx.currentTime, 0.25); },
+    drone(x) { if (ctx && drone) drone.gain.setTargetAtTime(on ? 0.1 * Math.max(0, Math.min(1, x)) : 0, ctx.currentTime, 0.25); },
+    /* x — яка частка першого екрана ще на місці (1 — людина вгорі, 0 — пішла вниз до проєктів) */
+    presence(x) {
+      x = Math.max(0, Math.min(1, x));
+      if (x === pres || (Math.abs(x - pres) < 0.004 && x > 0 && x < 1)) return;
+      pres = x; level(0.12);
+    },
     shimmer(x) { if (ctx && shim) shim.gain.setTargetAtTime(on ? 0.05 * Math.max(0, Math.min(1, x)) : 0, ctx.currentTime, 0.3); },
     whoosh(dur = 1.6) {
       if (!live()) return;
@@ -284,6 +294,19 @@ export function soundButton(snd, hero, { onEnable } = {}) {
   });
   document.body.appendChild(b);
   requestAnimationFrame(() => b.classList.add('is-ready'));
-  if (hero) new IntersectionObserver((es) => b.classList.toggle('is-away', !es[0].isIntersecting), { threshold: 0.15 }).observe(hero);
+  if (hero) {
+    new IntersectionObserver((es) => b.classList.toggle('is-away', !es[0].isIntersecting), { threshold: 0.15 }).observe(hero);
+    /* Звук лише на першому екрані: рахуємо, яка частка його висоти ще у вікні (на компʼютері hero липкий,
+       тож поки він тримається, частка = 1), і плавно глушимо все, поки перший екран іде вгору; коли від
+       нього лишилось 30 % — тиша. Назад угору звук так само повертається. */
+    const onScroll = () => {
+      const r = hero.getBoundingClientRect(), vh = window.innerHeight || 1;
+      const v = (r.top + Math.min(r.height, vh)) / vh, k = Math.max(0, Math.min(1, (v - 0.3) / 0.7));
+      snd.presence(k * k * (3 - 2 * k));
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    onScroll();
+  }
   return { repaint: () => paint(snd.on) };
 }

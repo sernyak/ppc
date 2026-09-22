@@ -1011,10 +1011,11 @@ function init() {
     grainMat.uniforms.uTime.value = tt; grainMat.uniforms.uSpread.value = fS.grains;
     grainMat.uniforms.uReach.value = fS.grains * far; grains.visible = fS.grains > 0.001;
     if (snd) {
-      /* гул наростає, поки проростають лінії, далі — ледь чутний фон; шелест — від яскравості голограми */
+      /* гул наростає, поки проростають лінії, далі — рівний ледь чутний фон (від скролу не гучнішає: власник
+         просив, щоб при русі вниз звук стихав — це робить presence у модулі звуку); шелест — від яскравості голограми */
       let lines = 0; for (let i = 0; i < fF.inner.length; i++) lines += fF.inner[i];
       lines /= Math.max(1, fF.inner.length);
-      snd.drone(introNow < 1 ? Math.sin(Math.PI * Math.min(1, lines)) * 0.9 + 0.25 * fF.light : 0.22 + 0.5 * fS.fade);
+      snd.drone(introNow < 1 ? Math.sin(Math.PI * Math.min(1, lines)) * 0.9 + 0.25 * fF.light : 0.22);
       snd.shimmer(wallMat.uniforms.uOpacity.value * 1.4);
     }
     if (glowEl) {
