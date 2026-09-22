@@ -4,20 +4,33 @@
  * натисне кнопку: браузери не дають сторінці грати звук без дотику, кліку чи клавіші (прокрутка не
  * рахується). Вибір запамʼятовується; при наступному візиті звук вмикається з першим кліком чи дотиком.
  *
- * Голоси:
- *   chime(i)  — кришталевий дзвін, коли крапка стає в хоровод (тон піднімається з кожною);
- *   tick()    — мʼякий «тік», коли крапка сідає на місце;
+ * Голоси хороводу (крапки по одній залітають справа в коло довкола фігури, кружляють і сідають на місця):
+ *   dotIn(i)   — крапка вилітає: короткий свист-проліт справа наліво з падінням тону, як повз вухо;
+ *   dotJoin(i) — крапка стала в коло;
+ *   ring(x)    — поки крапки кружляють (x — частка крапок у колі): перекат металевих кульок;
+ *   dotLand(i) — крапка сіла на місце: металевий «клак».
+ * Що саме звучить, вирішує варіант — параметр адреси ?snd= (порівняння на слух на прев'ю):
+ *   whoosh — лише проліт на вході (посадка — мʼякий «тік»);
+ *   roll   — перекат кульок у колі й «клак» на посадці;
+ *   mix    — усе разом: проліт, перекат і «клак» (за замовчуванням);
+ *   chime  — попередній кришталевий дзвін, для порівняння.
+ * Решта голосів:
+ *   lede()    — на телефоні проявився опис: мʼякий повітряний «вууш»;
  *   flap()    — клацання пластинки табло (щільність обмежена, тож хвиля пластинок — шелест, а не тріск);
  *   drone(x)  — низький гул: наростає, поки проростають лінії, далі — ледь чутний фон;
  *   shimmer(x) — тихий електронний шелест голограми, гучність — від її яскравості;
  *   whoosh()  — оберт ядра від кліку: «вууш» і легкий дзвін наприкінці.
  */
 const KEY = 'vault-sound';
+const VARIANTS = ['mix', 'whoosh', 'roll', 'chime'];
 
 export function createSound() {
   let ctx = null, master = null, wet = null, noiseBuf = null, drone = null, shim = null;
-  let on = false, lastFlap = 0;
+  let rollBus = null, rumble = null, panL = null, panR = null;
+  let on = false, lastFlap = 0, lastIn = 0, lastClack = 0, ringX = 0, nextGrain = 0, ringIdle = 0;
   const want = (() => { try { return localStorage.getItem(KEY) === '1'; } catch (e) { return false; } })();
+  const variant = (() => { try { const v = new URLSearchParams(location.search).get('snd'); return VARIANTS.includes(v) ? v : 'mix'; } catch (e) { return 'mix'; } })();
+  const flies = variant === 'whoosh' || variant === 'mix', rolls = variant === 'roll' || variant === 'mix';
 
   /* пентатоніка від ля першої октави: крапки хороводу підіймаються по ній і на десятій повертаються вниз */
   const SCALE = [440, 494, 554, 659, 740, 880, 988, 1109, 1319, 1480];
@@ -53,7 +66,26 @@ export function createSound() {
     const lfo = ctx.createOscillator(), lfoG = ctx.createGain(); lfo.frequency.value = 0.35; lfoG.gain.value = 1400;
     lfo.connect(lfoG); lfoG.connect(bp.frequency); lfo.start();
     src.connect(bp); bp.connect(shim); shim.connect(master); src.start();
+    if (rolls) buildRoll();
     return true;
+  }
+  const pan = (v) => { if (!ctx.createStereoPanner) return null; const p = ctx.createStereoPanner(); p.pan.value = v; return p; };
+  /* перекат: дрібні клацання кульок ідуть у дві трохи рознесені точки стерео, під ними — рокіт кочення,
+     який «пульсує» з частотою оберту кульки; гучність рокоту — від того, скільки крапок зараз у колі */
+  function buildRoll() {
+    rollBus = ctx.createGain(); rollBus.gain.value = 1; rollBus.connect(master);
+    panL = pan(-0.35); panR = pan(0.35);
+    for (const p of [panL, panR]) if (p) p.connect(rollBus);
+    rumble = ctx.createGain(); rumble.gain.value = 0;
+    const src = ctx.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
+    const low = ctx.createBiquadFilter(); low.type = 'bandpass'; low.frequency.value = 240; low.Q.value = 0.7;
+    const mid = ctx.createBiquadFilter(); mid.type = 'bandpass'; mid.frequency.value = 1100; mid.Q.value = 1.3;
+    const midG = ctx.createGain(); midG.gain.value = 0.45;
+    const am = ctx.createGain(); am.gain.value = 0.72;
+    const lfo = ctx.createOscillator(), lfoG = ctx.createGain(); lfo.frequency.value = 6.5; lfoG.gain.value = 0.28;
+    lfo.connect(lfoG); lfoG.connect(am.gain); lfo.start();
+    src.connect(low); low.connect(am); src.connect(mid); mid.connect(midG); midG.connect(am);
+    am.connect(rumble); rumble.connect(rollBus); src.start();
   }
   /* розблокувати звук — лише всередині обробника дотику/кліку/клавіші */
   function unlock() {
@@ -98,6 +130,54 @@ export function createSound() {
     s.start(t0, Math.random() * 0.5); s.stop(t0 + dur + 0.02);
     return g;
   }
+  /* металевий обертон: миттєвий удар і швидке згасання (у дзвона — мʼяка атака, у металу — ні) */
+  function ping(freq, t0, dur, gain, out) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(gain, t0 + 0.0012); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(out || master);
+    o.start(t0); o.stop(t0 + dur + 0.02);
+  }
+  /* проліт: повітря (широка смуга шуму) і тонкий свист (вузька смуга) наростають до моменту, коли крапка
+     пролітає найближче, і тоді тон різко падає — ефект Доплера; звук зсувається справа до центру */
+  function flyby(t0, level) {
+    const dur = 0.17 + Math.random() * 0.05, f0 = 2600 + Math.random() * 900, f1 = f0 * (0.3 + Math.random() * 0.06);
+    const pass = t0 + dur * 0.5, p = pan(0.85);
+    if (p) { p.pan.setValueAtTime(0.85, t0); p.pan.linearRampToValueAtTime(0.1, t0 + dur); p.connect(master); p.connect(wet); }
+    const out = p || master;
+    for (const [q, mul, g] of [[1.3, 1, 0.55], [9, 1.7, 0.22]]) {
+      const s = ctx.createBufferSource(); s.buffer = noiseBuf;
+      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = q;
+      bp.frequency.setValueAtTime(f0 * mul, t0); bp.frequency.setTargetAtTime(f1 * mul, pass - dur * 0.08, dur * 0.14);
+      const e = ctx.createGain();
+      e.gain.setValueAtTime(0.0001, t0); e.gain.exponentialRampToValueAtTime(g * level, pass); e.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      s.connect(bp); bp.connect(e); e.connect(out);
+      s.start(t0, Math.random() * 0.5); s.stop(t0 + dur + 0.02);
+    }
+  }
+  /* одне клацання кульки в колі: два неоднакові (інгармонійні) обертони в смузі 3–6 кГц і крихітний удар шуму */
+  function grain(t, x) {
+    const f = 3000 + Math.random() * 3000, g = (0.011 + 0.02 * Math.random()) * (0.55 + 0.45 * x);
+    const out = (Math.random() < 0.5 ? panL : panR) || rollBus;
+    ping(f, t, 0.02 + Math.random() * 0.025, g, out);
+    ping(f * (1.43 + Math.random() * 0.12), t, 0.012 + Math.random() * 0.012, g * 0.5, out);
+    if (Math.random() < 0.5) {
+      const s = ctx.createBufferSource(); s.buffer = noiseBuf;
+      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = 5;
+      const e = ctx.createGain(); e.gain.setValueAtTime(g * 2.2, t); e.gain.exponentialRampToValueAtTime(0.0001, t + 0.004);
+      s.connect(bp); bp.connect(e); e.connect(out);
+      s.start(t, Math.random() * 0.5); s.stop(t + 0.01);
+    }
+  }
+  /* кулька сідає в гніздо: удар шуму, металеві обертони (неоднакові) і коротке глухе «ток» корпусу */
+  function clack(t) {
+    const f = 2100 + Math.random() * 900;
+    noise(t, 0.012, 0.1, 4200, 2.2);
+    ping(f, t, 0.09 + Math.random() * 0.03, 0.034);
+    ping(f * 2.32, t, 0.05, 0.017);
+    ping(f * 3.87, t, 0.028, 0.009);
+    tone(360 + Math.random() * 80, t, 0.045, 0.028, 'triangle', false);
+  }
 
   const api = {
     onToggle: null,
@@ -112,6 +192,50 @@ export function createSound() {
     tick() {
       if (!live()) return;
       tone(1250 + Math.random() * 200, ctx.currentTime, 0.06, 0.03, 'sine', false);
+    },
+    variant,
+    dotIn() {
+      if (!flies || !live()) return;
+      const now = ctx.currentTime;
+      if (now - lastIn < 0.03) return;                            // пропущені кадри не зливаються в один гучний пучок
+      lastIn = now;
+      flyby(now, variant === 'mix' ? 0.75 : 1);
+    },
+    dotJoin(i) {
+      if (!live()) return;
+      if (variant === 'chime') api.chime(i);
+      else if (variant === 'roll') { const t = ctx.currentTime; ping(4200 + Math.random() * 900, t, 0.035, 0.02, (i % 2 ? panL : panR) || rollBus); }
+    },
+    dotLand() {
+      if (!live()) return;
+      if (!rolls) { api.tick(); return; }
+      const now = ctx.currentTime;
+      if (now - lastClack < 0.014) return;                        // крапки сідають густо — не частіше ~70 ударів на секунду
+      lastClack = now;
+      clack(now);
+    },
+    /* x — частка крапок, що зараз кружляють; викликається щокадру, поки йде хоровод */
+    ring(x) {
+      if (!rumble) return;
+      x = Math.max(0, Math.min(1, x));
+      if (x !== ringX) { ringX = x; rumble.gain.setTargetAtTime(on ? 0.7 * x : 0, ctx.currentTime, 0.09); }
+      clearTimeout(ringIdle);
+      if (x > 0) ringIdle = setTimeout(() => api.ring(0), 250);    // кадри зупинились (вкладку сховали) — рокіт не зависає
+      if (!live() || x <= 0) return;
+      const now = ctx.currentTime, rate = 20 + 40 * x;           // 20…60 клацань на секунду
+      if (nextGrain < now) nextGrain = now + 0.004;
+      while (nextGrain < now + 0.06) { grain(nextGrain, x); nextGrain += -Math.log(1 - Math.random()) / rate; }
+    },
+    lede() {
+      if (!live()) return;
+      if (variant === 'chime') { api.chime(2); return; }
+      const t0 = ctx.currentTime, s = ctx.createBufferSource(); s.buffer = noiseBuf;
+      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.1;
+      bp.frequency.setValueAtTime(420, t0); bp.frequency.exponentialRampToValueAtTime(1500, t0 + 0.7);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.07, t0 + 0.26); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.75);
+      s.connect(bp); bp.connect(g); g.connect(master); g.connect(wet);
+      s.start(t0, Math.random() * 0.2); s.stop(t0 + 0.8);
     },
     flap() {
       if (!live()) return;
@@ -130,7 +254,11 @@ export function createSound() {
       g.connect(wet);
       tone(1319, t0 + dur * 0.92, 1.4, 0.05); tone(1976, t0 + dur * 0.92, 0.9, 0.02);   // дзвін, коли ядро зупинилось
     },
-    silence() { if (ctx) { drone && drone.gain.setTargetAtTime(0, ctx.currentTime, 0.15); shim && shim.gain.setTargetAtTime(0, ctx.currentTime, 0.15); } },
+    silence() {
+      if (!ctx) return;
+      for (const v of [drone, shim, rumble]) if (v) v.gain.setTargetAtTime(0, ctx.currentTime, 0.15);
+      ringX = 0;
+    },
   };
   return api;
 }

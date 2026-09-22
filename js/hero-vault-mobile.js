@@ -220,13 +220,18 @@ function init() {
     sparks.visible = any;
     if (snd) soundDance(D);
   }
-  const heardJoin = new Uint8Array(joints.length), heardLand = new Uint8Array(joints.length);
+  const heardIn = new Uint8Array(joints.length), heardJoin = new Uint8Array(joints.length), heardLand = new Uint8Array(joints.length);
   function soundDance(D) {
-    if (introNow < DANCE.enter[0]) { heardJoin.fill(0); heardLand.fill(0); return; }
+    if (introNow < DANCE.enter[0]) { heardIn.fill(0); heardJoin.fill(0); heardLand.fill(0); snd.ring(0); return; }
+    let circling = 0;
     for (let k = 0; k < D.length; k++) {
-      if (!heardJoin[k] && D[k].reach >= 0.9) { heardJoin[k] = 1; snd.chime(k); }
-      if (!heardLand[k] && D[k].landed) { heardLand[k] = 1; snd.tick(); }
+      const d = D[k];
+      if (!heardIn[k] && d.reach > 0) { heardIn[k] = 1; snd.dotIn(k); }             // вилетіла з-за краю
+      if (!heardJoin[k] && d.reach >= 0.9) { heardJoin[k] = 1; snd.dotJoin(k); }    // стала в коло
+      if (!heardLand[k] && d.landed) { heardLand[k] = 1; snd.dotLand(k); }         // сіла на місце
+      if (d.reach >= 0.9 && !d.landed) circling++;
     }
+    snd.ring(circling / D.length);
   }
   const smoothstep01 = (x) => { const k = clamp01(x); return k * k * (3 - 2 * k); };
 
@@ -371,7 +376,7 @@ function init() {
     ledeShown = true;
     if (instant) lede.classList.add('vault-lede-now');
     lede.classList.add('vault-lede-in');
-    if (!instant && snd) snd.chime(2);                        // опис проявився — тихий дзвін
+    if (!instant && snd) snd.lede();                          // опис проявився — мʼякий «вууш»
   }
   /* висота «малого» вікна (з усіма панелями браузера): не змінюється, коли Safari ховає адресний рядок */
   const svhProbe = document.createElement('div');
