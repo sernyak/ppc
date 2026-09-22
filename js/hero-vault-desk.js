@@ -25,7 +25,7 @@
  * ?still=1 — один кадр, ?age=3 — стільки секунд «уже минуло» після вступу.
  */
 import * as THREE from 'three';
-import { figureFrame, figureProgress, getFrame as sceneFrame, introRelease, flapStart, restOrder, queueLaunch, danceFrame, DANCE, FIG_DANCE, kickFrame, FIG, clamp01, CFG } from './hero-vault-desk-frame.js';
+import { figureFrame, figureProgress, getFrame as sceneFrame, introRelease, REST_LEDE, flapStart, restOrder, queueLaunch, danceFrame, DANCE, FIG_DANCE, kickFrame, FIG, clamp01, CFG } from './hero-vault-desk-frame.js';
 
 const sceneEl = document.getElementById('vault-scene');
 const canvas = document.getElementById('vault-canvas');
@@ -264,8 +264,11 @@ function init() {
   /* у спокої поле тьмяне й сіре; від скролу розгоряється до яскравого — як у ранніх версіях */
   const TINT_REST = new THREE.Color(0x62728d), TINT_LIT = new THREE.Color(0xbcd3ff);
   /* у фото голограма не має заходити на ноутбук і монітор ліворуч від фігури: мʼяка межа, привʼязана до кадру фото
-     (у частках його ширини), тож на будь-якому екрані ліва частина кадру лишається чистою. (−2, −1) — без межі */
-  const MASK = { value: new THREE.Vector2(-2, -1) }, MASK_U = [0.63, 0.69];
+     (у частках його ширини), тож на будь-якому екрані ліва частина кадру лишається чистою. (−2, −1) — без межі.
+     У спокої напівпрозорі написи починаються від правого краю монітора (MASK_REST, прохання власника); коли скрол
+     розпалює голограму, межа плавно відходить до MASK_U — яскрава голограма не лягає на ноутбук. */
+  const MASK = { value: new THREE.Vector2(-2, -1) }, MASK_U = [0.63, 0.69], MASK_REST = [0.545, 0.585];
+  const maskPx = { rest: [-2, -1], lit: [-2, -1] };
   const wallMat = new THREE.ShaderMaterial({
     uniforms: {
       uAtlas: { value: blankTexture() }, uGrid: { value: blankData() }, uCell: { value: new THREE.Vector2(1, 1) }, uAt: { value: new THREE.Vector2(1, 1) },
@@ -806,8 +809,8 @@ function init() {
     setBaseCamera();
     outer.scale.setScalar(figScale);
     if (photo && photoEl) {
-      const P = photoRect(), pr = renderer.getPixelRatio();
-      MASK.value.set((P.x + MASK_U[0] * P.w) * pr, (P.x + MASK_U[1] * P.w) * pr);
+      const P = photoRect(), pr = renderer.getPixelRatio(), px = (u) => (P.x + u * P.w) * pr;
+      maskPx.rest = MASK_REST.map(px); maskPx.lit = MASK_U.map(px);
     }
     if (glowEl) {
       /* відблиск на стільниці: під фігурою, на висоті столу на фото; розмір — від висоти кадру */
@@ -926,8 +929,10 @@ function init() {
     if (photo) applyDance();
     placeLedeFrame();
     /* поле формул: у спокої тліє тьмяним сірим, від скролу розгоряється до яскравого */
-    const rest = introRelease(restSec);
+    const rest = photo ? introRelease(restSec, REST_LEDE) : introRelease(restSec);
     if (photo) {
+      const k = fS.fade;
+      MASK.value.set(maskPx.rest[0] + (maskPx.lit[0] - maskPx.rest[0]) * k, maskPx.rest[1] + (maskPx.lit[1] - maskPx.rest[1]) * k);
       const a = fS.orbit * WALL_FOLLOW;
       rotAround(wall.position.copy(wallC), cPos, a); wall.rotation.y = wallRot + a; wall.updateMatrixWorld();
       wallPlane.setFromNormalAndCoplanarPoint(tmpB.copy(wallN).applyAxisAngle(UP, a), wall.position);

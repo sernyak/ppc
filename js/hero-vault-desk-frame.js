@@ -111,10 +111,21 @@ export function getFrame(p, introT, cfg = CFG) {
   };
 }
 
-/** Рівні, які сцена тримає сама після вступу, без скролу (sinceIntro — секунд від кінця вступу). */
-export function introRelease(sinceIntro, cfg = CFG) {
-  const s = smooth(0, 1, clamp01(sinceIntro / cfg.rest.dur));
-  return { wall: cfg.rest.wall * s, cover: cfg.rest.cover * s };
+/**
+ * У фото поле формул у спокої проявляється РАЗОМ із першим реченням опису: те саме вікно, що й у табло, —
+ * від старту першої літери до посадки останньої (прохання власника: поява синхронна з текстом про мене).
+ */
+export const REST_LEDE = { ...CFG.rest, delay: CFG.flap.delay, dur: CFG.flap.spread + CFG.flap.jitter + CFG.flap.flips * CFG.flap.dur, easeOut: true };
+
+/**
+ * Рівні, які сцена тримає сама після вступу, без скролу (sinceIntro — секунд від кінця вступу).
+ * easeOut — швидкий старт: перші літери табло видно одразу, тож і написи мають займатися одразу, а не
+ * набирати хід третину вікна, як зі smoothstep.
+ */
+export function introRelease(sinceIntro, rest = CFG.rest) {
+  const x = clamp01((sinceIntro - (rest.delay || 0)) / rest.dur);
+  const s = rest.easeOut ? 1 - (1 - x) * (1 - x) : smooth(0, 1, x);
+  return { wall: rest.wall * s, cover: rest.cover * s };
 }
 
 /**

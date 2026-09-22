@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { FIG, CFG, DANCE, FIG_DANCE, danceFrame, danceSpeed, KICK, kickFrame, figureFrame, figureProgress, getFrame, introRelease, flapStart, flapDone, restOrder, queueLaunch, maxHold, clamp01, smooth } from './hero-vault-desk-frame.js';
+import { FIG, CFG, DANCE, FIG_DANCE, danceFrame, danceSpeed, KICK, kickFrame, figureFrame, figureProgress, getFrame, introRelease, REST_LEDE, flapStart, flapDone, restOrder, queueLaunch, maxHold, clamp01, smooth } from './hero-vault-desk-frame.js';
 
 const COUNTS = { joints: 24, inner: 36, outer: 24 };
 const near = (a, b, m) => assert.ok(Math.abs(a - b) < 1e-9, `${m}: ${a} ≠ ${b}`);
@@ -74,6 +74,17 @@ test('у спокої поле формул лише тліє й нароста�
   assert.ok(CFG.rest.wall <= 0.2, 'у спокої значно тьмяніше, ніж після скролу');
   let prev = 0;
   for (let i = 0; i <= 200; i++) { const v = introRelease(CFG.rest.dur * i / 200).wall; assert.ok(v >= prev && v - prev < 0.01); prev = v; }
+});
+
+test('фото: поле формул проявляється разом із першим реченням опису', () => {
+  const n = 70, first = flapStart(0, n, 0), done = flapDone();
+  assert.equal(introRelease(first - 0.01, REST_LEDE).wall, 0, 'до першої літери написів ще немає');
+  assert.ok(introRelease(first + 0.3, REST_LEDE).wall > 0, 'написи займаються разом із табло');
+  assert.ok(introRelease(done - 0.3, REST_LEDE).wall < REST_LEDE.wall, 'і ще наростають, поки табло складається');
+  near(introRelease(done, REST_LEDE).wall, REST_LEDE.wall, 'повні — коли сіла остання літера');
+  near(introRelease(done, REST_LEDE).cover, REST_LEDE.cover, 'хвиля дійшла до краю тоді ж');
+  let prev = 0;
+  for (let i = 0; i <= 400; i++) { const v = introRelease(done * i / 400, REST_LEDE).wall; assert.ok(v >= prev && v - prev < 0.01, 'без стрибків'); prev = v; }
 });
 
 test('табло: хвиля зліва направо, і вся фраза складається за кілька секунд', () => {
