@@ -130,6 +130,31 @@
             .vault-holo.vault-risen .vault-rise { transform: none; transition: transform var(--vault-rise-dur, 1s) cubic-bezier(.3,.1,.2,1), opacity .7s ease; }
             .vault-holo.vault-instant .vault-rise { transition: none; }
         }
+        /* варіант «фото»: шар знімка й відблиск на столі лежать у сцені ПІД полотном */
+        .vault-photo, .vault-deskglow { display: none; }
+        /* телефон: кадр лежить під фігурою, його розмір і місце ставить сцена; краї розчиняються в тло сторінки */
+        @media (max-width: 1023px) {
+            #vault-scene[data-variant="photo"] #vault-canvas { position: relative; }
+            /* текст — над фото й сценою (інакше абсолютний шар сцени лягає поверх заголовка й опису) */
+            #vault-hero .vault-rise, #vault-hero #vault-lede, #vault-hero .order-5 { position: relative; z-index: 1; }
+            .vault-photo { display: block; position: absolute; background: url(/ai/vault-bg-phone.webp) 0 0 / 100% 100% no-repeat;
+                -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 74%, transparent 97%);
+                        mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 74%, transparent 97%); }
+            .vault-deskglow { display: block; position: absolute; left: 0; top: 0; border-radius: 50%; pointer-events: none; opacity: 0;
+                background: radial-gradient(closest-side, rgba(120,178,255,.85), rgba(71,160,255,.32) 50%, rgba(71,160,255,0));
+                mix-blend-mode: screen; will-change: transform, opacity; }
+        }
+        @media (min-width: 1024px) {
+            #vault-scene[data-variant="photo"] #vault-canvas { position: relative; }   /* інакше абсолютний шар фото малювався б поверх полотна */
+            .vault-photo { display: block; position: absolute; left: -2%; top: -2%; width: 104%; height: 104%;
+                background: #0B0F19 url(/ai/vault-bg-desk.webp) 62% 50% / cover no-repeat; will-change: transform; }
+            /* темне поле ліворуч — під текстом, щоб яскраві монітори не заважали читати */
+            .vault-photo::after { content: ''; position: absolute; inset: 0;
+                background: linear-gradient(90deg, rgba(11,15,25,.92) 0%, rgba(11,15,25,.78) 30%, rgba(11,15,25,.32) 50%, rgba(11,15,25,0) 64%); }
+            .vault-deskglow { display: block; position: absolute; left: 0; top: 0; border-radius: 50%; pointer-events: none; opacity: 0;
+                background: radial-gradient(closest-side, rgba(120,178,255,.85), rgba(71,160,255,.32) 50%, rgba(71,160,255,0));
+                mix-blend-mode: screen; will-change: transform, opacity; }
+        }
         /* vault:end */
     </style>
     <!-- vault:head -->
@@ -139,6 +164,8 @@
         d.classList.add('vault-holo');
         setTimeout(function(){if(!d.classList.contains('vault-live'))d.classList.remove('vault-holo');},8000);
     }catch(e){}})();</script>
+    <link rel="preload" as="image" href="/ai/vault-bg-desk.webp" media="(min-width: 1024px)">
+    <link rel="preload" as="image" href="/ai/vault-bg-phone.webp" media="(max-width: 1023px)">
     <!-- /vault:head -->
 </head>
 
@@ -205,7 +232,9 @@
             <!-- місце під фігуру: сама сцена лежить фоном на весь екран, тут лише «вікно» в потоці тексту -->
             <div class="order-3 w-full h-[37vh] max-h-[330px] lg:hidden" aria-hidden="true"></div>
 
-            <div id="vault-scene" class="absolute inset-0 w-auto z-0 pointer-events-none lg:pointer-events-auto">
+            <div id="vault-scene" data-variant="photo" class="absolute inset-0 w-auto z-0 pointer-events-none lg:pointer-events-auto">
+                <div class="vault-photo" aria-hidden="true"></div>
+                <div class="vault-deskglow" aria-hidden="true"></div>
                 <canvas id="vault-canvas" role="img" aria-label="Металевий каркас-радіант: зі скролом розкривається, будує всередині ґратку, засвічується і розсипає світло, з якого складається текст поруч"></canvas>
             </div>
         </div>
