@@ -569,7 +569,11 @@ function init() {
     (function walk(node, bold) {
       for (const n of node.childNodes) {
         if (n.nodeType === 3) for (const wd of n.nodeValue.split(/\s+/)) { if (wd) ledeTokens.push({ w: wd, bold }); }
-        else if (n.nodeType === 1) walk(n, bold || n.tagName === 'STRONG');
+        else if (n.nodeType === 1) {
+          /* новий абзац розмітки — розрив і в табло (порожній токен без літер) */
+          if (n.tagName === 'P' && ledeTokens.length) ledeTokens.push({ w: '', bold, br: true });
+          walk(n, bold || n.tagName === 'STRONG');
+        }
       }
     })(lede, false);
     lede.classList.add('vault-lede-holo');
@@ -578,12 +582,12 @@ function init() {
   let autoLetters = 0;
   if (ledeTokens) {
     let c = 0;
-    for (const tk of ledeTokens) { c += tk.w.length; if (/[.!?]$/.test(tk.w)) { autoLetters = c; break; } }
+    for (const tk of ledeTokens) { if (tk.br) continue; c += tk.w.length; if (/[.!?]$/.test(tk.w)) { autoLetters = c; break; } }
   }
   const LCELL = 64, LFS = 42;
   function letterAtlas() {
     const set = [];
-    for (const tk of ledeTokens) for (const ch of tk.w) { const k = ch + (tk.bold ? '1' : '0'); if (!set.includes(k)) set.push(k); }
+    for (const tk of ledeTokens) for (const ch of tk.w) { const k = ch + (tk.bold ? '1' : '0'); if (!set.includes(k)) set.push(k); }   // br-токени порожні, літер не додають
     const cols = 16, rows = Math.ceil(set.length / cols);
     const c = document.createElement('canvas'); c.width = cols * LCELL; c.height = rows * LCELL;
     const g = c.getContext('2d');
@@ -608,6 +612,7 @@ function init() {
     const widthOf = (word, bold) => { let ww = 0; for (const ch of word) ww += (atlas.adv[ch + (bold ? '1' : '0')] || 0.3) * fsCss; return ww; };
     const sp = atlas.space * fsCss;
     for (const tk of ledeTokens) {
+      if (tk.br) { x = 0; y += lh * 1.5; continue; }                      // абзац: новий рядок і трохи повітря
       const tw = widthOf(tk.w, tk.bold);
       if (/^[,.;:!?»)\]]/.test(tk.w)) x -= sp;
       if (x > 0 && x + tw > boxW) { x = 0; y += lh; }
