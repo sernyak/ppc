@@ -156,6 +156,18 @@
                 background: radial-gradient(closest-side, rgba(120,178,255,.85), rgba(71,160,255,.32) 50%, rgba(71,160,255,0));
                 mix-blend-mode: screen; will-change: transform, opacity; }
         }
+        /* кнопка звуку: круглий динамік унизу праворуч, видно лише поки на екрані hero; ставить сцена */
+        .vault-sound { position: fixed; right: 20px; bottom: 20px; z-index: 45; width: 44px; height: 44px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; color: #cbd5e1; cursor: pointer;
+            background: rgba(21,28,44,.62); border: 1px solid rgba(255,255,255,.12); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+            opacity: 0; transform: translateY(6px); transition: opacity .5s ease, transform .5s ease, color .3s, border-color .3s, box-shadow .3s; }
+        .vault-sound.is-ready { opacity: 1; transform: none; }
+        .vault-sound.is-away { opacity: 0; pointer-events: none; }
+        .vault-sound:hover { color: #fff; border-color: rgba(255,255,255,.26); }
+        .vault-sound[aria-pressed="true"] { color: #93c5fd; border-color: rgba(59,130,246,.5); box-shadow: 0 0 18px rgba(59,130,246,.28); }
+        .vault-sound:focus-visible { outline: 2px solid #3B82F6; outline-offset: 3px; }
+        @media (max-width: 1023px) { .vault-sound { right: 16px; bottom: 18px; } }
+        @media (prefers-reduced-motion: reduce) { .vault-sound { display: none; } }
         /* vault:end */
     </style>
     <!-- vault:head -->
@@ -213,11 +225,12 @@
                 </h1>
 
                 <p id="vault-lede" class="order-4 text-lg text-slate-400 leading-relaxed">
-                    Мене звати <strong class="text-slate-200">Олександр Серняк</strong>, я займаюся маркетингом із 2016 року.
-                    Я не «роблю сайти» — я будую системи, які приймають гроші й доставляють результат без участі людини:
-                    від форми оплати й розрахунків до звіту, який сам приходить клієнту на пошту,
-                    і до Telegram-ботів, які спілкуються з клієнтами замість менеджера.
-                    Проєктування, код, деплой і підтримка — самостійно, з ШІ як інструментом розробки.
+                    Мене звати <strong class="text-slate-200">Олександр Серняк</strong>, я займаюся маркетингом із 2016 року
+                    і поєднав цей досвід із сучасними можливостями ШІ.
+                    За останній рік побудував низку автоматизованих систем — від Telegram-ботів, які самі спілкуються
+                    з клієнтами, до SaaS і вебсервісів із живими користувачами, прийомом оплат і повним автоматичним циклом.
+                    Автоматизую рутинні процеси й розробляю персональні рішення — вебсервіс або застосунок.
+                    Нижче мої напрацювання.
                 </p>
 
                 <div class="order-5 flex flex-wrap justify-center lg:justify-start gap-4 pt-2">
@@ -233,7 +246,7 @@
             <!-- місце під фігуру: сама сцена лежить фоном на весь екран, тут лише «вікно» в потоці тексту -->
             <div class="order-3 w-full h-[37vh] max-h-[330px] lg:hidden" aria-hidden="true"></div>
 
-            <div id="vault-scene" data-variant="photo" class="absolute inset-0 w-auto z-0 pointer-events-none lg:pointer-events-auto">
+            <div id="vault-scene" data-variant="photo" data-sound="1" class="absolute inset-0 w-auto z-0 pointer-events-none lg:pointer-events-auto">
                 <div class="vault-photo" aria-hidden="true"></div>
                 <div class="vault-deskglow" aria-hidden="true"></div>
                 <canvas id="vault-canvas" role="img" aria-label="Металевий каркас-радіант: зі скролом розкривається, будує всередині ґратку, засвічується і розсипає світло, з якого складається текст поруч"></canvas>

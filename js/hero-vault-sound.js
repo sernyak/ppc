@@ -10,9 +10,9 @@
  *   ring(x)    — поки крапки кружляють (x — частка крапок у колі): перекат металевих кульок;
  *   dotLand(i) — крапка сіла на місце: металевий «клак».
  * Що саме звучить, вирішує варіант — параметр адреси ?snd= (порівняння на слух на прев'ю):
- *   whoosh — лише проліт на вході (посадка — мʼякий «тік»);
+ *   whoosh — лише проліт на вході, посадка — мʼякий «тік» (за замовчуванням, вибір власника 2026-09-23);
  *   roll   — перекат кульок у колі й «клак» на посадці;
- *   mix    — усе разом: проліт, перекат і «клак» (за замовчуванням);
+ *   mix    — усе разом: проліт, перекат і «клак»;
  *   chime  — попередній кришталевий дзвін, для порівняння.
  * Решта голосів:
  *   lede()    — на телефоні проявився опис: мʼякий повітряний «вууш»;
@@ -23,7 +23,7 @@
  *   whoosh()  — оберт ядра від кліку: «вууш» і легкий дзвін наприкінці.
  */
 const KEY = 'vault-sound';
-const VARIANTS = ['mix', 'whoosh', 'roll', 'chime'];
+const VARIANTS = ['whoosh', 'mix', 'roll', 'chime'];
 
 export function createSound() {
   let ctx = null, master = null, wet = null, noiseBuf = null, drone = null, shim = null;
@@ -31,7 +31,7 @@ export function createSound() {
   let on = false, pres = 1, lastFlap = 0, lastIn = 0, lastClack = 0, ringX = 0, nextGrain = 0, ringIdle = 0;
   const LEVEL = 0.42;
   const want = (() => { try { return localStorage.getItem(KEY) === '1'; } catch (e) { return false; } })();
-  const variant = (() => { try { const v = new URLSearchParams(location.search).get('snd'); return VARIANTS.includes(v) ? v : 'mix'; } catch (e) { return 'mix'; } })();
+  const variant = (() => { try { const v = new URLSearchParams(location.search).get('snd'); return VARIANTS.includes(v) ? v : 'whoosh'; } catch (e) { return 'whoosh'; } })();
   const flies = variant === 'whoosh' || variant === 'mix', rolls = variant === 'roll' || variant === 'mix';
 
   /* пентатоніка від ля першої октави: крапки хороводу підіймаються по ній і на десятій повертаються вниз */
