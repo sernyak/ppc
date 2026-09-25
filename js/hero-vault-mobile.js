@@ -41,6 +41,20 @@ function init() {
     m.soundButton(snd, sceneEl.closest('section'), { onEnable: replayIntro });
   }).catch(() => { /* без звуку сторінка працює як завжди */ });
   const photoEl = photo ? sceneEl.querySelector('.vault-photo') : null;
+  /* фон проявляється лише тоді, коли кадр справді розкодовано: інакше видно стрибок «темний екран → фото».
+     Робимо це до створення рендерера — щоб фон зʼявився навіть там, де 3D не запуститься. */
+  if (photoEl) {
+    const bg = (getComputedStyle(photoEl).backgroundImage.match(/url\(["']?(.*?)["']?\)/) || [])[1];
+    const showPhoto = () => photoEl.classList.add('is-in');
+    if (bg) {
+      const im = new Image();
+      im.decoding = 'async'; im.src = bg;
+      (im.decode ? im.decode() : Promise.reject()).then(showPhoto).catch(() => {
+        if (im.complete) showPhoto(); else im.addEventListener('load', showPhoto, { once: true });
+      });
+      setTimeout(showPhoto, 2500);                            // мережа зовсім повільна — не тримаємо фон вічно прихованим
+    } else showPhoto();
+  }
   const glowEl = photo ? sceneEl.querySelector('.vault-deskglow') : null;
   const PHOTO = { w: 768, h: 1376, screens: 0.32, gap: 18, wide: 1.0, desk: 0.69 };   // screens — де в кадрі починаються монітори
   const INTRO_MS = photo ? DANCE.introMs : INTRO_MS;       // хоровод триває довше за звичайну появу

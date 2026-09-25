@@ -153,9 +153,16 @@
             #vault-scene[data-variant="photo"] #vault-canvas { position: relative; }
             /* текст — над фото й сценою (інакше абсолютний шар сцени лягає поверх заголовка й опису) */
             #vault-hero .vault-rise, #vault-hero #vault-lede, #vault-hero .order-5 { position: relative; z-index: 1; }
+            /* Фон проявляється, а не «вмикається»: доки кадр не завантажився, шар прозорий, а сцена додає
+               .is-in, коли картинка готова (див. hero-vault-mobile.js). Анімація-страховка виводить фон і
+               без скрипта — на 3-й секунді. */
             .vault-photo { display: block; position: absolute; background: url(/ai/vault-bg-phone.webp) 0 0 / 100% 100% no-repeat;
+                opacity: 0; animation: vaultPhotoSafe 1s ease 3s forwards;
                 -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 74%, transparent 97%);
                         mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 74%, transparent 97%); }
+            .vault-photo.is-in { opacity: 1; animation: none; transition: opacity 1s ease; }
+            @keyframes vaultPhotoSafe { to { opacity: 1; } }
+            @media (prefers-reduced-motion: reduce) { .vault-photo { opacity: 1; animation: none; } }
             .vault-deskglow { display: block; position: absolute; left: 0; top: 0; border-radius: 50%; pointer-events: none; opacity: 0;
                 background: radial-gradient(closest-side, rgba(120,178,255,.85), rgba(71,160,255,.32) 50%, rgba(71,160,255,0));
                 mix-blend-mode: screen; will-change: transform, opacity; }
