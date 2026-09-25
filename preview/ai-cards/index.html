@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Олександр Серняк | Що я будую за допомогою ШІ</title>
+    <title>Тест карток · Олександр Серняк | Що я будую за допомогою ШІ</title>
+    <meta name="robots" content="noindex, nofollow">
 
     <!-- SEO Meta Tags -->
     <meta name="description" content="Портфоліо AI-систем: астрологічний SaaS з оплатами, вебсервіс обліку фінансів із ШІ-імпортом виписок, аналітичний дашборд воронки з ШІ, аналіз дзвінків, Telegram-боти, автоматизація, мобільні застосунки та лендінги.">
     <link rel="canonical" href="https://ppcmarketing.pro/ai/" />
-    <meta name="robots" content="noindex, nofollow">
     <link rel="icon" href="/favicon.ico" sizes="32x32">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
@@ -156,19 +156,18 @@
             /* Фон проявляється, а не «вмикається»: доки кадр не завантажився, шар прозорий, а сцена додає
                .is-in, коли картинка готова (див. hero-vault-mobile.js). Анімація-страховка виводить фон і
                без скрипта — на 3-й секунді. */
-            .vault-photo { display: block; position: absolute; left: 0; top: 0; width: 100%; height: 100%;
-                opacity: .004; will-change: opacity; animation: vaultPhotoSafe 1s ease 3s forwards;
+            .vault-photo { display: block; position: absolute; background: url(/ai/vault-bg-phone.webp) 0 0 / 100% 100% no-repeat;
+                opacity: 0; animation: vaultPhotoSafe 1s ease 3s forwards;
                 -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 74%, transparent 97%);
                         mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 74%, transparent 97%); }
-            .vault-photo-src { display: block; width: 100%; height: 100%; }
-            .vault-holo.vault-hero-in.vault-scene-ok .vault-photo { opacity: 1; animation: none; transition: opacity 1s ease; }
+            .vault-holo.vault-hero-in .vault-photo, .vault-photo.is-in { opacity: 1; animation: none; transition: opacity 1s ease; }
             /* Текст першого екрана чекає на фото й виходить разом із ним однією хвилею (прохання власника
                25-09: раніше було «текст на темному тлі → бац, фото»). Гейт живе під .vault-holo, тобто лише
                там, де працює сцена; без скрипта напис видно одразу, а страховка виводить його на 3-й секунді. */
             .vault-holo #vault-hero .vault-rise, .vault-holo #vault-hero .order-5 {
-                opacity: 0; will-change: opacity; animation: vaultPhotoSafe 1s ease 3s forwards; }
-            .vault-holo.vault-hero-in.vault-scene-ok #vault-hero .vault-rise,
-            .vault-holo.vault-hero-in.vault-scene-ok #vault-hero .order-5 { opacity: 1; animation: none; transition: opacity 1s ease; }
+                opacity: 0; animation: vaultPhotoSafe 1s ease 3s forwards; }
+            .vault-holo.vault-hero-in #vault-hero .vault-rise, .vault-holo.vault-hero-in #vault-hero .order-5 {
+                opacity: 1; animation: none; transition: opacity 1s ease; }
             @keyframes vaultPhotoSafe { to { opacity: 1; } }
             @media (prefers-reduced-motion: reduce) { .vault-photo { opacity: 1; animation: none; } }
             .vault-deskglow { display: block; position: absolute; left: 0; top: 0; border-radius: 50%; pointer-events: none; opacity: 0;
@@ -177,9 +176,8 @@
         }
         @media (min-width: 1024px) {
             #vault-scene[data-variant="photo"] #vault-canvas { position: relative; }   /* інакше абсолютний шар фото малювався б поверх полотна */
-            .vault-photo { display: block; position: absolute; left: -2%; top: -2%; width: 104%; height: 104%; opacity: 1; animation: none;
+            .vault-photo { display: block; position: absolute; left: -2%; top: -2%; width: 104%; height: 104%;
                 background: #0B0F19 url(/ai/vault-bg-desk.webp) 62% 50% / cover no-repeat; will-change: transform; }
-            .vault-photo-src { display: none; }
             /* темне поле ліворуч — під текстом, щоб яскраві монітори не заважали читати */
             .vault-photo::after { content: ''; position: absolute; inset: 0;
                 background: linear-gradient(90deg, rgba(11,15,25,.92) 0%, rgba(11,15,25,.78) 30%, rgba(11,15,25,.32) 50%, rgba(11,15,25,0) 64%); }
@@ -200,22 +198,6 @@
         @media (max-width: 1023px) { .vault-sound { right: 16px; bottom: 18px; } }
         @media (prefers-reduced-motion: reduce) { .vault-sound { display: none; } }
         /* vault:end */
-        /* ---- прев’ю фону: bg-glow ---- */
-        body { background-color: #0B0F19;
-            background-image: linear-gradient(180deg, #0B0F19 0%, #0D1322 26%, #101829 52%, #0C1120 78%, #090C15 100%);
-            background-repeat: no-repeat; background-size: 100% 100%; }
-        .bg-vignette { position: fixed; inset: 0; z-index: -2; pointer-events: none;
-            background: radial-gradient(125% 85% at 50% 45%, rgba(0,0,0,0) 42%, rgba(0,0,0,.5) 100%); }
-        #projects, #how { position: relative; overflow: hidden; }   /* плями не повинні розтягувати сторінку вбік */
-        #projects::before, #projects::after, #how::before { content: ''; position: absolute; pointer-events: none; z-index: 0;
-            width: min(760px, 78vw); height: min(760px, 78vw); border-radius: 50%; filter: blur(40px); }
-        #projects::before { left: -22%; top: 4%;
-            background: radial-gradient(closest-side, rgba(59,130,246,.13), rgba(59,130,246,0) 72%); }
-        #projects::after { right: -26%; top: 52%;
-            background: radial-gradient(closest-side, rgba(139,92,246,.11), rgba(139,92,246,0) 72%); }
-        #how::before { left: 8%; top: -30%;
-            background: radial-gradient(closest-side, rgba(45,212,191,.10), rgba(45,212,191,0) 72%); }
-        #projects > *, #how > * { position: relative; z-index: 1; }
     </style>
     <!-- vault:head -->
     <link rel="modulepreload" href="/js/vendor/three.module.min.js">
@@ -226,21 +208,32 @@
         /* телефон: фон і текст першого екрана виходять однією хвилею, щойно кадр розкодовано. Робимо це тут,
            а не в модулі сцени: поки сцена будується, головний потік зайнятий, і клас чекав би до 3 с. */
         if(!matchMedia('(max-width: 1023px)').matches)return;
-        var go=function(){d.classList.add('vault-hero-in');};
-        var ready=function(el){if(el.decode)el.decode().then(go,go);else go();};
-        var arm=function(){var el=document.querySelector('.vault-photo-src');
-            if(!el){setTimeout(arm,40);return;}
-            if(el.complete&&el.naturalWidth)ready(el);else el.addEventListener('load',function(){ready(el);},{once:true});};
-        arm();setTimeout(function(){go();d.classList.add('vault-scene-ok');},1800);
+        var go=function(){d.classList.add('vault-hero-in');},i=new Image();
+        i.decoding='async';i.src='/ai/vault-bg-phone.webp';
+        if(i.decode)i.decode().then(go,go);else if(i.complete)go();else i.addEventListener('load',go,{once:true});
+        setTimeout(go,1500);
     }catch(e){}})();</script>
     <link rel="preload" as="image" href="/ai/vault-bg-desk.webp" media="(min-width: 1024px)">
     <link rel="preload" as="image" href="/ai/vault-bg-phone.webp" media="(max-width: 1023px)">
     <!-- /vault:head -->
+<style>
+        /* Тестовий варіант: розмітка змін у картках */
+        mark.chg { background: transparent; color: inherit; }
+        .chg-del { display: none; }
+        .chg-new-flag { display: none; }
+        .show-chg mark.chg { background: rgba(250, 204, 21, 0.14); box-shadow: inset 0 -2px 0 rgba(250, 204, 21, 0.55); color: #fef3c7; border-radius: 3px; padding: 0 2px; }
+        .show-chg del.chg-del { display: inline; color: #fca5a5; text-decoration: line-through; text-decoration-color: rgba(248, 113, 113, 0.8); opacity: 0.75; margin-left: 0.3em; }
+        .show-chg .chg-del-tag { display: inline-block; text-decoration: line-through; color: #fca5a5; border-color: rgba(248, 113, 113, 0.35); opacity: 0.7; }
+        .show-chg .chg-tag { border-color: rgba(250, 204, 21, 0.6); color: #fde68a; }
+        .show-chg article.chg-new { outline: 1px dashed rgba(250, 204, 21, 0.55); outline-offset: 4px; position: relative; }
+        .show-chg article.chg-new::before { content: 'НОВЕ'; position: absolute; top: -10px; right: 18px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #1a1400; background: #facc15; padding: 2px 8px; border-radius: 999px; }
+        .show-chg header.chg-new h3 mark.chg { box-shadow: inset 0 -3px 0 rgba(250, 204, 21, 0.55); }
+        #chg-panel { position: fixed; left: 16px; bottom: 16px; z-index: 70; max-width: calc(100vw - 32px); }
+        @media (max-width: 639px) { #chg-panel { left: 8px; bottom: 8px; padding: 8px 10px; } #chg-panel .chg-legend, #chg-panel .chg-title { display: none; } }
+    </style>
 </head>
 
-<!-- фон: bg-glow -->
 <body class="antialiased selection:bg-brand-accent selection:text-white">
-    <div class="bg-vignette" aria-hidden="true"></div>
     <script>document.documentElement.classList.add('js');</script>
 
     <!-- Background Effects -->
@@ -275,7 +268,7 @@
             <div class="contents lg:block lg:relative lg:z-[2] lg:max-w-[600px] lg:space-y-8 lg:animate-fade-in-up">
                 <div class="vault-rise order-1 justify-self-center lg:justify-self-start inline-flex items-center space-x-2 px-3 py-1 rounded-full glass-card border border-brand-accent/30 text-sm font-medium text-blue-400">
                     <span class="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></span>
-                    <span>14 побудованих систем</span>
+                    <span><mark class="chg">14 побудованих систем</mark><del class="chg-del">11 побудованих систем</del></span>
                 </div>
 
                 <h1 class="vault-rise order-2 text-center lg:text-left text-4xl md:text-6xl font-bold leading-tight tracking-tight">
@@ -312,7 +305,7 @@
             <div class="order-3 w-full h-[37vh] max-h-[330px] lg:hidden" aria-hidden="true"></div>
 
             <div id="vault-scene" data-variant="photo" data-sound="1" class="absolute inset-0 w-auto z-0 pointer-events-none lg:pointer-events-auto">
-                <div class="vault-photo" aria-hidden="true"><img class="vault-photo-src" src="/ai/vault-bg-phone.webp" alt="" decoding="async" fetchpriority="high" width="768" height="1376"></div>
+                <div class="vault-photo" aria-hidden="true"></div>
                 <div class="vault-deskglow" aria-hidden="true"></div>
                 <canvas id="vault-canvas" role="img" aria-label="Металевий каркас-радіант: зі скролом розкривається, будує всередині ґратку, засвічується і розсипає світло, з якого складається текст поруч"></canvas>
             </div>
@@ -325,7 +318,7 @@
         <div class="max-w-6xl mx-auto">
             <div class="mb-12 md:mb-16 reveal">
                 <h2 class="text-sm font-semibold text-brand-accent tracking-widest uppercase mb-3">Проєкти</h2>
-                <h3 class="text-3xl md:text-4xl font-bold">Чотирнадцять систем, які я побудував</h3>
+                <h3 class="text-3xl md:text-4xl font-bold"><mark class="chg">Чотирнадцять систем</mark><del class="chg-del">Одинадцять систем</del>, які я побудував</h3>
                 <p class="mt-4 text-slate-400 max-w-2xl">
                     Для кожної — що це, на чому зроблено і чи є що показати просто зараз.
                     Частина проєктів закрита автентифікацією або містить дані клієнтів, тому там чесно написано «демо за запитом».
@@ -355,14 +348,20 @@
                             ШІ пише персональний звіт, PDF формується й приходить на пошту.
                             Оплата — через Monobank Acquiring, зі збереженими картками й автоматичними поверненнями.
                         </p>
+                        <p class="text-slate-400 leading-relaxed mb-4">
+                            <mark class="chg">Під оплаченим звітом — чат-астролог, який знає контекст замовлення. Кожен ШІ-текст проходить
+                            автоматичну перевірку й ремонт: дати, транзити, звертання, зламані розділи. Вимикач білінгу зупиняє
+                            витрати, якщо рахунок перевищує стелю. Є англомовна версія.</mark>
+                        </p>
                         <p class="text-slate-300 text-sm mb-6">
-                            Сервіс <strong class="text-white">у робочому стані</strong>: приймає оплати, генерує звіти, робить&nbsp;розсилку.
+                            Сервіс <strong class="text-white">у робочому стані</strong>: приймає оплати, генерує звіти, <mark class="chg">надсилає їх поштою й у&nbsp;Telegram</mark><del class="chg-del">робить&nbsp;розсилку</del>.
                         </p>
                     </div>
                     <div class="md:w-72 md:shrink-0">
                         <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-3">Технології</p>
                         <div class="flex flex-wrap gap-2">
-                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Cloud Functions (Node 22, 23 функції)</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-tag">Firebase Cloud Functions (Node 24, 33 функції)</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-del chg-del-tag">Firebase Cloud Functions (Node 22, 23 функції)</span>
                             <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Vertex AI / Gemini з каскадом резервних моделей</span>
                             <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firestore</span>
                             <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Puppeteer (PDF)</span>
@@ -370,18 +369,17 @@
                             <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">2 Telegram-боти</span>
                             <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Meta CAPI</span>
                             <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Cloud Tasks + Cloud Scheduler</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-tag">Дашборд еквайрингу monobank (React, TypeScript)</span>
                         </div>
                     </div>
                 </div>
-                <div class="mb-6">
-                    <img src="/ai/shots/destinycode.webp" alt="Головна сторінка destinycode.online: форма з даними народження, з якої починається розрахунок карти й генерація звіту"
-                         width="1200" height="726" loading="lazy" decoding="async"
-                         class="w-full h-auto rounded-xl border border-white/10 shadow-lg shadow-black/40">
-                </div>
-                <div class="pt-6 mt-2 border-t border-white/10">
+                <div class="pt-6 mt-2 border-t border-white/10 flex flex-col sm:flex-row sm:items-center gap-x-8 gap-y-4">
                     <a href="https://destinycode.online" target="_blank" rel="noopener" class="flex w-full sm:inline-flex sm:w-auto items-center justify-center text-center px-3 sm:px-7 py-3.5 text-sm sm:text-base bg-purple-500 hover:bg-purple-400 text-white font-semibold rounded-lg transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] cursor-pointer">
                         Відкрити destinycode.online
                         <svg class="w-4 h-4 ml-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+                    <a href="https://destinykey-1010.web.app" target="_blank" rel="noopener" class="inline-flex items-center justify-center sm:justify-start text-sm font-medium text-slate-400 hover:text-slate-200 transition-colors cursor-pointer">
+                        <mark class="chg">Той самий рушій під другу нішу — Destiny Key</mark>
                     </a>
                 </div>
             </article>
@@ -398,13 +396,14 @@
                         </div>
                         <h4 class="text-2xl md:text-3xl font-bold mb-4">commandfinance.online — вебсервіс обліку особистих фінансів</h4>
                         <p class="text-slate-400 leading-relaxed mb-4">
-                            Продукт, а не функція: рахунки, категорії, планування бюджету, борги, статистика й фінансові цілі.
-                            Занесення витрат автоматизоване за допомогою ШІ: достатньо завантажити виписку з банку у PDF, XLSX,
-                            DOCX чи CSV — і вона перетвориться на структуровані транзакції.
+                            Продукт, а не функція: рахунки, категорії, планування бюджету, борги, статистика й <mark class="chg">цілі накопичення</mark><del class="chg-del">фінансові цілі</del>.
+                            Занесення витрат автоматизоване за допомогою ШІ: достатньо завантажити виписку з банку у <mark class="chg">PDF, XLSX, XLS,
+                            DOCX, CSV, TSV чи TXT</mark><del class="chg-del">PDF, XLSX, DOCX чи CSV</del> — і вона перетвориться на структуровані транзакції.
                         </p>
                         <p class="text-slate-300 text-sm mb-6">
-                            Із виявленням дублікатів, зшиванням переказів між власними рахунками, точною грошовою
-                            арифметикою без похибок округлення і синхронізацією з Google Sheets.
+                            Із виявленням дублікатів, зшиванням переказів між власними рахунками і точною грошовою
+                            арифметикою без похибок округлення<del class="chg-del"> і синхронізацією з Google Sheets</del>. <mark class="chg">Кілька валют із курсом Monobank, що
+                            оновлюється щогодини, автоматичні накопичення «Скарбничка» і скасування цілого імпорту з відкатом балансів.</mark>
                         </p>
 
                         <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-3">Технології</p>
@@ -415,13 +414,19 @@
                             <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Cloud Functions</span>
                             <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Vertex AI / Gemini зі структурованою схемою відповіді</span>
                             <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">pdf.js</span>
-                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">тести на грошову логіку</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-tag">448 тестів на грошову логіку</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-del chg-del-tag">тести на грошову логіку</span>
                         </div>
 
-                        <a href="https://commandfinance.online" target="_blank" rel="noopener" class="flex w-full sm:inline-flex sm:w-auto items-center justify-center text-center px-3 sm:px-7 py-3.5 text-sm sm:text-base bg-brand-accent hover:bg-blue-500 text-white font-semibold rounded-lg transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] cursor-pointer">
-                            Відкрити commandfinance.online
-                            <svg class="w-4 h-4 ml-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                        </a>
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-x-8 gap-y-4">
+                            <a href="https://commandfinance.online" target="_blank" rel="noopener" class="flex w-full sm:inline-flex sm:w-auto items-center justify-center text-center px-3 sm:px-7 py-3.5 text-sm sm:text-base bg-brand-accent hover:bg-blue-500 text-white font-semibold rounded-lg transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] cursor-pointer">
+                                Відкрити commandfinance.online
+                                <svg class="w-4 h-4 ml-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </a>
+                            <a href="https://commandfinance.online/demo" target="_blank" rel="noopener" class="inline-flex items-center justify-center sm:justify-start text-sm font-medium text-slate-400 hover:text-slate-200 transition-colors cursor-pointer">
+                                <mark class="chg">Одразу в демо — без реєстрації</mark>
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Головний екран продукту -->
@@ -446,11 +451,12 @@
                         </div>
                         <span class="inline-block text-[11px] font-semibold text-teal-400 bg-teal-500/10 px-2.5 py-0.5 rounded-full">Демо з тестовими даними</span>
                     </div>
-                    <h4 class="text-xl font-bold mb-3">Аналітичний дашборд воронки з ШІ-співрозмовником</h4>
+                    <h4 class="text-xl font-bold mb-3">Аналітичний дашборд воронки <mark class="chg">Meta Ads</mark><del class="chg-del">з ШІ-співрозмовником</del></h4>
                     <p class="text-slate-400 text-sm leading-relaxed mb-5">
                         Дашборд моделювання маркетингової воронки: підтягує дані з Meta Ads і рахує сценарії —
-                        що станеться з виручкою, якщо змінити бюджет або конверсію на конкретному кроці.
-                        Замість таблиці з цифрами власник бачить, де саме рветься ланцюжок і скільки це коштує.
+                        що станеться з виручкою, якщо змінити бюджет, <mark class="chg">CPM, середній чек</mark> або конверсію на конкретному кроці.
+                        Замість таблиці з цифрами власник бачить, де саме рветься ланцюжок<mark class="chg">, і скільки покупок і виручки
+                        додасть його виправлення за той самий бюджет</mark><del class="chg-del"> і скільки це коштує</del>.
                         За посиланням — спеціально зібрана демо-версія з вигаданими даними.
                     </p>
                     <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
@@ -462,7 +468,7 @@
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Recharts</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Meta Marketing API</span>
-                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Gemini</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-del chg-del-tag">Gemini</span>
                     </div>
                     <div class="mt-auto pt-5 border-t border-white/10">
                         <a href="https://destinycode-analytics-demo.web.app" target="_blank" rel="noopener" class="inline-flex items-center text-sm font-semibold text-teal-400 hover:text-teal-300 transition-colors cursor-pointer">
@@ -483,25 +489,24 @@
                     </div>
                     <h4 class="text-xl font-bold mb-3">AI Call Intelligence — аналіз дзвінків відділу продажів</h4>
                     <p class="text-slate-400 text-sm leading-relaxed mb-4">
-                        Запис дзвінка перетворюється на транскрипцію з розділенням спікерів, а далі — на резюме для керівника,
-                        список дій, оцінку настрою клієнта, скоринг ліда від 1 до 10 і автозаповнену CRM-картку.
-                        Керівник не переслуховує години розмов, а читає структуровану вижимку.
+                        Запис дзвінка перетворюється на транскрипцію з розділенням спікерів<mark class="chg"> — ШІ сам визначає, хто менеджер,
+                        а хто клієнт</mark>, а далі — на резюме для керівника, список дій, оцінку настрою клієнта, скоринг ліда від 1 до 10
+                        і автозаповнену CRM-картку. Керівник не переслуховує години розмов, а читає структуровану вижимку.
                     </p>
                     <p class="text-slate-300 text-sm mb-5">
-                        Обробка 100 дзвінків по 5 хвилин коштує близько <strong class="text-white">$3,5 на місяць</strong> — це перевірена оцінка з проєкту.
+                        <mark class="chg">Приймає й текстові записи розмов (TXT, PDF, DOCX) — тоді аналіз іде одразу, без розпізнавання мови.
+                        Усі дзвінки лягають у базу з CRM-панеллю.</mark>
+                        <del class="chg-del">Обробка 100 дзвінків по 5 хвилин коштує близько $3,5 на місяць — це перевірена оцінка з проєкту.</del>
                     </p>
                     <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
                     <div class="flex flex-wrap gap-2 mb-6">
-                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Google Cloud Speech-to-Text v2</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-tag">Google Cloud Speech-to-Text</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-del chg-del-tag">Google Cloud Speech-to-Text v2</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Gemini на Vertex AI зі структурованим виводом</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Functions</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Storage</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firestore</span>
-                    </div>
-                    <div class="mb-6">
-                        <img src="/ai/shots/callintel.webp" alt="Демо аналізу дзвінка: настрій клієнта, скоринг ліда, список дій і автозаповнена CRM-картка"
-                             width="1200" height="899" loading="lazy" decoding="async"
-                             class="w-full h-auto rounded-xl border border-white/10 shadow-lg shadow-black/40">
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-tag">ffmpeg</span>
                     </div>
                     <div class="mt-auto pt-5 border-t border-white/10 flex flex-wrap gap-x-6 gap-y-2">
                         <a href="https://automation-0105.web.app/" target="_blank" rel="noopener" class="inline-flex items-center text-sm font-semibold text-green-400 hover:text-green-300 transition-colors cursor-pointer">
@@ -540,12 +545,13 @@
                     <p class="text-slate-400 text-sm leading-relaxed mb-4">
                         Два боти працюють всередині DestinyCode. Перший — бот підтримки: відповідає клієнтам через ШІ,
                         тримає контекст діалогу між повідомленнями, обмежує частоту запитів на користувача,
-                        ескалює складні звернення до адміністратора, а планувальник закриває залишені сесії.
-                        Другий — бот доставки: видає клієнтці куплений звіт, оформлює підписку й надсилає бонусні матеріали.
+                        ескалює складні звернення до адміністратора, а планувальник <mark class="chg">нагадує про себе після 15 хвилин тиші
+                        й закриває сесію з підсумком</mark><del class="chg-del">закриває залишені сесії</del>.
+                        Другий — бот доставки: видає клієнтці куплений звіт, <mark class="chg">сповіщає, щойно новий звіт готовий,</mark><del class="chg-del">оформлює підписку</del> і надсилає бонусні матеріали.
                     </p>
                     <p class="text-slate-400 text-sm leading-relaxed mb-5">
-                        Під капотом: перевірка підпису вебхука, захист від повторних запитів, збереження історії діалогу
-                        й окремий ендпоінт логів для розбору інцидентів.
+                        Під капотом: <mark class="chg">перевірка секретного токена вебхука, ліміти спроб на службових ендпоінтах</mark><del class="chg-del">перевірка підпису вебхука, захист від повторних запитів</del>,
+                        збереження історії діалогу й окремий ендпоінт логів для розбору інцидентів.
                     </p>
                     <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
                     <div class="flex flex-wrap gap-2 mb-6">
@@ -574,10 +580,10 @@
                     </div>
                     <h4 class="text-xl font-bold mb-3">Агент пошуку клієнтів на Reddit</h4>
                     <p class="text-slate-400 text-sm leading-relaxed mb-5">
-                        Автономний агент: кожні 12 годин переглядає чотири тематичні спільноти Reddit і шукає пости,
-                        де людина описує проблему, яку вирішує продукт. ШІ пише чернетку корисної відповіді,
-                        і все це лягає в дашборд, де людина лише схвалює або відхиляє.
-                        Один і той самий пост повторно не обробляється.
+                        Автономний агент: кожні 12 годин переглядає чотири тематичні спільноти Reddit і <mark class="chg">відбирає свіжі пости
+                        за ключовими словами теми</mark><del class="chg-del">шукає пости, де людина описує проблему, яку вирішує продукт</del>. ШІ пише чернетку корисної відповіді<mark class="chg"> — у промпті перелік
+                        реальних функцій продукту й пряма заборона вигадувати інші</mark>. Усе лягає в дашборд, де людина <mark class="chg">редагує чернетку,</mark>
+                        схвалює або відхиляє. Один і той самий пост повторно не обробляється.
                     </p>
                     <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
                     <div class="flex flex-wrap gap-2 mb-6">
@@ -586,11 +592,6 @@
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Gemini</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">React</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firestore</span>
-                    </div>
-                    <div class="mb-6">
-                        <img src="/ai/shots/sbtagent.webp" alt="Дашборд агента: знайдені пости Reddit і чернетки відповідей, які людина схвалює або відхиляє"
-                             width="1200" height="855" loading="lazy" decoding="async"
-                             class="w-full h-auto rounded-xl border border-white/10 shadow-lg shadow-black/40">
                     </div>
                     <div class="mt-auto pt-5 border-t border-white/10 flex flex-wrap gap-x-6 gap-y-2">
                         <a href="https://sbt-growth-agent.web.app/" target="_blank" rel="noopener" class="inline-flex items-center text-sm font-semibold text-orange-400 hover:text-orange-300 transition-colors cursor-pointer">
@@ -613,8 +614,10 @@
                     </div>
                     <h4 class="text-xl font-bold mb-3">Генератор контенту в стилі конкретного автора</h4>
                     <p class="text-slate-400 text-sm leading-relaxed mb-5">
-                        Система вчиться на архіві текстів експерта: розбирає стиль за 11 вимірами й тримає корпус реальних постів,
-                        а потім пише нові тексти в його манері, а не «нейтральним ШІ-тоном».
+                        <mark class="chg">Стиль експерта розібрано за 11 вимірами — ритм, лексикон, зачини, кінцівки, риторичні фігури тощо —
+                        на 50 постах із корпусу в 96. Генератор отримує ці правила й реальні пости як приклади</mark><del class="chg-del">Система вчиться на архіві текстів експерта: розбирає стиль за 11 вимірами й тримає корпус реальних постів,
+                        а потім</del> і пише нові тексти в його манері, а не «нейтральним ШІ-тоном».
+                        <mark class="chg">Пост можна доопрацювати зауваженням, а бібліотека веде статуси: чернетка, затверджено, опубліковано.</mark>
                         Обгорнуто в мобільний застосунок, щоб експерт генерував пости просто з телефона.
                     </p>
                     <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
@@ -630,7 +633,7 @@
                     <div class="mt-auto pt-5 border-t border-white/10">
                         <span class="inline-flex items-start text-sm font-medium text-slate-500">
                             <svg class="w-4 h-4 mr-1.5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                            Демо за запитом — застосунок за автентифікацією
+                            Демо за запитом<del class="chg-del"> — застосунок за автентифікацією</del>
                         </span>
                     </div>
                 </article>
@@ -645,9 +648,10 @@
                     </div>
                     <h4 class="text-xl font-bold mb-3">Автоматична публікація в Instagram за календарем</h4>
                     <p class="text-slate-400 text-sm leading-relaxed mb-5">
-                        Конвеєр без ручної роботи: контент-календар ведеться в Notion, зображення генерує ШІ, а публікатор
+                        Конвеєр<del class="chg-del"> без ручної роботи</del>: контент-календар ведеться в Notion, зображення <mark class="chg">заздалегідь</mark> генерує ШІ, а публікатор
                         у GitHub Actions за розкладом викладає в Instagram карусель і серію сторіс через офіційний API
-                        й повертає статус публікації назад у Notion. Людина лише наповнює й схвалює календар.
+                        й повертає статус публікації назад у Notion. <mark class="chg">Від дублів захищає потрійна звірка, а перед кожною
+                        публікацією бот перевіряє кадри, довжину підпису й термін дії токена.</mark> Людина лише наповнює й схвалює календар.
                     </p>
                     <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
                     <div class="flex flex-wrap gap-2 mb-6">
@@ -655,8 +659,10 @@
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Notion API</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Instagram Graph API</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">GitHub Actions</span>
-                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Gemini на Vertex AI для зображень</span>
-                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Hosting</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-tag">Gemini для зображень</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-del chg-del-tag">Gemini на Vertex AI для зображень</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-tag">Firebase Hosting для кадрів</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-del chg-del-tag">Firebase Hosting</span>
                     </div>
                     <div class="mt-auto pt-5 border-t border-white/10">
                         <span class="inline-flex items-start text-sm font-medium text-slate-500">
@@ -685,25 +691,26 @@
                         </p>
                         <p class="text-slate-400 text-sm leading-relaxed mb-4">
                             Критерії система бере прямо з документа з вимогами. Можна знайти бізнеси, що вже платять за рекламу,
-                            або нові компанії без сайту, оцінити нішу в місті чи порівняти кілька ніш між собою.
+                            або нові компанії без сайту<del class="chg-del">, оцінити нішу в місті чи порівняти кілька ніш між собою</del>.
+                            <mark class="chg">Дані звіряє з державними реєстрами: з ЄДР — дату реєстрації й керівника, з Prozorro — виграні тендери
+                            як доказ платоспроможності; перевіряє, що знайдений сайт справді належить компанії.</mark>
                             На виході — список компаній з обґрунтуванням для кожної: звіт, CSV або Markdown.
                         </p>
                     </div>
                     <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
                     <div class="flex flex-wrap gap-2 mb-6">
-                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Node.js (ESM), без залежностей у конвеєрі</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-tag">Node.js (ESM)</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-del chg-del-tag">Node.js (ESM), без залежностей у конвеєрі</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Google Places API (New)</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Overpass / OpenStreetMap</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Розпакування GTM-контейнера</span>
-                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Регулярні вирази замість ML</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-tag">Регулярні вирази для сигнатур трекерів</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-del chg-del-tag">Регулярні вирази замість ML</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Gemini на Vertex AI: документ із вимогами → план пошуку</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-tag">ЄДР: потокове читання 3,2 ГБ XML</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-tag">Prozorro</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">JSON · CSV · Markdown</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Hosting</span>
-                    </div>
-                    <div class="mb-6">
-                        <img src="/ai/shots/leadhunter.webp" alt="Демо Lead Hunter: вимоги замовника на вході й картка кваліфікованої компанії з обґрунтуванням на виході"
-                             width="1200" height="525" loading="lazy" decoding="async"
-                             class="w-full h-auto rounded-xl border border-white/10 shadow-lg shadow-black/40">
                     </div>
                     <div class="mt-auto pt-5 border-t border-white/10 flex flex-wrap gap-x-6 gap-y-2">
                         <a href="https://lead-hunter-10.web.app/" target="_blank" rel="noopener" class="inline-flex items-center text-sm font-semibold text-rose-400 hover:text-rose-300 transition-colors cursor-pointer">
@@ -718,20 +725,19 @@
 
             </div>
 
-            <!-- ГРУПА 3 — Навчальні платформи -->
-            <header class="mt-16 mb-6 reveal">
+            <!-- ГРУПА НОВА — Навчальні платформи -->
+            <header class="mt-16 mb-6 reveal chg-new">
                 <div class="flex items-center gap-4">
-                    <h3 class="text-xl md:text-2xl font-bold">Навчальні платформи</h3>
+                    <h3 class="text-xl md:text-2xl font-bold"><mark class="chg">Навчальні платформи</mark></h3>
                     <span class="h-px flex-1 bg-white/10"></span>
                 </div>
-                <p class="text-slate-500 text-sm mt-2">Курси з практикою просто в браузері: без встановлення й без реєстрації.</p>
+                <p class="text-slate-500 text-sm mt-2"><mark class="chg">Курси з практикою просто в браузері: без встановлення й без реєстрації.</mark></p>
             </header>
 
-            <!-- 10–11 -->
             <div class="grid md:grid-cols-2 gap-6">
 
                 <!-- 10 — Agent Hub -->
-                <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal">
+                <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal chg-new">
                     <div class="flex items-center gap-3 mb-4">
                         <span class="text-sm font-bold text-violet-400">10</span>
                         <div class="w-9 h-9 bg-violet-500/10 rounded-lg flex items-center justify-center text-violet-400">
@@ -759,11 +765,6 @@
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">інтервальне повторення SM-2</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">синхронізація прогресу без акаунта</span>
                     </div>
-                    <div class="mb-6">
-                        <img src="/ai/shots/agenthub.webp" alt="Курс Agent Hub: інтерфейс із уроками про розробку ШІ-агентів"
-                             width="1200" height="708" loading="lazy" decoding="async"
-                             class="w-full h-auto rounded-xl border border-white/10 shadow-lg shadow-black/40">
-                    </div>
                     <div class="mt-auto pt-5 border-t border-white/10">
                         <a href="https://agent-hub-course.web.app" target="_blank" rel="noopener" class="inline-flex items-center text-sm font-semibold text-violet-400 hover:text-violet-300 transition-colors cursor-pointer">
                             Відкрити курс
@@ -773,7 +774,7 @@
                 </article>
 
                 <!-- 11 — SQL course -->
-                <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal">
+                <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal chg-new">
                     <div class="flex items-center gap-3 mb-4">
                         <span class="text-sm font-bold text-cyan-400">11</span>
                         <div class="w-9 h-9 bg-cyan-500/10 rounded-lg flex items-center justify-center text-cyan-400">
@@ -811,7 +812,7 @@
 
             </div>
 
-            <!-- ГРУПА 4 -->
+            <!-- ГРУПА 3 -->
             <header class="mt-16 mb-6 reveal">
                 <div class="flex items-center gap-4">
                     <h3 class="text-xl md:text-2xl font-bold">Застосунки</h3>
@@ -834,12 +835,12 @@
                     <h4 class="text-xl font-bold mb-3">ShadowBoxing Timer — застосунок для iOS</h4>
                     <p class="text-slate-400 text-sm leading-relaxed mb-4">
                         Таймер інтервальних тренувань для боксу. Ключове — керування голосом: команди «start», «pause», «resume»,
-                        щоб не знімати рукавички. Складні інтервали, де кожен раунд і кожна пауза мають власну тривалість;
+                        щоб не знімати рукавички<mark class="chg">, а також через Siri і Shortcuts</mark>. Складні інтервали, де кожен раунд і кожна пауза мають власну тривалість;
                         звукові сигнали мікшуються поверх музики, не зупиняючи її.
                     </p>
                     <p class="text-slate-400 text-sm leading-relaxed mb-5">
-                        Таймер живе на екрані блокування і в Dynamic Island, є віджет і застосунок для Apple Watch,
-                        налаштовувана затримка перед першим раундом, режим простого секундоміра й пауза дотиком до циферблата.
+                        Таймер живе на екрані блокування і в Dynamic Island<mark class="chg"> і працює у фоні — навіть під час запису відео тренування</mark><del class="chg-del">, є віджет і застосунок для Apple Watch</del>.
+                        <mark class="chg">Історія тренувань із календарем активності й графіками,</mark> налаштовувана затримка перед першим раундом<del class="chg-del">, режим простого секундоміра</del> і пауза дотиком до циферблата.
                     </p>
                     <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
                     <div class="flex flex-wrap gap-2 mb-6">
@@ -847,12 +848,14 @@
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">SwiftUI</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Live Activities</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">WidgetKit</span>
-                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">watchOS</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-del chg-del-tag">watchOS</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-tag">App Intents: Siri і Shortcuts</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Speech Recognition</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-tag">Core Data</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">StoreKit</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Analytics</span>
-                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">три мови інтерфейсу</span>
-                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">юніт- і UI-тести</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-del chg-del-tag">три мови інтерфейсу</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-del chg-del-tag">юніт- і UI-тести</span>
                     </div>
                     <div class="mt-auto pt-5 border-t border-white/10">
                         <a href="https://sernyak.github.io/-ShadowBoxingTimer/" target="_blank" rel="noopener" class="inline-flex items-center text-sm font-semibold text-indigo-400 hover:text-indigo-300 transition-colors">
@@ -874,6 +877,7 @@
                     <p class="text-slate-400 text-sm leading-relaxed mb-4">
                         PWA українською для залу: таймер відпочинку між підходами, відмітка виконаних підходів,
                         історія тренувань, графіки прогресу, калькулятор млинців на штангу й шаблони тренувань.
+                        <mark class="chg">Особисті рекорди з оцінкою 1ПМ, таймер боксерських раундів і автоматичні резервні копії з експортом у JSON.</mark>
                     </p>
                     <p class="text-slate-400 text-sm leading-relaxed mb-5">
                         Спроєктовано під реальні умови залу — одна рука зайнята, екран мокрий: кожна дія в один дотик,
@@ -889,15 +893,10 @@
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">vite-plugin-pwa (офлайн, автооновлення)</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Hosting</span>
                     </div>
-                    <div class="mb-6">
-                        <img src="/ai/shots/ironlog.webp" alt="Сайт IRONLOG і екрани застосунку: таймер відпочинку, підходи й історія тренувань"
-                             width="1200" height="714" loading="lazy" decoding="async"
-                             class="w-full h-auto rounded-xl border border-white/10 shadow-lg shadow-black/40">
-                    </div>
                     <div class="mt-auto pt-5 border-t border-white/10">
                         <a href="https://shadowboxing-agent.web.app" target="_blank" rel="noopener" class="inline-flex items-center px-6 py-3 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 font-semibold rounded-lg transition-all cursor-pointer">
                             Сайт і застосунок
-                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            <svg class="w-4 h-4 ml-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                         </a>
                         <a href="https://shadowboxing-agent.web.app/app?demo=1" target="_blank" rel="noopener" class="inline-flex items-center ml-4 text-sm font-medium text-slate-400 hover:text-slate-200 transition-colors">
                             Демо з готовою історією
@@ -906,7 +905,7 @@
                 </article>
 
                 <!-- 14 — Attention trainers -->
-                <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal md:col-span-2">
+                <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal md:col-span-2 chg-new">
                     <div class="flex items-center gap-3 mb-4">
                         <span class="text-sm font-bold text-lime-400">14</span>
                         <div class="w-9 h-9 bg-lime-500/10 rounded-lg flex items-center justify-center text-lime-400">
@@ -941,7 +940,7 @@
 
             </div>
 
-            <!-- ГРУПА 5 -->
+            <!-- ГРУПА 4 -->
             <header class="mt-16 mb-6 reveal">
                 <div class="flex items-center gap-4">
                     <h3 class="text-xl md:text-2xl font-bold">Сайти й лендінги</h3>
@@ -963,38 +962,51 @@
                         <h4 class="text-xl md:text-2xl font-bold mb-4">Сайти під ключ</h4>
                         <p class="text-slate-400 text-sm md:text-base leading-relaxed mb-4">
                             Закриваю задачу цілком: структура сторінки, тексти, адаптив під телефон,
-                            анімації появи при прокрутці й форма запису.
+                            анімації появи при прокрутці <mark class="chg">і кнопки запису в месенджери й соцмережі</mark><del class="chg-del">й форма запису</del>.
                         </p>
                         <p class="text-slate-400 text-sm md:text-base leading-relaxed mb-6">
-                            Приклади: сайт психотерапевта, ppcmarketing.pro, це портфоліо і destinycode.online.
+                            Приклади: сайт психотерапевта, <mark class="chg">сайт нумеролога, лендінг сервісного центру касових апаратів</mark>,
+                            ppcmarketing.pro, це портфоліо <mark class="chg">з 3D-сценою</mark> і destinycode.online.
                         </p>
                     </div>
                     <div class="md:w-72 md:shrink-0">
                         <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-3">Технології</p>
                         <div class="flex flex-wrap gap-2">
-                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">HTML, CSS, JavaScript без фреймворків</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-tag">HTML, CSS, JavaScript</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-del chg-del-tag">HTML, CSS, JavaScript без фреймворків</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-tag">Tailwind CSS</span>
                             <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">адаптивна верстка</span>
                             <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Intersection Observer для анімацій</span>
-                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">GitHub Pages</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-tag">three.js</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-tag">GitHub Pages і Firebase Hosting</span>
+                            <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg chg-del chg-del-tag">GitHub Pages</span>
                         </div>
                     </div>
                 </div>
                 <div class="pt-6 mt-2 border-t border-white/10 flex flex-wrap items-center gap-x-8 gap-y-3">
                     <a href="https://sernyak.github.io/Olofinskiy/v6/" target="_blank" rel="noopener" class="inline-flex items-center text-sm font-semibold text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer">
                         Сайт психотерапевта
-                        <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        <svg class="w-4 h-4 ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+                    <a href="https://energycodes.pro" target="_blank" rel="noopener" class="inline-flex items-center text-sm font-medium text-slate-400 hover:text-white transition-colors cursor-pointer">
+                        <mark class="chg">Сайт нумеролога</mark>
+                        <svg class="w-4 h-4 ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+                    <a href="https://sernyak.github.io/Pavlovskiy/" target="_blank" rel="noopener" class="inline-flex items-center text-sm font-medium text-slate-400 hover:text-white transition-colors cursor-pointer">
+                        <mark class="chg">КасаМайстер</mark>
+                        <svg class="w-4 h-4 ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </a>
                     <a href="/" class="inline-flex items-center text-sm font-medium text-slate-400 hover:text-white transition-colors cursor-pointer">
                         ppcmarketing.pro
-                        <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        <svg class="w-4 h-4 ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </a>
                     <a href="/ai/" class="inline-flex items-center text-sm font-medium text-slate-400 hover:text-white transition-colors cursor-pointer">
                         ppcmarketing.pro/ai
-                        <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        <svg class="w-4 h-4 ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </a>
                     <a href="https://destinycode.online" target="_blank" rel="noopener" class="inline-flex items-center text-sm font-medium text-slate-400 hover:text-white transition-colors cursor-pointer">
                         destinycode.online
-                        <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        <svg class="w-4 h-4 ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </a>
                 </div>
             </article>
@@ -1070,5 +1082,35 @@
     <script type="importmap">{"imports":{"three":"/js/vendor/three.module.min.js","three/addons/":"/js/vendor/addons/"}}</script>
     <script type="module">import(matchMedia('(max-width: 1023px)').matches ? '/js/hero-vault-mobile.js' : '/js/hero-vault-desk.js').catch(() => document.documentElement.classList.remove('vault-holo'));</script>
     <!-- /vault:scripts -->
+<!-- Панель тестового варіанта -->
+    <div id="chg-panel" class="glass-card rounded-xl px-4 py-3 text-xs text-slate-300 shadow-2xl border border-yellow-400/30">
+        <div class="chg-title font-semibold text-yellow-300 mb-1">Тестовий варіант /ai</div>
+        <div class="chg-legend text-slate-400 mb-2 leading-relaxed">
+            <span class="text-yellow-200">жовте</span> — нове або виправлене,
+            <span class="text-red-300 line-through">закреслене</span> — прибрано
+        </div>
+        <div class="flex items-center gap-3">
+            <button id="chg-toggle" type="button" class="px-3 py-1.5 rounded-lg bg-yellow-400/15 hover:bg-yellow-400/25 border border-yellow-400/40 text-yellow-200 font-semibold cursor-pointer">Сховати зміни</button>
+            <a href="#projects" class="text-slate-400 hover:text-white">До карток</a>
+            <a href="/ai/" class="text-slate-400 hover:text-white">Жива /ai</a>
+        </div>
+    </div>
+    <script>
+        (function () {
+            var root = document.documentElement, btn = document.getElementById('chg-toggle');
+            var on = true;
+            try { on = localStorage.getItem('aiCardsChg') !== '0'; } catch (e) {}
+            function apply() {
+                root.classList.toggle('show-chg', on);
+                btn.textContent = on ? 'Сховати зміни' : 'Показати зміни';
+            }
+            btn.addEventListener('click', function () {
+                on = !on;
+                try { localStorage.setItem('aiCardsChg', on ? '1' : '0'); } catch (e) {}
+                apply();
+            });
+            apply();
+        })();
+    </script>
 </body>
 </html>

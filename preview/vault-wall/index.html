@@ -109,6 +109,14 @@
         }
         /* vault:start — перший екран «Сховище»; вставляє build-vault-page.mjs, руками не правити */
         body { overflow-x: clip; }                 /* hidden ламає position: sticky */
+        /* Фон сторінки: дві дуже мʼякі плями світла на темній основі — синя згори зліва, фіолетова праворуч.
+           Зразок власника — meowmatrix (26-09). Нерухомий шар, а не background-attachment: fixed на <body>:
+           на iOS такий фон смикається під час скролу. Перший екран малює своє фото поверх. */
+        body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background:
+                radial-gradient(circle at 30% 0%, rgba(59,130,246,.16), transparent 45%),
+                radial-gradient(circle at 85% 40%, rgba(168,85,247,.10), transparent 45%),
+                #0B0F19; }
         #vault-canvas { display: block; width: 100%; height: 100%; touch-action: pan-y; }
         #vault-scene.vault-nogl { background: radial-gradient(60% 60% at 50% 55%, rgba(59,130,246,.22), rgba(11,15,25,0) 70%); }
         /* на телефоні абзац показує сцена — голограмою; сам текст лишається в розмітці, але невидимий,
@@ -223,8 +231,8 @@
 
             <!-- 01 — DestinyCode -->
             <article class="glass-card rounded-2xl p-7 md:p-10 mb-6 border-l-4 border-purple-500 reveal">
-                <div class="flex flex-col md:flex-row md:items-start md:gap-10">
-                    <div class="md:flex-1">
+                <div class="grid lg:grid-cols-[1.35fr_1fr] gap-10 items-center">
+                    <div>
                         <div class="flex items-center gap-3 mb-4">
                             <span class="text-sm font-bold text-purple-400">01</span>
                             <span class="inline-block text-[11px] font-semibold text-purple-400 bg-purple-500/10 px-2.5 py-0.5 rounded-full">Живий продукт</span>
@@ -238,10 +246,9 @@
                         <p class="text-slate-300 text-sm mb-6">
                             Сервіс <strong class="text-white">у робочому стані</strong>: приймає оплати, генерує звіти, робить&nbsp;розсилку.
                         </p>
-                    </div>
-                    <div class="md:w-72 md:shrink-0">
+
                         <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-3">Технології</p>
-                        <div class="flex flex-wrap gap-2">
+                        <div class="flex flex-wrap gap-2 mb-8">
                             <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Cloud Functions (Node 22, 23 функції)</span>
                             <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Vertex AI / Gemini з каскадом резервних моделей</span>
                             <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firestore</span>
@@ -251,18 +258,19 @@
                             <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Meta CAPI</span>
                             <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Cloud Tasks + Cloud Scheduler</span>
                         </div>
+
+                        <a href="https://destinycode.online" target="_blank" rel="noopener" class="flex w-full sm:inline-flex sm:w-auto items-center justify-center text-center px-3 sm:px-7 py-3.5 text-sm sm:text-base bg-purple-500 hover:bg-purple-400 text-white font-semibold rounded-lg transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] cursor-pointer">
+                            Відкрити destinycode.online
+                            <svg class="w-4 h-4 ml-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </a>
                     </div>
-                </div>
-                <div class="mb-6">
-                    <img src="/ai/shots/destinycode.webp" alt="Головна сторінка destinycode.online: форма з даними народження, з якої починається розрахунок карти й генерація звіту"
-                         width="1200" height="726" loading="lazy" decoding="async"
-                         class="w-full h-auto rounded-xl border border-white/10 shadow-lg shadow-black/40">
-                </div>
-                <div class="pt-6 mt-2 border-t border-white/10">
-                    <a href="https://destinycode.online" target="_blank" rel="noopener" class="flex w-full sm:inline-flex sm:w-auto items-center justify-center text-center px-3 sm:px-7 py-3.5 text-sm sm:text-base bg-purple-500 hover:bg-purple-400 text-white font-semibold rounded-lg transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] cursor-pointer">
-                        Відкрити destinycode.online
-                        <svg class="w-4 h-4 ml-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </a>
+
+                    <div class="relative">
+                        <img src="/ai/destinycode-square.webp"
+                             alt="DestinyCode — SaaS з прийомом оплат: головна сторінка сервісу з розрахунком натальної карти"
+                             width="1000" height="1000" loading="lazy" decoding="async"
+                             class="w-full h-auto max-w-[420px] mx-auto rounded-2xl border border-white/10 shadow-2xl">
+                    </div>
                 </div>
             </article>
 
@@ -378,11 +386,6 @@
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Storage</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firestore</span>
                     </div>
-                    <div class="mb-6">
-                        <img src="/ai/shots/callintel.webp" alt="Демо аналізу дзвінка: настрій клієнта, скоринг ліда, список дій і автозаповнена CRM-картка"
-                             width="1200" height="899" loading="lazy" decoding="async"
-                             class="w-full h-auto rounded-xl border border-white/10 shadow-lg shadow-black/40">
-                    </div>
                     <div class="mt-auto pt-5 border-t border-white/10 flex flex-wrap gap-x-6 gap-y-2">
                         <a href="https://automation-0105.web.app/" target="_blank" rel="noopener" class="inline-flex items-center text-sm font-semibold text-green-400 hover:text-green-300 transition-colors cursor-pointer">
                             Відкрити демо
@@ -466,11 +469,6 @@
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Gemini</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">React</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firestore</span>
-                    </div>
-                    <div class="mb-6">
-                        <img src="/ai/shots/sbtagent.webp" alt="Дашборд агента: знайдені пости Reddit і чернетки відповідей, які людина схвалює або відхиляє"
-                             width="1200" height="855" loading="lazy" decoding="async"
-                             class="w-full h-auto rounded-xl border border-white/10 shadow-lg shadow-black/40">
                     </div>
                     <div class="mt-auto pt-5 border-t border-white/10 flex flex-wrap gap-x-6 gap-y-2">
                         <a href="https://sbt-growth-agent.web.app/" target="_blank" rel="noopener" class="inline-flex items-center text-sm font-semibold text-orange-400 hover:text-orange-300 transition-colors cursor-pointer">
@@ -580,11 +578,6 @@
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">JSON · CSV · Markdown</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Hosting</span>
                     </div>
-                    <div class="mb-6">
-                        <img src="/ai/shots/leadhunter.webp" alt="Демо Lead Hunter: вимоги замовника на вході й картка кваліфікованої компанії з обґрунтуванням на виході"
-                             width="1200" height="525" loading="lazy" decoding="async"
-                             class="w-full h-auto rounded-xl border border-white/10 shadow-lg shadow-black/40">
-                    </div>
                     <div class="mt-auto pt-5 border-t border-white/10 flex flex-wrap gap-x-6 gap-y-2">
                         <a href="https://lead-hunter-10.web.app/" target="_blank" rel="noopener" class="inline-flex items-center text-sm font-semibold text-rose-400 hover:text-rose-300 transition-colors cursor-pointer">
                             Відкрити демо
@@ -638,11 +631,6 @@
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Gemini на Vertex AI</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">інтервальне повторення SM-2</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">синхронізація прогресу без акаунта</span>
-                    </div>
-                    <div class="mb-6">
-                        <img src="/ai/shots/agenthub.webp" alt="Курс Agent Hub: інтерфейс із уроками про розробку ШІ-агентів"
-                             width="1200" height="708" loading="lazy" decoding="async"
-                             class="w-full h-auto rounded-xl border border-white/10 shadow-lg shadow-black/40">
                     </div>
                     <div class="mt-auto pt-5 border-t border-white/10">
                         <a href="https://agent-hub-course.web.app" target="_blank" rel="noopener" class="inline-flex items-center text-sm font-semibold text-violet-400 hover:text-violet-300 transition-colors cursor-pointer">
@@ -768,11 +756,6 @@
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">zustand з persist</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">vite-plugin-pwa (офлайн, автооновлення)</span>
                         <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Hosting</span>
-                    </div>
-                    <div class="mb-6">
-                        <img src="/ai/shots/ironlog.webp" alt="Сайт IRONLOG і екрани застосунку: таймер відпочинку, підходи й історія тренувань"
-                             width="1200" height="714" loading="lazy" decoding="async"
-                             class="w-full h-auto rounded-xl border border-white/10 shadow-lg shadow-black/40">
                     </div>
                     <div class="mt-auto pt-5 border-t border-white/10">
                         <a href="https://shadowboxing-agent.web.app" target="_blank" rel="noopener" class="inline-flex items-center px-6 py-3 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 font-semibold rounded-lg transition-all cursor-pointer">
