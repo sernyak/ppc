@@ -41,19 +41,20 @@ function init() {
     m.soundButton(snd, sceneEl.closest('section'), { onEnable: replayIntro });
   }).catch(() => { /* без звуку сторінка працює як завжди */ });
   const photoEl = photo ? sceneEl.querySelector('.vault-photo') : null;
-  /* фон проявляється лише тоді, коли кадр справді розкодовано: інакше видно стрибок «темний екран → фото».
-     Робимо це до створення рендерера — щоб фон зʼявився навіть там, де 3D не запуститься. */
-  if (photoEl) {
-    const bg = (getComputedStyle(photoEl).backgroundImage.match(/url\(["']?(.*?)["']?\)/) || [])[1];
-    const showPhoto = () => photoEl.classList.add('is-in');
-    if (bg) {
-      const im = new Image();
-      im.decoding = 'async'; im.src = bg;
-      (im.decode ? im.decode() : Promise.reject()).then(showPhoto).catch(() => {
-        if (im.complete) showPhoto(); else im.addEventListener('load', showPhoto, { once: true });
+  /* фон і текст першого екрана виводить скрипт у <head> (клас vault-hero-in): він встигає до того, як
+     побудова сцени займе головний потік. Тут лишається тільки дочекатись тієї ж миті, щоб фігура не
+     починала збиратися на порожньому темному екрані. */
+  let heroReady = !photo;
+  if (photo) {
+    const seen = () => { heroReady = true; };
+    if (document.documentElement.classList.contains('vault-hero-in')) seen();
+    else {
+      const mo = new MutationObserver(() => {
+        if (document.documentElement.classList.contains('vault-hero-in')) { mo.disconnect(); seen(); schedule(); }
       });
-      setTimeout(showPhoto, 2500);                            // мережа зовсім повільна — не тримаємо фон вічно прихованим
-    } else showPhoto();
+      mo.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+      setTimeout(seen, 2000);
+    }
   }
   const glowEl = photo ? sceneEl.querySelector('.vault-deskglow') : null;
   const PHOTO = { w: 768, h: 1376, screens: 0.32, gap: 18, wide: 1.0, desk: 0.69 };   // screens — де в кадрі починаються монітори
@@ -536,7 +537,7 @@ function init() {
     running = false;
     const dt = Math.min(last ? now - last : 16, 50); last = now;      // покадрово, крок ≤ 50 мс (iOS присипляє цикл)
     t += dt / 1000; frameNo++;
-    if (dbgIntro == null) introMs += dt;
+    if (dbgIntro == null && heroReady) introMs += dt;
     const introT = dbgIntro != null ? dbgIntro : clamp01(introMs / INTRO_MS);
     pT = progress();
     pS += (pT - pS) * 0.16;

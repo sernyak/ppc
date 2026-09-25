@@ -159,7 +159,14 @@
                 opacity: 0; animation: vaultPhotoSafe 1s ease 3s forwards;
                 -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 74%, transparent 97%);
                         mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 74%, transparent 97%); }
-            .vault-photo.is-in { opacity: 1; animation: none; transition: opacity 1s ease; }
+            .vault-holo.vault-hero-in .vault-photo, .vault-photo.is-in { opacity: 1; animation: none; transition: opacity 1s ease; }
+            /* Текст першого екрана чекає на фото й виходить разом із ним однією хвилею (прохання власника
+               25-09: раніше було «текст на темному тлі → бац, фото»). Гейт живе під .vault-holo, тобто лише
+               там, де працює сцена; без скрипта напис видно одразу, а страховка виводить його на 3-й секунді. */
+            .vault-holo #vault-hero .vault-rise, .vault-holo #vault-hero .order-5 {
+                opacity: 0; animation: vaultPhotoSafe 1s ease 3s forwards; }
+            .vault-holo.vault-hero-in #vault-hero .vault-rise, .vault-holo.vault-hero-in #vault-hero .order-5 {
+                opacity: 1; animation: none; transition: opacity 1s ease; }
             @keyframes vaultPhotoSafe { to { opacity: 1; } }
             @media (prefers-reduced-motion: reduce) { .vault-photo { opacity: 1; animation: none; } }
             .vault-deskglow { display: block; position: absolute; left: 0; top: 0; border-radius: 50%; pointer-events: none; opacity: 0;
@@ -197,6 +204,13 @@
         if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
         d.classList.add('vault-holo');
         setTimeout(function(){if(!d.classList.contains('vault-live'))d.classList.remove('vault-holo');},8000);
+        /* телефон: фон і текст першого екрана виходять однією хвилею, щойно кадр розкодовано. Робимо це тут,
+           а не в модулі сцени: поки сцена будується, головний потік зайнятий, і клас чекав би до 3 с. */
+        if(!matchMedia('(max-width: 1023px)').matches)return;
+        var go=function(){d.classList.add('vault-hero-in');},i=new Image();
+        i.decoding='async';i.src='/ai/vault-bg-phone.webp';
+        if(i.decode)i.decode().then(go,go);else if(i.complete)go();else i.addEventListener('load',go,{once:true});
+        setTimeout(go,1500);
     }catch(e){}})();</script>
     <link rel="preload" as="image" href="/ai/vault-bg-desk.webp" media="(min-width: 1024px)">
     <link rel="preload" as="image" href="/ai/vault-bg-phone.webp" media="(max-width: 1023px)">

@@ -154,6 +154,13 @@
         if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
         d.classList.add('vault-holo');
         setTimeout(function(){if(!d.classList.contains('vault-live'))d.classList.remove('vault-holo');},8000);
+        /* телефон: фон і текст першого екрана виходять однією хвилею, щойно кадр розкодовано. Робимо це тут,
+           а не в модулі сцени: поки сцена будується, головний потік зайнятий, і клас чекав би до 3 с. */
+        if(!matchMedia('(max-width: 1023px)').matches)return;
+        var go=function(){d.classList.add('vault-hero-in');},i=new Image();
+        i.decoding='async';i.src='/ai/vault-bg-phone.webp';
+        if(i.decode)i.decode().then(go,go);else if(i.complete)go();else i.addEventListener('load',go,{once:true});
+        setTimeout(go,1500);
     }catch(e){}})();</script>
     <!-- /vault:head -->
 </head>
