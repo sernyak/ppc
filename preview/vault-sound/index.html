@@ -156,16 +156,17 @@
             /* Фон проявляється, а не «вмикається»: доки кадр не завантажився, шар прозорий, а сцена додає
                .is-in, коли картинка готова (див. hero-vault-mobile.js). Анімація-страховка виводить фон і
                без скрипта — на 3-й секунді. */
-            .vault-photo { display: block; position: absolute; background: url(/ai/vault-bg-phone.webp) 0 0 / 100% 100% no-repeat;
-                opacity: 0; animation: vaultPhotoSafe 1s ease 3s forwards;
+            .vault-photo { display: block; position: absolute;
+                opacity: .004; will-change: opacity; animation: vaultPhotoSafe 1s ease 3s forwards;
                 -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 74%, transparent 97%);
                         mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 74%, transparent 97%); }
+            .vault-photo-src { display: block; width: 100%; height: 100%; }
             .vault-holo.vault-hero-in .vault-photo, .vault-photo.is-in { opacity: 1; animation: none; transition: opacity 1s ease; }
             /* Текст першого екрана чекає на фото й виходить разом із ним однією хвилею (прохання власника
                25-09: раніше було «текст на темному тлі → бац, фото»). Гейт живе під .vault-holo, тобто лише
                там, де працює сцена; без скрипта напис видно одразу, а страховка виводить його на 3-й секунді. */
             .vault-holo #vault-hero .vault-rise, .vault-holo #vault-hero .order-5 {
-                opacity: 0; animation: vaultPhotoSafe 1s ease 3s forwards; }
+                opacity: 0; will-change: opacity; animation: vaultPhotoSafe 1s ease 3s forwards; }
             .vault-holo.vault-hero-in #vault-hero .vault-rise, .vault-holo.vault-hero-in #vault-hero .order-5 {
                 opacity: 1; animation: none; transition: opacity 1s ease; }
             @keyframes vaultPhotoSafe { to { opacity: 1; } }
@@ -176,8 +177,9 @@
         }
         @media (min-width: 1024px) {
             #vault-scene[data-variant="photo"] #vault-canvas { position: relative; }   /* інакше абсолютний шар фото малювався б поверх полотна */
-            .vault-photo { display: block; position: absolute; left: -2%; top: -2%; width: 104%; height: 104%;
+            .vault-photo { display: block; position: absolute; left: -2%; top: -2%; width: 104%; height: 104%; opacity: 1; animation: none;
                 background: #0B0F19 url(/ai/vault-bg-desk.webp) 62% 50% / cover no-repeat; will-change: transform; }
+            .vault-photo-src { display: none; }
             /* темне поле ліворуч — під текстом, щоб яскраві монітори не заважали читати */
             .vault-photo::after { content: ''; position: absolute; inset: 0;
                 background: linear-gradient(90deg, rgba(11,15,25,.92) 0%, rgba(11,15,25,.78) 30%, rgba(11,15,25,.32) 50%, rgba(11,15,25,0) 64%); }
@@ -208,10 +210,12 @@
         /* телефон: фон і текст першого екрана виходять однією хвилею, щойно кадр розкодовано. Робимо це тут,
            а не в модулі сцени: поки сцена будується, головний потік зайнятий, і клас чекав би до 3 с. */
         if(!matchMedia('(max-width: 1023px)').matches)return;
-        var go=function(){d.classList.add('vault-hero-in');},i=new Image();
-        i.decoding='async';i.src='/ai/vault-bg-phone.webp';
-        if(i.decode)i.decode().then(go,go);else if(i.complete)go();else i.addEventListener('load',go,{once:true});
-        setTimeout(go,1500);
+        var go=function(){d.classList.add('vault-hero-in');};
+        var ready=function(el){if(el.decode)el.decode().then(go,go);else go();};
+        var arm=function(){var el=document.querySelector('.vault-photo-src');
+            if(!el){setTimeout(arm,40);return;}
+            if(el.complete&&el.naturalWidth)ready(el);else el.addEventListener('load',function(){ready(el);},{once:true});};
+        arm();setTimeout(go,1800);
     }catch(e){}})();</script>
     <link rel="preload" as="image" href="/ai/vault-bg-desk.webp" media="(min-width: 1024px)">
     <link rel="preload" as="image" href="/ai/vault-bg-phone.webp" media="(max-width: 1023px)">
@@ -290,7 +294,7 @@
             <div class="order-3 w-full h-[37vh] max-h-[330px] lg:hidden" aria-hidden="true"></div>
 
             <div id="vault-scene" data-variant="photo" data-sound="1" class="absolute inset-0 w-auto z-0 pointer-events-none lg:pointer-events-auto">
-                <div class="vault-photo" aria-hidden="true"></div>
+                <div class="vault-photo" aria-hidden="true"><img class="vault-photo-src" src="/ai/vault-bg-phone.webp" alt="" decoding="async" fetchpriority="high" width="768" height="1376"></div>
                 <div class="vault-deskglow" aria-hidden="true"></div>
                 <canvas id="vault-canvas" role="img" aria-label="Металевий каркас-радіант: зі скролом розкривається, будує всередині ґратку, засвічується і розсипає світло, з якого складається текст поруч"></canvas>
             </div>
@@ -303,7 +307,7 @@
         <div class="max-w-6xl mx-auto">
             <div class="mb-12 md:mb-16 reveal">
                 <h2 class="text-sm font-semibold text-brand-accent tracking-widest uppercase mb-3">Проєкти</h2>
-                <h3 class="text-3xl md:text-4xl font-bold">Одинадцять систем, які я побудував</h3>
+                <h3 class="text-3xl md:text-4xl font-bold">Чотирнадцять систем, які я побудував</h3>
                 <p class="mt-4 text-slate-400 max-w-2xl">
                     Для кожної — що це, на чому зроблено і чи є що показати просто зараз.
                     Частина проєктів закрита автентифікацією або містить дані клієнтів, тому там чесно написано «демо за запитом».
@@ -676,7 +680,95 @@
 
             </div>
 
-            <!-- ГРУПА 3 -->
+            <!-- ГРУПА 3 — Навчальні платформи -->
+            <header class="mt-16 mb-6 reveal">
+                <div class="flex items-center gap-4">
+                    <h3 class="text-xl md:text-2xl font-bold">Навчальні платформи</h3>
+                    <span class="h-px flex-1 bg-white/10"></span>
+                </div>
+                <p class="text-slate-500 text-sm mt-2">Курси з практикою просто в браузері: без встановлення й без реєстрації.</p>
+            </header>
+
+            <!-- 10–11 -->
+            <div class="grid md:grid-cols-2 gap-6">
+
+                <!-- 10 — Agent Hub -->
+                <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-sm font-bold text-violet-400">10</span>
+                        <div class="w-9 h-9 bg-violet-500/10 rounded-lg flex items-center justify-center text-violet-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <span class="inline-block text-[11px] font-semibold text-violet-400 bg-violet-500/10 px-2.5 py-0.5 rounded-full">Відкритий доступ</span>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">Agent Hub — курс із розробки ШІ-агентів</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                        Курс українською на відкритих матеріалах Anthropic: 12 модулів і 79 уроків — від першого запиту
+                        до API до власного агента в продакшні. У кожному уроці практика з автоперевіркою й посилання на першоджерело.
+                    </p>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-5">
+                        Вхідний тест визначає рівень, трек «перший агент» веде за 26 кроків, картки з інтервальним повторенням
+                        закріплюють матеріал, а розбір власних файлів перевіряє SKILL.md, схеми інструментів, хуки й конфігурації MCP.
+                        ШІ-помічник бачить відкритий урок і не вигадує полів API, яких немає в матеріалі.
+                    </p>
+                    <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">JavaScript без фреймворків</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">PWA, працює офлайн</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Hosting</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Cloud Functions</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Gemini на Vertex AI</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">інтервальне повторення SM-2</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">синхронізація прогресу без акаунта</span>
+                    </div>
+                    <div class="mt-auto pt-5 border-t border-white/10">
+                        <a href="https://agent-hub-course.web.app" target="_blank" rel="noopener" class="inline-flex items-center text-sm font-semibold text-violet-400 hover:text-violet-300 transition-colors cursor-pointer">
+                            Відкрити курс
+                            <svg class="w-4 h-4 ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- 11 — SQL course -->
+                <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-sm font-bold text-cyan-400">11</span>
+                        <div class="w-9 h-9 bg-cyan-500/10 rounded-lg flex items-center justify-center text-cyan-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+                        </div>
+                        <span class="inline-block text-[11px] font-semibold text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full">Готується публічна версія</span>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">Курс SQL із тренажером у браузері</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                        Покроковий курс від першого SELECT до віконних функцій, масивів і рев'ю чужого коду: 12 модулів,
+                        у кожному уроці теорія, приклад, завдання в тренажері й вікторина. Справжній SQL-рушій працює просто
+                        в браузері на навчальній базі — нічого не треба встановлювати.
+                    </p>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-5">
+                        Крім уроків — вхідний тест, «перекладач» SQL людською мовою, розбір будь-якого запиту на кроки
+                        з їхніми залежностями, картки з інтервальним повторенням і конспект. Шар сумісності з BigQuery
+                        показує, що саме змінив у запиті, — різниця діалектів пояснюється, а не ховається.
+                    </p>
+                    <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">DuckDB-WASM у браузері</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">шар сумісності з BigQuery</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">JavaScript без фреймворків</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">PWA, працює офлайн</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">інтервальне повторення SM-2</span>
+                        <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Firebase Hosting</span>
+                    </div>
+                    <div class="mt-auto pt-5 border-t border-white/10">
+                        <span class="inline-flex items-start text-sm font-medium text-slate-500">
+                            <svg class="w-4 h-4 mr-1.5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            Посилання з'явиться після запуску
+                        </span>
+                    </div>
+                </article>
+
+            </div>
+
+            <!-- ГРУПА 4 -->
             <header class="mt-16 mb-6 reveal">
                 <div class="flex items-center gap-4">
                     <h3 class="text-xl md:text-2xl font-bold">Застосунки</h3>
@@ -685,13 +777,13 @@
                 <p class="text-slate-500 text-sm mt-2">Інтерфейси, якими користуються з телефона — у русі, однією рукою.</p>
             </header>
 
-            <!-- 10–11 -->
+            <!-- 12–14 -->
             <div class="grid md:grid-cols-2 gap-6">
 
-                <!-- 10 — ShadowBoxing Timer -->
+                <!-- 12 — ShadowBoxing Timer -->
                 <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal">
                     <div class="flex items-center gap-3 mb-4">
-                        <span class="text-sm font-bold text-indigo-400">10</span>
+                        <span class="text-sm font-bold text-indigo-400">12</span>
                         <div class="w-9 h-9 bg-indigo-500/10 rounded-lg flex items-center justify-center text-indigo-400">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         </div>
@@ -727,10 +819,10 @@
                     </div>
                 </article>
 
-                <!-- 11 — IRONLOG -->
+                <!-- 13 — IRONLOG -->
                 <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal">
                     <div class="flex items-center gap-3 mb-4">
-                        <span class="text-sm font-bold text-emerald-400">11</span>
+                        <span class="text-sm font-bold text-emerald-400">13</span>
                         <div class="w-9 h-9 bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-400">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                         </div>
@@ -765,9 +857,43 @@
                     </div>
                 </article>
 
+                <!-- 14 — Attention trainers -->
+                <article class="glass-card rounded-2xl p-7 md:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 reveal md:col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-sm font-bold text-lime-400">14</span>
+                        <div class="w-9 h-9 bg-lime-500/10 rounded-lg flex items-center justify-center text-lime-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path></svg>
+                        </div>
+                    </div>
+                    <div class="md:flex md:items-start md:gap-10">
+                        <div class="md:flex-1">
+                            <h4 class="text-xl font-bold mb-3">Тренажери уваги: таблиця Шульте й «Алфавіт»</h4>
+                            <p class="text-slate-400 text-sm leading-relaxed mb-5">
+                                Таблиця Шульте з режимом Горбова й рекордами та гра «Алфавіт» для тренування концентрації.
+                                Одна ідея — три платформи: веб, десктоп і iOS.
+                            </p>
+                        </div>
+                        <div class="md:w-72 md:shrink-0">
+                            <p class="text-[11px] uppercase tracking-wider text-slate-500 mb-2.5">Технології</p>
+                            <div class="flex flex-wrap gap-2 mb-6">
+                                <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">HTML, CSS, JavaScript</span>
+                                <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">Electron</span>
+                                <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">iOS</span>
+                                <span class="inline-block max-w-full break-words text-[11px] leading-relaxed text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">GitHub Pages</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-auto pt-5 border-t border-white/10">
+                        <a href="https://sernyak.github.io/web-games/" target="_blank" rel="noopener" class="inline-flex items-center text-sm font-semibold text-lime-400 hover:text-lime-300 transition-colors cursor-pointer">
+                            Відкрити веб-версію
+                            <svg class="w-4 h-4 ml-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </a>
+                    </div>
+                </article>
+
             </div>
 
-            <!-- ГРУПА 4 -->
+            <!-- ГРУПА 5 -->
             <header class="mt-16 mb-6 reveal">
                 <div class="flex items-center gap-4">
                     <h3 class="text-xl md:text-2xl font-bold">Сайти й лендінги</h3>
@@ -776,12 +902,12 @@
                 <p class="text-slate-500 text-sm mt-2">Сайти під конкретну задачу.</p>
             </header>
 
-            <!-- 12 — Landing pages -->
+            <!-- 15 — Landing pages -->
             <article class="glass-card rounded-2xl p-7 md:p-10 border-l-4 border-cyan-500 reveal">
                 <div class="flex flex-col md:flex-row md:items-start md:gap-10">
                     <div class="md:flex-1">
                         <div class="flex items-center gap-3 mb-4">
-                            <span class="text-sm font-bold text-cyan-400">12</span>
+                            <span class="text-sm font-bold text-cyan-400">15</span>
                             <div class="w-9 h-9 bg-cyan-500/10 rounded-lg flex items-center justify-center text-cyan-400">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             </div>

@@ -155,16 +155,17 @@
             /* Фон проявляється, а не «вмикається»: доки кадр не завантажився, шар прозорий, а сцена додає
                .is-in, коли картинка готова (див. hero-vault-mobile.js). Анімація-страховка виводить фон і
                без скрипта — на 3-й секунді. */
-            .vault-photo { display: block; position: absolute; background: url(/ai/vault-bg-phone.webp) 0 0 / 100% 100% no-repeat;
-                opacity: 0; animation: vaultPhotoSafe 1s ease 3s forwards;
+            .vault-photo { display: block; position: absolute;
+                opacity: .004; will-change: opacity; animation: vaultPhotoSafe 1s ease 3s forwards;
                 -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 74%, transparent 97%);
                         mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 74%, transparent 97%); }
+            .vault-photo-src { display: block; width: 100%; height: 100%; }
             .vault-holo.vault-hero-in .vault-photo, .vault-photo.is-in { opacity: 1; animation: none; transition: opacity 1s ease; }
             /* Текст першого екрана чекає на фото й виходить разом із ним однією хвилею (прохання власника
                25-09: раніше було «текст на темному тлі → бац, фото»). Гейт живе під .vault-holo, тобто лише
                там, де працює сцена; без скрипта напис видно одразу, а страховка виводить його на 3-й секунді. */
             .vault-holo #vault-hero .vault-rise, .vault-holo #vault-hero .order-5 {
-                opacity: 0; animation: vaultPhotoSafe 1s ease 3s forwards; }
+                opacity: 0; will-change: opacity; animation: vaultPhotoSafe 1s ease 3s forwards; }
             .vault-holo.vault-hero-in #vault-hero .vault-rise, .vault-holo.vault-hero-in #vault-hero .order-5 {
                 opacity: 1; animation: none; transition: opacity 1s ease; }
             @keyframes vaultPhotoSafe { to { opacity: 1; } }
@@ -175,8 +176,9 @@
         }
         @media (min-width: 1024px) {
             #vault-scene[data-variant="photo"] #vault-canvas { position: relative; }   /* інакше абсолютний шар фото малювався б поверх полотна */
-            .vault-photo { display: block; position: absolute; left: -2%; top: -2%; width: 104%; height: 104%;
+            .vault-photo { display: block; position: absolute; left: -2%; top: -2%; width: 104%; height: 104%; opacity: 1; animation: none;
                 background: #0B0F19 url(/ai/vault-bg-desk.webp) 62% 50% / cover no-repeat; will-change: transform; }
+            .vault-photo-src { display: none; }
             /* темне поле ліворуч — під текстом, щоб яскраві монітори не заважали читати */
             .vault-photo::after { content: ''; position: absolute; inset: 0;
                 background: linear-gradient(90deg, rgba(11,15,25,.92) 0%, rgba(11,15,25,.78) 30%, rgba(11,15,25,.32) 50%, rgba(11,15,25,0) 64%); }
@@ -207,10 +209,12 @@
         /* телефон: фон і текст першого екрана виходять однією хвилею, щойно кадр розкодовано. Робимо це тут,
            а не в модулі сцени: поки сцена будується, головний потік зайнятий, і клас чекав би до 3 с. */
         if(!matchMedia('(max-width: 1023px)').matches)return;
-        var go=function(){d.classList.add('vault-hero-in');},i=new Image();
-        i.decoding='async';i.src='/ai/vault-bg-phone.webp';
-        if(i.decode)i.decode().then(go,go);else if(i.complete)go();else i.addEventListener('load',go,{once:true});
-        setTimeout(go,1500);
+        var go=function(){d.classList.add('vault-hero-in');};
+        var ready=function(el){if(el.decode)el.decode().then(go,go);else go();};
+        var arm=function(){var el=document.querySelector('.vault-photo-src');
+            if(!el){setTimeout(arm,40);return;}
+            if(el.complete&&el.naturalWidth)ready(el);else el.addEventListener('load',function(){ready(el);},{once:true});};
+        arm();setTimeout(go,1800);
     }catch(e){}})();</script>
     <link rel="preload" as="image" href="/ai/vault-bg-desk.webp" media="(min-width: 1024px)">
     <link rel="preload" as="image" href="/ai/vault-bg-phone.webp" media="(max-width: 1023px)">
@@ -252,7 +256,7 @@
             <div class="contents lg:block lg:relative lg:z-[2] lg:max-w-[600px] lg:space-y-8 lg:animate-fade-in-up">
                 <div class="vault-rise order-1 justify-self-center lg:justify-self-start inline-flex items-center space-x-2 px-3 py-1 rounded-full glass-card border border-brand-accent/30 text-sm font-medium text-blue-400">
                     <span class="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></span>
-                    <span>14 побудованих систем</span>
+                    <span>11 побудованих систем</span>
                 </div>
 
                 <h1 class="vault-rise order-2 text-center lg:text-left text-4xl md:text-6xl font-bold leading-tight tracking-tight">
@@ -289,7 +293,7 @@
             <div class="order-3 w-full h-[37vh] max-h-[330px] lg:hidden" aria-hidden="true"></div>
 
             <div id="vault-scene" data-variant="photo" data-sound="1" class="absolute inset-0 w-auto z-0 pointer-events-none lg:pointer-events-auto">
-                <div class="vault-photo" aria-hidden="true"></div>
+                <div class="vault-photo" aria-hidden="true"><img class="vault-photo-src" src="/ai/vault-bg-phone.webp" alt="" decoding="async" fetchpriority="high" width="768" height="1376"></div>
                 <div class="vault-deskglow" aria-hidden="true"></div>
                 <canvas id="vault-canvas" role="img" aria-label="Металевий каркас-радіант: зі скролом розкривається, будує всередині ґратку, засвічується і розсипає світло, з якого складається текст поруч"></canvas>
             </div>
