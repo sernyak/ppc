@@ -119,9 +119,17 @@
         .vault-veil { background: linear-gradient(180deg, rgba(11,15,25,0) 78%, #0B0F19 100%); }
         @media (min-width: 1024px) { #vault-scene::before, #vault-scene::after { display: none; } }
         .vault-holo #vault-lede { opacity: 0; }
-        /* телефон: опис — звичайний текст, який просто плавно проявляється, щойно почався скрол */
-        .vault-holo #vault-lede.vault-lede-in { opacity: 1; transition: opacity .75s ease; }
-        .vault-holo #vault-lede.vault-lede-now { transition: none; }
+        /* Телефон: опис — звичайний текст, який плавно проявляється, щойно почався скрол. Разом із прозорістю
+           йде зсув на 10 px угору: так поява читається як рух, а не як увімкнене світло. will-change віддає
+           обидві властивості композитору — інакше згасання ділить кадри з 3D-сценою й видно сходинки
+           (заміряно 25-09: прозорість стрибала 0 → 0,77 за один крок). */
+        @media (max-width: 1023px) {
+            .vault-holo #vault-lede { transform: translateY(10px); will-change: opacity, transform; }
+            .vault-holo #vault-lede.vault-lede-in { transform: none;
+                transition: opacity 1.05s ease, transform 1.05s cubic-bezier(.22,.61,.36,1); }
+        }
+        .vault-holo #vault-lede.vault-lede-in { opacity: 1; transition: opacity 1.05s ease; }
+        .vault-holo #vault-lede.vault-lede-now { transition: none; transform: none; }
         /* натяк, що сторінку треба гортати: крапка повільно стікає в капсулі; ставить і прибирає сцена */
         .vault-cue { position: fixed; left: 50%; bottom: 18px; width: 26px; height: 42px; margin-left: -13px; z-index: 40;
             border: 1.5px solid rgba(226,236,255,.34); border-radius: 13px; opacity: 0; transition: opacity .6s ease; pointer-events: none; }
