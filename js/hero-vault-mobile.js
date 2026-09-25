@@ -19,7 +19,6 @@
  */
 import * as THREE from 'three';
 import { figureFrame, getFrame as sceneFrame, kickFrame, KICK, danceFrame, DANCE, FIG_DANCE, FIG, clamp01, CFG } from './hero-vault-mobile-frame.js';
-import { createHolo } from './hero-vault-holo.js';
 
 const sceneEl = document.getElementById('vault-scene');
 const canvas = document.getElementById('vault-canvas');
@@ -363,18 +362,6 @@ function init() {
   });
   const nebula = new THREE.Points(nGeo, nebMat); nebula.renderOrder = -4; scene.add(nebula);
 
-  /* ---------- проекція формул: похила напівпрозора площина за фігурою (лише у фото-варіанті) ----------
-     Тут вона нічого не робить: зʼявляється після того, як фігура зібралась, і просто стоїть — ні скрол,
-     ні дотик її не чіпають. Прохання власника: доповнити композицію, не перетягуючи увагу на себе. */
-  const holo = photo ? createHolo(THREE, renderer, { w: 6.4, h: 3.5, cols: 600, rows: 30 }) : null;
-  let holoLevel = 0, holoPrevT = 0;
-  if (holo) {
-    holo.mesh.position.set(0.5, cPos.y + 0.15, -4.6);
-    holo.mesh.rotation.set(0.05, 0.42, 0.015);
-    scene.add(holo.mesh);
-    holo.ready.then(() => schedule());
-  }
-
   /* ---------- стан ---------- */
   let introMs = -300, last = 0, t = 0, angle = 0.4, frameNo = 0;
   let pT = 0, pS = 0;
@@ -508,14 +495,6 @@ function init() {
     if (fS.lede) showLede(false);
     dustMat.uniforms.uTime.value = tt; nebMat.uniforms.uTime.value = tt;
     beamMat.uniforms.uTime.value = tt; beamMat.uniforms.uOp.value = fS.beams; beams.visible = fS.beams > 0.002;
-    if (holo) {
-      /* фігура зібралась (лінії вже світяться) — поле проступає за 1,2 с і далі тримає сталу яскравість */
-      const want = introNow >= 0.9 ? 1 : 0, step = Math.min(0.05, Math.max(0, tt - holoPrevT));
-      holoPrevT = tt;
-      holoLevel += (want - holoLevel) * Math.min(1, step / 0.4);
-      holo.setLevel(holoLevel * 0.2);
-      holo.tick(tt);
-    }
     if (snd) {
       /* гул наростає, поки проростають лінії, далі — рівний ледь чутний фон (від скролу не гучнішає: при русі
          вниз звук стихає через presence у модулі звуку); шелест — від променів */
