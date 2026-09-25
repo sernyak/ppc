@@ -523,6 +523,8 @@ function init() {
   function render(fF, fS) { apply(fF, fS, t); renderer.render(scene, camera); }
 
   fitScene();
+  /* кадр фото вже на своєму місці — тепер його можна показувати (див. .vault-scene-ok у CSS) */
+  document.documentElement.classList.add('vault-scene-ok');
   if (reduced) {
     html.classList.remove('vault-holo');                       // опис лишається звичайним видимим текстом
     const one = () => render(...frames(0.95, 1));

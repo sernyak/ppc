@@ -162,7 +162,7 @@
         var arm=function(){var el=document.querySelector('.vault-photo-src');
             if(!el){setTimeout(arm,40);return;}
             if(el.complete&&el.naturalWidth)ready(el);else el.addEventListener('load',function(){ready(el);},{once:true});};
-        arm();setTimeout(go,1800);
+        arm();setTimeout(function(){go();d.classList.add('vault-scene-ok');},1800);
     }catch(e){}})();</script>
     <!-- /vault:head -->
 </head>

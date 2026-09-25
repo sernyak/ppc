@@ -156,19 +156,19 @@
             /* Фон проявляється, а не «вмикається»: доки кадр не завантажився, шар прозорий, а сцена додає
                .is-in, коли картинка готова (див. hero-vault-mobile.js). Анімація-страховка виводить фон і
                без скрипта — на 3-й секунді. */
-            .vault-photo { display: block; position: absolute;
+            .vault-photo { display: block; position: absolute; left: 0; top: 0; width: 100%; height: 100%;
                 opacity: .004; will-change: opacity; animation: vaultPhotoSafe 1s ease 3s forwards;
                 -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 74%, transparent 97%);
                         mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 74%, transparent 97%); }
             .vault-photo-src { display: block; width: 100%; height: 100%; }
-            .vault-holo.vault-hero-in .vault-photo, .vault-photo.is-in { opacity: 1; animation: none; transition: opacity 1s ease; }
+            .vault-holo.vault-hero-in.vault-scene-ok .vault-photo { opacity: 1; animation: none; transition: opacity 1s ease; }
             /* Текст першого екрана чекає на фото й виходить разом із ним однією хвилею (прохання власника
                25-09: раніше було «текст на темному тлі → бац, фото»). Гейт живе під .vault-holo, тобто лише
                там, де працює сцена; без скрипта напис видно одразу, а страховка виводить його на 3-й секунді. */
             .vault-holo #vault-hero .vault-rise, .vault-holo #vault-hero .order-5 {
                 opacity: 0; will-change: opacity; animation: vaultPhotoSafe 1s ease 3s forwards; }
-            .vault-holo.vault-hero-in #vault-hero .vault-rise, .vault-holo.vault-hero-in #vault-hero .order-5 {
-                opacity: 1; animation: none; transition: opacity 1s ease; }
+            .vault-holo.vault-hero-in.vault-scene-ok #vault-hero .vault-rise,
+            .vault-holo.vault-hero-in.vault-scene-ok #vault-hero .order-5 { opacity: 1; animation: none; transition: opacity 1s ease; }
             @keyframes vaultPhotoSafe { to { opacity: 1; } }
             @media (prefers-reduced-motion: reduce) { .vault-photo { opacity: 1; animation: none; } }
             .vault-deskglow { display: block; position: absolute; left: 0; top: 0; border-radius: 50%; pointer-events: none; opacity: 0;
@@ -215,7 +215,7 @@
         var arm=function(){var el=document.querySelector('.vault-photo-src');
             if(!el){setTimeout(arm,40);return;}
             if(el.complete&&el.naturalWidth)ready(el);else el.addEventListener('load',function(){ready(el);},{once:true});};
-        arm();setTimeout(go,1800);
+        arm();setTimeout(function(){go();d.classList.add('vault-scene-ok');},1800);
     }catch(e){}})();</script>
     <link rel="preload" as="image" href="/ai/vault-bg-desk.webp" media="(min-width: 1024px)">
     <link rel="preload" as="image" href="/ai/vault-bg-phone.webp" media="(max-width: 1023px)">
