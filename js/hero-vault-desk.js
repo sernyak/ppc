@@ -586,49 +586,49 @@ function init() {
     const c = document.createElement('canvas'); c.width = cols * LCELL; c.height = rows * LCELL;
     const g = c.getContext('2d');
     g.fillStyle = '#ffffff'; g.textAlign = 'center'; g.textBaseline = 'middle';
-    const adv = {}, index = {};
+    const index = {};
     set.forEach((k, i) => {
       const ch = k.slice(0, -1), bold = k.endsWith('1');
       g.font = `${bold ? 700 : 400} ${LFS}px Inter, sans-serif`;
       g.fillText(ch, (i % cols + 0.5) * LCELL, (Math.floor(i / cols) + 0.5) * LCELL);
-      adv[k] = g.measureText(ch).width / LFS;
       index[k] = i;
     });
     const tex = new THREE.CanvasTexture(c);
     tex.flipY = false; tex.colorSpace = THREE.SRGBColorSpace;
     tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-    return { tex, cols, rows, count: set.length, adv, index, space: adv[' 0'] || 0.26 };
+    return { tex, cols, rows, count: set.length, index };
   }
-  /* розкладка абзацу по літерах у пікселях CSS — тими самими метриками, що й браузер */
-  function ledeLayout(atlas, fsCss, boxW, lhCss) {
-    const out = [], lh = lhCss || fsCss * 1.42;
-    let x = 0, y = fsCss * 0.95;
-    const widthOf = (word, bold) => { let ww = 0; for (const ch of word) ww += (atlas.adv[ch + (bold ? '1' : '0')] || 0.3) * fsCss; return ww; };
-    const sp = atlas.space * fsCss;
-    for (const tk of ledeTokens) {
-      if (tk.br) { x = 0; y += lh * 1.5; continue; }                      // абзац: новий рядок і трохи повітря
-      const tw = widthOf(tk.w, tk.bold);
-      if (/^[,.;:!?»)\]]/.test(tk.w)) x -= sp;
-      if (x > 0 && x + tw > boxW) { x = 0; y += lh; }
-      for (const ch of tk.w) {
-        const k = ch + (tk.bold ? '1' : '0'), a = (atlas.adv[k] || 0.3) * fsCss;
-        out.push({ k, cx: x + a / 2, cy: y - fsCss * 0.32, adv: a / fsCss });
-        x += a;
+  /* Розкладка опису по літерах — із самого браузера: центр кожної літери справжнього тексту в пікселях CSS від
+     лівого верхнього кута абзацу. Табло лягає точно на ці місця, тож коли воно складеться, його непомітно
+     змінює сам текст (раніше розкладку рахували своїми метриками — літери стояли на ~6 px вбік). */
+  function ledeLetters(fsCss) {
+    const box = lede.getBoundingClientRect(), out = [], range = document.createRange();
+    const walker = document.createTreeWalker(lede, NodeFilter.SHOW_TEXT);
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      const bold = !!n.parentElement.closest('strong'), s = n.nodeValue;
+      for (let i = 0; i < s.length; i++) {
+        if (/\s/.test(s[i])) continue;
+        range.setStart(n, i); range.setEnd(n, i + 1);
+        const r = range.getBoundingClientRect();
+        if (!r.width) continue;
+        out.push({ k: s[i] + (bold ? '1' : '0'), cx: r.left + r.width / 2 - box.left, cy: r.top + r.height / 2 - box.top, adv: r.width / fsCss });
       }
-      x += tw > 0 ? sp : 0;
     }
-    return { letters: out };
+    return out;
   }
 
   /* Рама опису: прямокутник абзацу, винесений у світ перед камерою й повернутий до неї. Літери лежать у її
      власних координатах, тож раму переставляємо щокадру — текст стоїть на місці абзацу, поки камера облітає. */
   const ledeFrame = new THREE.Object3D(); scene.add(ledeFrame);
-  const ndcToWorld = new THREE.Vector3();
+  const ndcToWorld = new THREE.Vector3(), camFwd = new THREE.Vector3();
   let ledeBox = null;
   function placeLedeFrame() {
     if (!ledeBox) return;
     ndcToWorld.set(ledeBox.cx, ledeBox.cy, 0.5).unproject(camera).sub(camera.position).normalize();
-    ledeFrame.position.copy(camera.position).addScaledVector(ndcToWorld, ledeBox.D);
+    /* рама стоїть на глибині D уздовж осі камери (а не на відстані D по косому променю) — тоді її масштаб
+       збігається з пікселями абзацу, і табло не розʼїжджається з текстом до країв */
+    camera.getWorldDirection(camFwd);
+    ledeFrame.position.copy(camera.position).addScaledVector(ndcToWorld, ledeBox.D / Math.max(0.5, ndcToWorld.dot(camFwd)));
     ledeFrame.quaternion.copy(camera.quaternion); ledeFrame.rotateX(-ledeBox.tilt);
     ledeFrame.updateMatrixWorld();
     if (flapMat) flapMat.uniforms.uFrame.value.copy(ledeFrame.matrixWorld);
@@ -647,7 +647,7 @@ function init() {
     ledeBox = { cx: ((r.left + r.width / 2) / bw) * 2 - 1, cy: -(((r.top + r.height / 2) / bh) * 2 - 1), D, tilt: TILT };
     placeLedeFrame();
     const cs = getComputedStyle(lede);
-    placeLetters(ww, parseFloat(cs.fontSize) || 18, r.width, r.height, parseFloat(cs.lineHeight) || 0);
+    placeLetters(ww, parseFloat(cs.fontSize) || 18, r.width, r.height);
   }
 
   /* «ще не відкрита» — окрема мітка: час старту буває відʼємним (після перезавантаження табло ставимо вже складеним) */
@@ -655,6 +655,9 @@ function init() {
   let letterAtl = null, flaps = null, flapMat = null, flipSeen = null;
   let launch = null, autoStart = null;
   const rnd2 = seeded(77);
+  /* табло складене → його змінює справжній текст; HAND_S — тривалість підміни, як перехід .vault-lede-in у CSS */
+  const FLAP_OPACITY = 0.86, HAND_S = 1.05;
+  let handed = false, handAt = 0;
   /* ТАБЛО для всього опису. Кожна літера — три шматки: верхня половина нового знака (відкривається позаду),
      нижня половина старого (закривається згори) і сама пластинка на петлі посередині, що падає вниз: поки не
      пройшла ребром — на ній верх старого знака, після — низ нового. Змішування адитивне, тож перекриття робимо
@@ -680,7 +683,7 @@ function init() {
       uniforms: {
         uAtlas: { value: letterAtl.tex }, uGrid: { value: new THREE.Vector2(letterAtl.cols, letterAtl.rows) }, uCount: { value: letterAtl.count },
         uFrame: { value: new THREE.Matrix4() }, uTime: { value: 0 },
-        uTint: { value: new THREE.Color(0xcfe0ff) }, uOpacity: { value: 0.86 },
+        uTint: { value: new THREE.Color(0xcfe0ff) }, uOpacity: { value: FLAP_OPACITY },
       },
       vertexShader: `attribute float aPart; attribute vec3 aTo; attribute float aIdx; attribute float aSize; attribute float aSeed; attribute float aLaunch; attribute float aHalf; attribute float aRow;
         uniform mat4 uFrame; uniform vec2 uGrid; uniform float uCount; uniform float uTime;
@@ -742,10 +745,10 @@ function init() {
     scene.add(flaps);
   }
   /* розкласти табло по рамі опису; кожна літера має свій час старту від кінця вступу — хвиля в порядку читання */
-  function placeLetters(ww, fsCss, rw, rh, lhCss) {
+  function placeLetters(ww, fsCss, rw, rh) {
     buildFlaps();
     if (!flaps) return;
-    const lay = ledeLayout(letterAtl, fsCss, rw, lhCss);
+    const lay = { letters: ledeLetters(fsCss) };
     const n = lay.letters.length, scale = ww / rw;
     const cellW = (LCELL / LFS) * fsCss * scale;
     const to = new Float32Array(n * 3), idxA = new Float32Array(n), sz = new Float32Array(n), sd = new Float32Array(n), half = new Float32Array(n), rowv = new Float32Array(n);
@@ -878,6 +881,7 @@ function init() {
     if (window.scrollY > 40 || dbgIntro != null || introMs < INTRO_MS) return;
     introMs = 0;
     if (launch) { launch.fill(UNSET); flaps.geometry.attributes.aLaunch.needsUpdate = true; }
+    if (handed) { handed = false; lede.classList.remove('vault-lede-in', 'vault-lede-now'); }   // текст знову складає табло
     last = 0; schedule();
   }
   /* hero липкий на час прокрутки доріжки */
@@ -984,7 +988,17 @@ function init() {
         if (launch[i] !== UNSET) any = true;
       }
       if (touched) flaps.geometry.attributes.aLaunch.needsUpdate = true;
-      flaps.visible = any;
+      /* Табло склалося — його змінює справжній текст абзацу, той самий, що на телефоні: він чіткіший за літери
+         в полотні. Літери стоять точно на місцях тексту (ledeLetters), тож текст проявляється переходом CSS,
+         а табло за той самий час гасне — без зсуву. Лише у фото: там рама рівна, без нахилу площини. */
+      if (photo && !handed && any && tt >= lettersEnd()) {
+        handed = true; handAt = tt;
+        if (tt - lettersEnd() > 0.5) { handAt = -1e9; lede.classList.add('vault-lede-now'); }   // склалося давно (перезавантаження) — одразу текст
+        lede.classList.add('vault-lede-in');
+      }
+      const handK = handed ? clamp01((tt - handAt) / HAND_S) : 0;
+      flapMat.uniforms.uOpacity.value = FLAP_OPACITY * (1 - handK);
+      flaps.visible = any && handK < 1;
       if (snd) {
         if (!flipSeen || flipSeen.length !== launch.length) flipSeen = new Uint8Array(launch.length);
         for (let i = 0; i < launch.length; i++) {
@@ -1065,16 +1079,17 @@ function init() {
   new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (visible) { last = 0; schedule(); } else if (snd) snd.silence(); }, { threshold: 0.02 }).observe(sceneEl);
   document.addEventListener('visibilitychange', () => { if (document.hidden) { if (snd) snd.silence(); } else if (visible) { last = 0; schedule(); } });
   new ResizeObserver(() => { fit(); schedule(); }).observe(sceneEl);
-  /* табло складене: усі літери стартували й зупинились */
-  function lettersDone() {
-    if (!launch) return true;
+  /* коли табло цілком зупиниться: усі літери стартували, остання відкидалась (Infinity — ще не всі стартували) */
+  function lettersEnd() {
+    if (!launch) return -Infinity;
     let end = -Infinity;
     for (let i = 0; i < launch.length; i++) {
-      if (launch[i] === UNSET) return false;
+      if (launch[i] === UNSET) return Infinity;
       end = Math.max(end, launch[i]);
     }
-    return t >= end + CFG.flap.flips * CFG.flap.dur;
+    return end + CFG.flap.flips * CFG.flap.dur;
   }
+  function lettersDone() { return t >= lettersEnd(); }
   /* на <html> стоїть scroll-smooth: звичайний scrollTo поїхав би плавно, а треба зупинити скрол на місці */
   function jumpTo(y) {
     const prev = html.style.scrollBehavior;
