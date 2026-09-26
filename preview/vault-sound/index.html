@@ -127,7 +127,7 @@
         .vault-veil { background: linear-gradient(180deg, rgba(11,15,25,0) 78%, #0B0F19 100%); }
         @media (min-width: 1024px) { #vault-scene::before, #vault-scene::after { display: none; } }
         .vault-holo #vault-lede { opacity: 0; }
-        /* Телефон: опис — звичайний текст, який плавно проявляється сам, щойно зібралась фігура. Разом із прозорістю
+        /* Телефон: опис — звичайний текст, який плавно проявляється, щойно почався скрол. Разом із прозорістю
            йде зсув на 10 px угору: так поява читається як рух, а не як увімкнене світло. will-change віддає
            обидві властивості композитору — інакше згасання ділить кадри з 3D-сценою й видно сходинки
            (заміряно 25-09: прозорість стрибала 0 → 0,77 за один крок). */
@@ -138,6 +138,14 @@
         }
         .vault-holo #vault-lede.vault-lede-in { opacity: 1; transition: opacity 1.05s ease; }
         .vault-holo #vault-lede.vault-lede-now { transition: none; transform: none; }
+        /* натяк, що сторінку треба гортати: крапка повільно стікає в капсулі; ставить і прибирає сцена */
+        .vault-cue { position: fixed; left: 50%; bottom: 18px; width: 26px; height: 42px; margin-left: -13px; z-index: 40;
+            border: 1.5px solid rgba(226,236,255,.34); border-radius: 13px; opacity: 0; transition: opacity .6s ease; pointer-events: none; }
+        .vault-cue.is-on { opacity: 1; }
+        .vault-cue span { position: absolute; left: 50%; top: 8px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%;
+            background: rgba(226,236,255,.85); animation: vaultCue 2s cubic-bezier(.4,0,.2,1) infinite; }
+        @keyframes vaultCue { 0% { transform: translateY(0); opacity: 0 } 22% { opacity: 1 } 72% { transform: translateY(20px); opacity: .9 } 100% { transform: translateY(24px); opacity: 0 } }
+        @media (min-width: 1024px), (prefers-reduced-motion: reduce) { .vault-cue { display: none; } }
         @media (min-width: 1024px) {
             /* поки сцена не виміряла, де фігура, заголовок невидимий — потім зʼявляється одразу на своєму місці
                (раніше він стояв на приблизній позиції й доїжджав униз — зайвий рух) */

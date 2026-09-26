@@ -383,8 +383,8 @@ function init() {
   let visible = false, running = false;
   const hero = sceneEl.closest('section');
   const lede = document.getElementById('vault-lede');
-  /* опис — звичайний текст сторінки: поки збирається фігура, він прихований (клас у <head>), далі сам
-     проявляється переходом CSS, без скролу. Жодної анімації по літерах — власник просив не перевантажувати. */
+  /* опис — звичайний текст сторінки: до скролу він прихований (клас у <head>), далі просто проявляється
+     переходом CSS. Жодної анімації по літерах — власник просив не перевантажувати. */
   let ledeShown = false;
   function showLede(instant) {
     if (ledeShown || !lede) return;
@@ -397,6 +397,20 @@ function init() {
   const svhProbe = document.createElement('div');
   svhProbe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100svh;visibility:hidden;pointer-events:none';
   document.body.appendChild(svhProbe);
+
+  /* ---------- натяк, що треба гортати ---------- */
+  /* Німий індикатор унизу екрана: крапка повільно стікає в капсулі. Зʼявляється, коли фігура вже зібралась,
+     і зникає від першого ж руху скролу — більше не показується. */
+  const cue = document.createElement('div');
+  cue.className = 'vault-cue'; cue.setAttribute('aria-hidden', 'true');
+  cue.innerHTML = '<span></span>';
+  document.body.appendChild(cue);
+  let cueDone = false;
+  function hideCueForever() {
+    if (cueDone) return;
+    cueDone = true; cue.classList.remove('is-on');
+    setTimeout(() => cue.remove(), 700);
+  }
 
   /* ---------- розкладка: фігура й промені відносно місця опису ---------- */
   const photoRect = { x: 0, y: 0, w: 0, h: 0 };
@@ -519,7 +533,7 @@ function init() {
     return;
   }
   /* сторінку відкрито не згори (перезавантаження, перехід назад) — нічого не програється: одразу кінцевий стан */
-  if (dbgP == null && window.scrollY > 40) { introMs = INTRO_MS; pS = pT = progress(); showLede(true); }
+  if (dbgP == null && window.scrollY > 40) { introMs = INTRO_MS; pS = pT = progress(); showLede(true); hideCueForever(); }
 
   function tick(now) {
     running = false;
@@ -530,6 +544,7 @@ function init() {
     pT = progress();
     pS += (pT - pS) * 0.16;
     angle += dt / 1000 * (0.2 + 0.12 * pS);                           // фігура помітно крутиться, зі скролом — трохи швидше
+    if (introT >= 1 && !cueDone && window.scrollY < 8) cue.classList.add('is-on');   // фігура зібралась — показуємо, що треба гортати
     if (still) { pS = pT; render(...frames(pS, introT)); return; }
     if (frameNo % 2) render(...frames(pS, introT));                   // 30 к/с
     if (visible && !document.hidden) schedule();
@@ -544,7 +559,7 @@ function init() {
     introMs = 0; last = 0; schedule();
   }
   new ResizeObserver(() => { fitScene(); schedule(); }).observe(sceneEl);
-  window.addEventListener('scroll', () => { schedule(); }, { passive: true });
+  window.addEventListener('scroll', () => { if (window.scrollY > 8) hideCueForever(); schedule(); }, { passive: true });
   /* дотик до фігури — ядро робить повний оберт (наступний — коли скінчився попередній). Сцена на телефоні
      пропускає дотики крізь себе (кнопки й прокрутка), тож слухаємо весь hero і перевіряємо, чи влучили у фігуру */
   if (photo && hero) hero.addEventListener('click', (ev) => {
