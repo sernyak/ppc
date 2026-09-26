@@ -14,9 +14,9 @@
  * місці абзацу в розмітці (сам <p> лишається прозорим носієм змісту). Рама
  * тексту прибита до кадру, тож камера може облітати фігуру. Увесь опис —
  * ТАБЛО: кожна літера кілька разів перекидає пластинку й зупиняється на своєму
- * знаку. Перше речення проявляється саме, щойно фігура зʼявилась і заголовок
- * звільнив місце; решту відкриває скрол — хвилею в порядку читання. Швидкий
- * скрол сторінка притримує, доки табло не складеться (до ~1,5 с).
+ * знаку. Увесь опис проявляється сам, хвилею в порядку читання, щойно фігура
+ * зʼявилась і заголовок звільнив місце, — гортати, щоб дочитати, не треба
+ * (прохання власника 26-09; раніше після першого речення решту відкривав скрол).
  *
  * ПОЛЕ ФОРМУЛ за фігурою: після вступу ледь тліє, а щойно починається скрол і
  * з ядра вирушають вогники — стає яскравим.
@@ -25,7 +25,7 @@
  * ?still=1 — один кадр, ?age=3 — стільки секунд «уже минуло» після вступу.
  */
 import * as THREE from 'three';
-import { figureFrame, figureProgress, getFrame as sceneFrame, introRelease, REST_LEDE, flapStart, restOrder, queueLaunch, danceFrame, DANCE, FIG_DANCE, kickFrame, FIG, clamp01, CFG } from './hero-vault-desk-frame.js';
+import { figureFrame, figureProgress, getFrame as sceneFrame, introRelease, REST_LEDE, flapStart, danceFrame, DANCE, FIG_DANCE, kickFrame, FIG, clamp01, CFG } from './hero-vault-desk-frame.js';
 
 const sceneEl = document.getElementById('vault-scene');
 const canvas = document.getElementById('vault-canvas');
@@ -578,12 +578,6 @@ function init() {
     })(lede, false);
     lede.classList.add('vault-lede-holo');
   }
-  /* перше речення — «Мене звати Олександр Серняк, я технічний PPC-маркетолог із 2016 року.» — зʼявляється табло */
-  let autoLetters = 0;
-  if (ledeTokens) {
-    let c = 0;
-    for (const tk of ledeTokens) { if (tk.br) continue; c += tk.w.length; if (/[.!?]$/.test(tk.w)) { autoLetters = c; break; } }
-  }
   const LCELL = 64, LFS = 42;
   function letterAtlas() {
     const set = [];
@@ -659,13 +653,13 @@ function init() {
   /* «ще не відкрита» — окрема мітка: час старту буває відʼємним (після перезавантаження табло ставимо вже складеним) */
   const UNSET = -1e6;
   let letterAtl = null, flaps = null, flapMat = null, flipSeen = null;
-  let order = null, launch = null, autoStart = null, nAuto = 0, lastStart = -1e9;
+  let launch = null, autoStart = null;
   const rnd2 = seeded(77);
   /* ТАБЛО для всього опису. Кожна літера — три шматки: верхня половина нового знака (відкривається позаду),
      нижня половина старого (закривається згори) і сама пластинка на петлі посередині, що падає вниз: поки не
      пройшла ребром — на ній верх старого знака, після — низ нового. Змішування адитивне, тож перекриття робимо
-     не глибиною, а відсіканням: що вже закрила пластинка, того не малюємо. Перше речення запускається саме за
-     розкладом від кінця вступу, решту відкриває скрол. */
+     не глибиною, а відсіканням: що вже закрила пластинка, того не малюємо. Увесь опис запускається сам за
+     розкладом від кінця вступу. */
   function buildFlaps() {
     if (!ledeTokens || flaps) return;
     letterAtl = letterAtlas();
@@ -747,17 +741,17 @@ function init() {
     flaps.frustumCulled = false; flaps.renderOrder = -1; flaps.visible = false;
     scene.add(flaps);
   }
-  /* розкласти табло по рамі опису: перше речення — за розкладом після вступу, решта — від скролу */
+  /* розкласти табло по рамі опису; кожна літера має свій час старту від кінця вступу — хвиля в порядку читання */
   function placeLetters(ww, fsCss, rw, rh, lhCss) {
     buildFlaps();
     if (!flaps) return;
     const lay = ledeLayout(letterAtl, fsCss, rw, lhCss);
-    const n = lay.letters.length, scale = ww / rw, na = Math.min(autoLetters, n), m = n - na;
+    const n = lay.letters.length, scale = ww / rw;
     const cellW = (LCELL / LFS) * fsCss * scale;
     const to = new Float32Array(n * 3), idxA = new Float32Array(n), sz = new Float32Array(n), sd = new Float32Array(n), half = new Float32Array(n), rowv = new Float32Array(n);
     /* перерахунок розкладки (довантажився шрифт, змінився розмір вікна) не скидає вже відкрите табло */
     const prev = launch;
-    order = new Float32Array(n); autoStart = new Float32Array(n); nAuto = na;
+    autoStart = new Float32Array(n);
     launch = new Float32Array(n).fill(UNSET);
     if (prev && prev.length === n) launch.set(prev);
     lay.letters.forEach((L, i) => {
@@ -765,8 +759,7 @@ function init() {
       idxA[i] = letterAtl.index[L.k]; sz[i] = cellW; sd[i] = rnd2();
       half[i] = L.adv * LFS / LCELL * 0.5 - 0.025;             // пластинка завширшки як сам знак, з тонкою щілиною до сусідньої
       rowv[i] = L.cy / rh;
-      if (i < na) { order[i] = 2; autoStart[i] = flapStart(i, na, rnd2()); }
-      else order[i] = restOrder(i - na, m, rnd2());
+      autoStart[i] = flapStart(i, n, rnd2());
     });
     const g = flaps.geometry;
     g.setAttribute('aTo', new THREE.InstancedBufferAttribute(to, 3));
@@ -849,7 +842,7 @@ function init() {
   const smoothRamp = (x) => { const k = clamp01((x - 0.15) / 0.85); return k * k * (3 - 2 * k); };
   /* Поки опису ще немає, заголовок стоїть на рівні центра фігури — без порожнечі під ним. Щойно фігура
      повністю зʼявилась, він плавно відʼїжджає вгору на своє місце (перехід — у CSS, клас vault-risen),
-     і лише тоді табло виводить перше речення. */
+     і лише тоді табло виводить опис. */
   let risen = false;
   function placeTitle() {
     if (!html.classList.contains('vault-holo')) return;
@@ -870,29 +863,29 @@ function init() {
     html.classList.add('vault-risen');
   }
   /* Після перезавантаження браузер повертає сторінку туди, де її лишили. Тоді нічого не програється саме:
-     фігура вже зібрана, заголовок на місці, літери, які відкрив би цей скрол, уже стоять, табло складене. */
+     фігура вже зібрана, заголовок на місці, табло складене. */
   let userInput = false, instantLand = false;
   for (const ev of ['wheel', 'touchstart', 'keydown', 'pointerdown']) window.addEventListener(ev, () => { userInput = true; }, { passive: true });
   function enterInstant() {
     introMs = INTRO_MS; restSec = 99;
-    pTarget = pSmooth = progress(); pText = latch;
+    pTarget = pSmooth = progress();
     instantLand = true;
     rise(true);
   }
   /* Людина ввімкнула звук угорі сторінки — програємо появу ще раз, щоб вона почула хоровод і табло з самого
-     початку. Заголовок лишається на місці; перше речення гасне й складається знову; решта опису не чіпається. */
+     початку. Заголовок лишається на місці; опис гасне й складається знову. */
   function replayIntro() {
     if (window.scrollY > 40 || dbgIntro != null || introMs < INTRO_MS) return;
     introMs = 0;
-    if (launch) { for (let i = 0; i < nAuto; i++) launch[i] = UNSET; flaps.geometry.attributes.aLaunch.needsUpdate = true; }
+    if (launch) { launch.fill(UNSET); flaps.geometry.attributes.aLaunch.needsUpdate = true; }
     last = 0; schedule();
   }
   /* hero липкий на час прокрутки доріжки */
   /* Історія програється ОДИН РАЗ: досягнутий стан замикається, назад нічого не відмотується — інакше
      при русі вгору сцена переграє все у зворотному напрямку й скрол відчувається вʼязким. */
   /* У фото-варіанті фігура й голограма йдуть за скролом в ОБИДВА боки: скрол назад відкручує їх до початкового
-     стану (прохання власника). Опис при цьому лишається — для нього прогрес так само замикається (pText). */
-  let latch = 0, collapsed = false, pText = 0;
+     стану (прохання власника). Опис від скролу не залежить. */
+  let latch = 0, collapsed = false;
   function progress() {
     if (dbgP != null) return dbgP;
     if (collapsed) return 1;
@@ -909,7 +902,6 @@ function init() {
     if (extra <= 0 || window.scrollY < extra + 4) return;
     collapsed = true; latch = 1;
     track.style.height = hero.offsetHeight + 'px';
-    lastY = window.scrollY - extra;
     jumpTo(window.scrollY - extra);
   }
   function placeBeam(m, a, b, d) {
@@ -986,16 +978,9 @@ function init() {
     wall.visible = wallMat.uniforms.uOpacity.value > 0.002;
     if (flaps) {
       let touched = false, any = false;
-      const m = launch.length - nAuto;
       for (let i = 0; i < launch.length; i++) {
-        if (i < nAuto) {
-          /* перше речення: табло за розкладом від кінця вступу (restSec уже враховує ?age і перезавантаження) */
-          if (launch[i] === UNSET && fS.after) { launch[i] = tt - restSec + autoStart[i]; touched = true; }
-        } else if (launch[i] === UNSET && textFade >= order[i]) {
-          /* решта: скрол відпускає літеру; відпущені разом стають у чергу — табло однаково біжить хвилею */
-          lastStart = instantLand ? tt - 10 : queueLaunch(tt - AGE, lastStart, m);
-          launch[i] = lastStart; touched = true;
-        } else if (launch[i] !== UNSET && textFade < order[i] - 0.03) { launch[i] = UNSET; touched = true; }   // скрол назад — табло гасне (у фото — ні: опис лишається)
+        /* табло за розкладом від кінця вступу (restSec уже враховує ?age і перезавантаження) */
+        if (launch[i] === UNSET && fS.after) { launch[i] = tt - restSec + autoStart[i]; touched = true; }
         if (launch[i] !== UNSET) any = true;
       }
       if (touched) flaps.geometry.attributes.aLaunch.needsUpdate = true;
@@ -1038,10 +1023,8 @@ function init() {
   const frames = (p, introT) => {
     introNow = introT;
     const fS = sceneFrame(p, introT);
-    textFade = photo ? sceneFrame(dbgP != null ? p : pText, introT).fade : fS.fade;
     return [figureFrame(figureProgress(p), introT, COUNTS, photo ? FIG_DANCE : FIG), fS];
   };
-  let textFade = 0;
   let introNow = 0, glowCur = 0;
   function render(fF, fS) { apply(fF, fS, t); renderer.render(scene, camera); }
 
@@ -1069,12 +1052,11 @@ function init() {
     if (!risen && introT >= 1) rise(dbgIntro != null);   // фігура повністю зʼявилась — заголовок звільняє місце опису
     pTarget = progress();
     pSmooth += (pTarget - pSmooth) * 0.16;
-    pText += (latch - pText) * 0.16;
     mx += (tmx - mx) * 0.08; my += (tmy - my) * 0.08;
     spot.lerp(tspot, 0.12);
     stepGrid(Math.min(dt / 1000, 0.05));
     angle += dt / 1000 * (0.1 + 0.08 * pSmooth);                         // обертання: повільне у спокої, трохи швидше зі скролом
-    if (still) { pSmooth = pTarget; pText = latch; render(...frames(pSmooth, introT)); return; }
+    if (still) { pSmooth = pTarget; render(...frames(pSmooth, introT)); return; }
     render(...frames(pSmooth, introT));
     if (visible && !document.hidden) schedule();
   }
@@ -1083,24 +1065,15 @@ function init() {
   new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (visible) { last = 0; schedule(); } else if (snd) snd.silence(); }, { threshold: 0.02 }).observe(sceneEl);
   document.addEventListener('visibilitychange', () => { if (document.hidden) { if (snd) snd.silence(); } else if (visible) { last = 0; schedule(); } });
   new ResizeObserver(() => { fit(); schedule(); }).observe(sceneEl);
-  /* Швидкий скрол не проскакує опис: сторінка не йде нижче точки, де скрол відпустив останню літеру, доки всі
-     літери не долетять і не сядуть. Hero весь цей час прилиплий, тож кадр не стрибає. Лише на спуску. */
-  let lastY = window.scrollY;
+  /* табло складене: усі літери стартували й зупинились */
   function lettersDone() {
     if (!launch) return true;
     let end = -Infinity;
-    for (let i = nAuto; i < launch.length; i++) {
+    for (let i = 0; i < launch.length; i++) {
       if (launch[i] === UNSET) return false;
       end = Math.max(end, launch[i]);
     }
     return t >= end + CFG.flap.flips * CFG.flap.dur;
-  }
-  function holdForLetters() {
-    const y = window.scrollY, down = y > lastY;
-    lastY = y;
-    if (!flaps || dbgP != null || !down || lettersDone()) return;
-    const gateY = Math.round(CFG.fade[1] * Math.max(1, (track ? track.offsetHeight : 0) - window.innerHeight));
-    if (y > gateY + 2) { jumpTo(gateY); lastY = gateY; }
   }
   /* на <html> стоїть scroll-smooth: звичайний scrollTo поїхав би плавно, а треба зупинити скрол на місці */
   function jumpTo(y) {
@@ -1109,7 +1082,7 @@ function init() {
     window.scrollTo(0, y);
     html.style.scrollBehavior = prev;
   }
-  window.addEventListener('scroll', () => { holdForLetters(); collapseTrack(); schedule(); }, { passive: true });
+  window.addEventListener('scroll', () => { collapseTrack(); schedule(); }, { passive: true });
   const hero = sceneEl.closest('section') || sceneEl;
   if (fine) {
     hero.addEventListener('pointermove', (ev) => {

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { FIG, CFG, DANCE, FIG_DANCE, danceFrame, danceSpeed, KICK, kickFrame, figureFrame, figureProgress, getFrame, introRelease, REST_LEDE, flapStart, flapDone, restOrder, queueLaunch, maxHold, clamp01, smooth } from './hero-vault-desk-frame.js';
+import { FIG, CFG, DANCE, FIG_DANCE, danceFrame, danceSpeed, KICK, kickFrame, figureFrame, figureProgress, getFrame, introRelease, REST_LEDE, flapStart, flapDone, clamp01, smooth } from './hero-vault-desk-frame.js';
 
 const COUNTS = { joints: 24, inner: 36, outer: 24 };
 const near = (a, b, m) => assert.ok(Math.abs(a - b) < 1e-9, `${m}: ${a} ≠ ${b}`);
@@ -43,11 +43,11 @@ test('скрол одразу випускає вогники, і поле фо�
   assert.equal(end.fade, 1); assert.equal(end.grains, 1); assert.equal(end.coverage, 1);
 });
 
-test('після того, як вилетіли всі літери, скрол голограму вже не крутить — лишається тільки кінець доріжки', () => {
-  assert.ok(CFG.fade[1] < 1, 'літери відпущено до кінця доріжки');
+test('після того, як поле формул розгорілось, скрол голограму вже не крутить — лишається тільки кінець доріжки', () => {
+  assert.ok(CFG.fade[1] < 1, 'поле формул розгоряється до кінця доріжки');
   assert.ok(CFG.coverage[1] <= 0.95 && CFG.figureSpan <= 0.95 && CFG.grains[1] <= CFG.fade[1], 'поле, фігура й вогники теж встигають');
   const tail = (1 - CFG.fade[1]) * (CFG.trackVh - 100) / 100;
-  assert.ok(tail <= 0.1, `після останньої літери лишається ${tail.toFixed(3)} екрана скролу — майже одразу далі`);
+  assert.ok(tail <= 0.1, `після нього лишається ${tail.toFixed(3)} екрана скролу — майже одразу далі`);
 });
 
 test('яскравість поля формул наростає плавно, без стрибка', () => {
@@ -76,8 +76,8 @@ test('у спокої поле формул лише тліє й нароста�
   for (let i = 0; i <= 200; i++) { const v = introRelease(CFG.rest.dur * i / 200).wall; assert.ok(v >= prev && v - prev < 0.01); prev = v; }
 });
 
-test('фото: поле формул проявляється разом із першим реченням опису', () => {
-  const n = 70, first = flapStart(0, n, 0), done = flapDone();
+test('фото: поле формул проявляється разом з описом', () => {
+  const n = 370, first = flapStart(0, n, 0), done = flapDone();
   assert.equal(introRelease(first - 0.01, REST_LEDE).wall, 0, 'до першої літери написів ще немає');
   assert.ok(introRelease(first + 0.3, REST_LEDE).wall > 0, 'написи займаються разом із табло');
   assert.ok(introRelease(done - 0.3, REST_LEDE).wall < REST_LEDE.wall, 'і ще наростають, поки табло складається');
@@ -87,35 +87,15 @@ test('фото: поле формул проявляється разом із �
   for (let i = 0; i <= 400; i++) { const v = introRelease(done * i / 400, REST_LEDE).wall; assert.ok(v >= prev && v - prev < 0.01, 'без стрибків'); prev = v; }
 });
 
-test('табло: хвиля зліва направо, і вся фраза складається за кілька секунд', () => {
-  const n = 70;
+test('табло: увесь опис складається сам, хвилею в порядку читання, за кілька секунд — без скролу', () => {
+  const n = 370;                                          // стільки літер в описі
+  for (let i = 1; i < n; i++) assert.ok(flapStart(i, n, 0.5) > flapStart(i - 1, n, 0.5), 'хвиля в порядку читання');
   assert.ok(flapStart(0, n, 0) >= CFG.flap.delay, 'перша літера — після короткої паузи');
   assert.ok(flapStart(n - 1, n, 0) > flapStart(0, n, 1), 'остання — помітно пізніше за першу');
   for (let i = 0; i < n; i++) assert.ok(flapStart(i, n, 1) + CFG.flap.flips * CFG.flap.dur <= flapDone() + 1e-9, 'кожна літера встигає зупинитись');
   assert.ok(flapDone() < 3, `табло зупиняється за ${flapDone()} с — перший екран не чекає довго`);
   assert.ok(CFG.flap.delay >= CFG.titleRise, 'спершу заголовок підіймається й звільняє місце, лише потім зʼявляється текст');
   assert.ok(CFG.flap.dur >= 0.1, 'пластинка перекидається не частіше ~10 разів на секунду — без мерехтіння');
-});
-
-test('решта опису: скрол відпускає літери в порядку читання, і всі встигають до кінця випуску', () => {
-  const m = 330;
-  let prev = -1;
-  for (let j = 0; j < m; j++) {
-    const o = restOrder(j, m, 0.5);
-    assert.ok(o > prev, 'хвиля в порядку читання'); prev = o;
-    assert.ok(restOrder(j, m, 0) >= CFG.order.min, 'поріг не нижчий за мінімум');
-    assert.ok(restOrder(j, m, 1) <= 0.9, 'останні літери відпускаються ще до кінця fade');
-  }
-  assert.ok(CFG.order.min >= 0.035, 'при скролі назад перша ж літера може сховатися (fade < поріг − 0,03)');
-});
-
-test('швидкий скрол: табло біжить хвилею, і сторінка тримає недовго', () => {
-  const m = 330;
-  let last = -Infinity, first = null;
-  for (let j = 0; j < m; j++) { last = queueLaunch(10, last, m); if (first == null) first = last; }
-  assert.ok(last - first <= CFG.flap.burst + 1e-9, 'уся хвиля — не довша за burst');
-  assert.equal(queueLaunch(20, 3, m), 20, 'повільний скрол черги не помічає');
-  assert.ok(maxHold() <= 1.6, `утримання не довше ${maxHold()} с`);
 });
 
 test('фото-варіант, хоровод: крапки по одній стають у коло, заповнюють його рівно й лише потім сідають', () => {

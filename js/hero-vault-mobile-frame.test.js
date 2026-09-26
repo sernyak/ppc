@@ -24,11 +24,11 @@ test('до кінця вступу скрол нічого не робить', (
   assert.equal(f.pull, 0); assert.equal(f.beams, 0); assert.equal(f.story, 0); assert.equal(f.lede, false); assert.equal(f.after, false);
 });
 
-test('скрол: фігура меншає, вмикаються промені, опис просто проявляється', () => {
+test('опис проявляється сам, щойно зібралась фігура; скрол меншає фігуру й вмикає промені', () => {
+  assert.equal(getFrame(0, 0.99).lede, false, 'поки фігура збирається, опису ще немає');
   const f0 = getFrame(0, 1);
-  assert.equal(f0.pull, 0); assert.equal(f0.beams, 0); assert.equal(f0.lede, false, 'без скролу опису ще немає');
-  assert.equal(getFrame(CFG.lede, 1).lede, true, 'щойно почався скрол — опис проявляється');
-  assert.ok(CFG.lede <= 0.1, 'і не змушує довго гортати');
+  assert.equal(f0.pull, 0); assert.equal(f0.beams, 0);
+  assert.equal(f0.lede, true, 'фігура зібралась — опис видно без жодного скролу');
   const f1 = getFrame(1, 1);
   assert.equal(f1.pull, 1); assert.equal(f1.beams, 1); assert.equal(f1.story, 1);
   assert.ok(CFG.pull[1] <= 0.9 && CFG.beams[1] <= 0.9, 'усе встигає до кінця відрізка скролу');
