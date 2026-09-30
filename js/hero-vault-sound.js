@@ -279,11 +279,13 @@ export function soundButton(snd, hero, { onEnable } = {}) {
   b.type = 'button'; b.className = 'vault-sound';
   const ICON_OFF = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="m22 9-6 6M16 9l6 6"/></svg>';
   const ICON_ON = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+  const en = document.documentElement.lang === 'en';          // /ai/en/
+  const label = (on) => (en ? (on ? 'Turn sound off' : 'Turn sound on') : (on ? 'Вимкнути звук' : 'Увімкнути звук'));
   const paint = (on) => {
     b.innerHTML = on ? ICON_ON : ICON_OFF;
     b.setAttribute('aria-pressed', on ? 'true' : 'false');
-    b.setAttribute('aria-label', on ? 'Вимкнути звук' : 'Увімкнути звук');
-    b.title = on ? 'Вимкнути звук' : 'Увімкнути звук';
+    b.setAttribute('aria-label', label(on));
+    b.title = label(on);
   };
   paint(false);                                              // до першого дотику звук ще не грає — показуємо чесно
   snd.onToggle = (on) => paint(on);

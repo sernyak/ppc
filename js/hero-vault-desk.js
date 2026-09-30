@@ -331,8 +331,19 @@ function init() {
   });
   const wall = new THREE.Mesh(new THREE.PlaneGeometry(WW, H), wallMat); wall.position.copy(wallC); wall.rotation.y = wallRot;
   wall.visible = false; scene.add(wall);
-  /* Не про мої проєкти, а про економіку того, хто читає. Три голоси: модель · результат · процес. */
-  const CORPUS = [
+  /* Не про мої проєкти, а про економіку того, хто читає. Три голоси: модель · результат · процес.
+     Англійська сторінка (/ai/en/, <html lang="en">) бере той самий набір англійською. */
+  const CORPUS = document.documentElement.lang === 'en' ? [
+    'LTV / CAC = 3.8', 'ROAS = revenue / spend', 'margin = AOV × frequency − CAC',
+    '∂ profit / ∂ budget', 'break-even: 2.5 mo', 'segment × channel × margin',
+    '14-day demand forecast', 'p(payment | source)', 'plan / actual = 96%',
+    'CAC ↓ 34% in 6 weeks', 'conversion 2.1% → 3.4%', 'lead handling: 4 h → 3 min',
+    'checkout drop-off −41%', 'repeat purchases 19% → 31%', 'cost per lead $12.40',
+    'avg order value ↑ 22%', '12 h of routine a week → 0', 'manual work 68% → 8%',
+    '0 lost leads', 'A/B: +18% add-to-cart', 'lead → CRM → call in 60 s',
+    'report every Monday 08:00', 'payment → invoice → email', 'reply to customer 24/7 · 30 s',
+    'daily reconciliation: 0 gaps', 'click → lead → payment', 'queue: 0 · wait → 0',
+  ] : [
     'LTV / CAC = 3,8', 'ROAS = дохід / витрати', 'маржа = чек × частота − CAC',
     '∂ прибуток / ∂ бюджет', 'точка окупності: 2,5 міс', 'сегмент × канал × маржа',
     'прогноз попиту на 14 днів', 'p(оплата | джерело)', 'план / факт = 96 %',

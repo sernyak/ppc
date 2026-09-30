@@ -10,6 +10,9 @@
     <meta name="description" content="ШІ-продавці й асистенти, які цілодобово спілкуються з клієнтами, аналіз дзвінків відділу продажів, пошук клієнтів у відкритих джерелах і контент-«завод» з автопублікацією. Робочі демо можна спробувати.">
     <link rel="canonical" href="https://ppcmarketing.pro/ai/" />
     <meta name="robots" content="noindex, nofollow">
+    <link rel="alternate" hreflang="uk" href="https://ppcmarketing.pro/ai/" />
+    <link rel="alternate" hreflang="en" href="https://ppcmarketing.pro/ai/en/" />
+    <link rel="alternate" hreflang="x-default" href="https://ppcmarketing.pro/ai/" />
     <link rel="icon" href="/favicon.ico" sizes="32x32">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
@@ -28,6 +31,7 @@
     <meta name="twitter:description" content="ШІ-продавці й асистенти, які цілодобово спілкуються з клієнтами, аналіз дзвінків відділу продажів, пошук клієнтів у відкритих джерелах і контент-«завод» з автопублікацією. Робочі демо можна спробувати." />
     <meta name="twitter:image" content="https://ppcmarketing.pro/ai/og-cover.jpg" />
     <meta property="og:locale" content="uk_UA" />
+    <meta property="og:locale:alternate" content="en_US" />
 
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -187,19 +191,24 @@
     <nav class="fixed w-full z-50 glass-card border-b border-white/5 transition-all duration-300">
         <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center gap-4">
             <a href="/ai/" class="leading-tight cursor-pointer">
-                <span class="block text-lg font-bold tracking-tight text-white">Олександр <span class="text-brand-accent">Серняк</span></span>
-                <span class="block text-[11px] font-medium tracking-wide text-slate-400">AI-системи та автоматизація</span>
+                <span class="block whitespace-nowrap text-lg font-bold tracking-tight text-white">Олександр <span class="text-brand-accent">Серняк</span></span>
+                <span class="block whitespace-nowrap text-[11px] font-medium tracking-wide text-slate-400">AI-системи та автоматизація</span>
             </a>
             <div class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300">
                 <a href="#offers" class="hover:text-white transition-colors cursor-pointer">Послуги</a>
                 <a href="#projects" class="hover:text-white transition-colors cursor-pointer">Кейси</a>
                 <a href="#about" class="hover:text-white transition-colors cursor-pointer">Про мене</a>
                 <a href="#how" class="hover:text-white transition-colors cursor-pointer">Як я працюю</a>
-                <a href="/" class="text-slate-500 hover:text-slate-300 transition-colors cursor-pointer">EN</a>
             </div>
-            <a href="https://t.me/serniak_ai_bot?start=site" target="_blank" rel="noopener" class="shrink-0 px-5 py-2.5 bg-brand-accent hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] cursor-pointer">
-                Написати
-            </a>
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                <div class="flex items-center rounded-lg border border-white/10 bg-white/[.03] p-0.5 text-xs font-semibold tracking-wide" role="group" aria-label="Мова сторінки">
+                    <span class="px-2 py-1 rounded-md bg-white/10 text-white" aria-current="page">UA</span>
+                    <a href="/ai/en/" hreflang="en" lang="en" class="px-2 py-1 rounded-md text-slate-400 hover:text-white transition-colors cursor-pointer">EN</a>
+                </div>
+                <a href="https://t.me/serniak_ai_bot?start=site" target="_blank" rel="noopener" class="shrink-0 inline-flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto sm:px-5 sm:py-2.5 bg-brand-accent hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] cursor-pointer" aria-label="Написати ШІ-асистенту в Telegram">
+                    <svg class="w-5 h-5 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 12 3.27 3.13A59.77 59.77 0 0 1 21.49 12 59.77 59.77 0 0 1 3.27 20.88L6 12Zm0 0h7.5"/></svg><span class="hidden sm:inline">Написати</span>
+                </a>
+            </div>
         </div>
     </nav>
 
@@ -236,7 +245,7 @@
 
                 <div class="order-5 flex flex-wrap justify-center lg:justify-start gap-4 pt-2">
                     <a href="#offers" class="px-7 py-3.5 bg-white text-brand-dark font-bold rounded-lg hover:bg-slate-200 transition-all cursor-pointer">
-                        Що можна спробувати
+                        Спробувати
                     </a>
                     <a href="https://t.me/serniak_ai_bot?start=site" target="_blank" rel="noopener" class="px-7 py-3.5 glass-card text-white font-medium rounded-lg hover:bg-white/5 transition-all cursor-pointer">
                         Написати ШІ-асистенту
@@ -767,7 +776,7 @@
                 </p>
                 <p class="text-slate-400 text-lg leading-relaxed mb-7">
                     З 2025 року будую ШІ-продукти. Власні системи працюють із реальними користувачами й оплатами — їх можна
-                    відкрити й перевірити. Проєкт веде одна людина від задачі до запуску.
+                    відкрити й перевірити.
                 </p>
                 <div class="grid grid-cols-2 gap-4 max-w-md mb-7">
                         <div class="glass-card rounded-2xl p-5">
@@ -809,13 +818,13 @@
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
                 <div class="glass-card rounded-2xl p-6">
                     <div class="text-sm font-bold text-brand-accent mb-3">01</div>
-                    <div class="text-lg font-bold mb-2">Бриф</div>
-                    <p class="text-sm text-slate-400 leading-relaxed">Хто ваш клієнт, як іде процес, що зараз робиться руками і який результат потрібен на виході.</p>
+                    <div class="text-lg font-bold mb-2">Первинний збір інформації</div>
+                    <p class="text-sm text-slate-400 leading-relaxed">Що є зараз, яке питання/проблему потрібно вирішити. Бажаний результат.</p>
                 </div>
                 <div class="glass-card rounded-2xl p-6">
                     <div class="text-sm font-bold text-brand-accent mb-3">02</div>
-                    <div class="text-lg font-bold mb-2">Опис результату</div>
-                    <p class="text-sm text-slate-400 leading-relaxed">Що має робити система і скільки вона має заробляти чи економити.</p>
+                    <div class="text-lg font-bold mb-2">З'ясування деталей</div>
+                    <p class="text-sm text-slate-400 leading-relaxed">Побажання до функціоналу. Адаптація рішень розробки під особисті потреби.</p>
                 </div>
                 <div class="glass-card rounded-2xl p-6">
                     <div class="text-sm font-bold text-brand-accent mb-3">03</div>
@@ -824,12 +833,11 @@
                 </div>
                 <div class="glass-card rounded-2xl p-6">
                     <div class="text-sm font-bold text-brand-accent mb-3">04</div>
-                    <div class="text-lg font-bold mb-2">Здача</div>
-                    <p class="text-sm text-slate-400 leading-relaxed">Готово, коли система відповідає опису з кроку 02. Код, доступи й акаунти — ваші. Два тижні супроводу безкоштовно.</p>
+                    <div class="text-lg font-bold mb-2">Кінцевий результат</div>
+                    <p class="text-sm text-slate-400 leading-relaxed">Робота закінчена, коли ви кажете: «Так, це саме те, що потрібно». Код, доступи й акаунти — ваші. Два тижні супроводу безкоштовно.</p>
                 </div>
             </div>
             <ul class="flex flex-wrap gap-x-8 gap-y-2 text-sm text-slate-400">
-                <li>Передоплата 50&nbsp;%, можна поетапно</li>
                 <li>Оплата офіційно, на ФОП</li>
                 <li>NDA — на ваш запит</li>
                 <li>Хостинг і API — на ваших акаунтах</li>
@@ -916,7 +924,7 @@
         <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <p>© 2026 Олександр Серняк. Технічний PPC-маркетолог.</p>
             <div class="flex flex-wrap justify-center gap-6">
-                <a href="/" class="hover:text-white transition-colors cursor-pointer">English version</a>
+                <a href="/ai/en/" hreflang="en" lang="en" class="hover:text-white transition-colors cursor-pointer">English version</a>
                 <a href="https://linkedin.com/in/serniak" target="_blank" rel="noopener" class="hover:text-white transition-colors cursor-pointer">LinkedIn</a>
                 <a href="https://t.me/serniak_ai_bot?start=site" target="_blank" rel="noopener" class="hover:text-white transition-colors cursor-pointer">ШІ-асистент у Telegram</a>
             </div>
