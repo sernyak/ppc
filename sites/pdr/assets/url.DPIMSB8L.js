@@ -1,0 +1,1 @@
+var e=`./`.replace(/\/?$/,`/`),t=t=>e+t.replace(/^\//,``);export{t};

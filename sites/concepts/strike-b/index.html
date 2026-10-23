@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Strike · Афіша бою - концепт</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&amp;family=Oswald:wght@500;600;700&amp;family=Podkova:wght@600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+.sb{--paper:#e4e3de;--paper-2:#d9d8d2;--ink:#151413;--red:#b51b14;--grey:#4f4d48;
+  background:var(--paper);color:var(--ink);font-family:'Golos Text',system-ui,sans-serif;font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  background-image:radial-gradient(rgba(0,0,0,.035) 1px,transparent 1.2px);background-size:5px 5px}
+.sb *{box-sizing:border-box}
+.sb ::selection{background:var(--red);color:var(--paper)}
+.sb a{color:inherit;text-decoration:none}
+.sb a.ticket,.sb a.launch{color:var(--paper)}
+.sb a:focus-visible{outline:3px solid var(--red);outline-offset:4px}
+.wrap{max-width:1300px;margin:0 auto;padding:0 44px}
+.wood{font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;line-height:.84;letter-spacing:-.005em}
+.slab{font-family:'Podkova',serif;font-weight:700}
+.red{color:var(--red)}
+
+/* poster border: a heavy rule over a thin one, as on a printed bill */
+.rule{height:9px;border-top:5px solid var(--ink);border-bottom:1.5px solid var(--ink)}
+
+.hd{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px 0 16px}
+.logo{display:flex;align-items:center;gap:12px;font-family:'Oswald',sans-serif;font-weight:700;font-size:38px;letter-spacing:.06em;line-height:1}
+.logo i{display:block;width:12px;height:12px;background:var(--red);transform:rotate(45deg)}
+.nav{display:flex;align-items:center;gap:32px}
+.nav a.l{font-family:'Podkova',serif;font-weight:700;font-size:18px;transition:color .2s}
+.nav a.l:hover{color:var(--red)}
+.nav .tk{font-family:'Oswald',sans-serif;font-weight:600;font-size:18px;letter-spacing:.06em;text-transform:uppercase;color:var(--paper);background:var(--red);padding:10px 18px 11px;transition:background-color .2s}
+.nav .tk:hover{background:var(--ink)}
+
+/* the bill */
+.bill{display:grid;grid-template-columns:minmax(0,1.32fr) minmax(0,1fr);gap:48px;padding:34px 0 46px;align-items:stretch}
+.stack h1{margin:0}
+.stack .w1{display:block;font-size:clamp(5rem,12.2vw,11.4rem)}
+.stack .w2{display:block;font-size:clamp(3.2rem,7.3vw,6.9rem);color:var(--red);margin-top:6px}
+.stack .w3{display:block;font-size:clamp(2.9rem,6.65vw,6.25rem);margin-top:8px}
+.over{text-shadow:2px 1px 0 rgba(181,27,20,.28)}
+.lead{margin:26px 0 0;max-width:600px;font-size:19px;color:#2b2a27}
+.bout{margin-top:30px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:18px;border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);padding:14px 0}
+.bout .t{font-family:'Oswald',sans-serif;font-weight:600;font-size:32px;line-height:1;letter-spacing:.02em}
+.bout .vs{font-family:'Podkova',serif;font-weight:800;font-size:19px;text-align:center;color:var(--red)}
+.bout .c{font-family:'Oswald',sans-serif;font-weight:600;font-size:22px;line-height:1.05;text-align:right;text-transform:uppercase}
+.bout .c small{display:block;font-family:'Golos Text',sans-serif;font-weight:500;font-size:13px;text-transform:none;color:var(--grey)}
+
+/* the ticket: the primary action, perforated */
+.ticket{position:relative;margin-top:22px;display:grid;grid-template-columns:minmax(0,1fr) 210px;background:var(--ink);color:var(--paper);transition:transform .25s cubic-bezier(.2,.9,.3,1),box-shadow .25s}
+.ticket:hover{transform:translateY(-3px);box-shadow:0 18px 30px -18px rgba(0,0,0,.6)}
+.ticket::before,.ticket::after{content:'';position:absolute;right:198px;width:24px;height:24px;border-radius:50%;background:var(--paper)}
+.ticket::before{top:-12px}.ticket::after{bottom:-12px}
+.ticket .main{padding:18px 24px 20px}
+.ticket .main span{display:block;font-family:'Podkova',serif;font-weight:700;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:#bdbbb3}
+.ticket .main b{display:block;margin-top:4px;font-family:'Oswald',sans-serif;font-weight:700;font-size:34px;line-height:1;text-transform:uppercase}
+.ticket .stub{display:flex;align-items:center;justify-content:center;gap:10px;border-left:2px dashed rgba(228,227,222,.55);background:var(--red);font-family:'Oswald',sans-serif;font-weight:600;font-size:22px;letter-spacing:.04em;text-transform:uppercase;line-height:1.05;padding:0 18px;text-align:center}
+.photo{position:relative;margin:0;align-self:stretch;min-height:560px}
+.photo .plate{position:absolute;inset:16px -16px -16px 16px;background:var(--red)}
+.photo img{position:relative;display:block;width:100%;height:100%;object-fit:cover;object-position:50% 40%;filter:grayscale(1) contrast(1.18) brightness(.98)}
+.photo .dots{position:absolute;inset:0;background-image:radial-gradient(rgba(228,227,222,.22) 1px,transparent 1.4px);background-size:4px 4px;mix-blend-mode:screen;pointer-events:none}
+.photo figcaption{position:absolute;left:0;bottom:0;background:var(--paper);padding:10px 16px 8px;font-family:'Oswald',sans-serif;font-weight:600;font-size:20px;letter-spacing:.04em;text-transform:uppercase}
+
+/* the week's card */
+.sec{padding:84px 0 0}
+.h2{margin:0;font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;font-size:clamp(3rem,6.2vw,5.6rem);line-height:.86}
+.sub{margin:16px 0 0;font-family:'Podkova',serif;font-weight:700;font-size:20px;color:var(--grey)}
+.card{margin-top:34px;border-top:5px solid var(--ink)}
+.row{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1.45fr) minmax(0,.9fr);gap:28px;align-items:baseline;padding:16px 0;border-bottom:1.5px solid var(--ink)}
+.row .d{font-family:'Oswald',sans-serif;font-weight:700;font-size:38px;line-height:.95;text-transform:uppercase}
+.row .d small{display:block;font-family:'Podkova',serif;font-weight:700;font-size:15px;text-transform:none;color:var(--red);margin-top:4px}
+.row .when{font-family:'Podkova',serif;font-weight:700;font-size:18px;line-height:1.45}
+.row .when span{display:block}
+.row .when b{font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:.02em;font-size:19px;margin-right:6px}
+.row .who{font-family:'Oswald',sans-serif;font-weight:500;font-size:17px;letter-spacing:.04em;text-transform:uppercase;text-align:right;color:var(--grey)}
+.row.main .d{font-size:56px;color:var(--red)}
+.note{margin:16px 0 0;font-size:14.5px;color:var(--grey)}
+
+/* billing over the gloves */
+.billing{position:relative;margin-top:84px;color:var(--paper);background:var(--ink)}
+.billing img{display:block;width:100%;height:420px;object-fit:cover;object-position:50% 45%;filter:grayscale(1) contrast(1.15) brightness(.7)}
+.billing .on{position:absolute;inset:auto 0 0 0;padding:0 44px 38px;max-width:1300px;margin:0 auto}
+.billing h2{margin:0;font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(2.4rem,4.6vw,4.2rem);line-height:.9;text-transform:uppercase}
+.billing p{margin:16px 0 0;font-family:'Oswald',sans-serif;font-weight:500;font-size:20px;letter-spacing:.05em;line-height:1.55;text-transform:uppercase;max-width:1100px}
+.billing p em{font-style:normal;color:#ff6b5f}
+
+/* prices: the bill's price box */
+.prices{margin-top:34px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:5px solid var(--ink)}
+.pcol{padding:24px 26px 26px}
+.pcol+.pcol{border-left:1.5px solid var(--ink)}
+.pcol h3{margin:0 0 14px;font-family:'Podkova',serif;font-weight:800;font-size:21px}
+.pcol ul{list-style:none;margin:0;padding:0}
+.pcol li{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:8px 0;border-top:1px dashed rgba(21,20,19,.4)}
+.pcol li span{font-size:16px}
+.pcol li b{font-family:'Oswald',sans-serif;font-weight:600;font-size:30px;line-height:1;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pcol li.free b{color:var(--red)}
+.extra{display:flex;flex-wrap:wrap;gap:10px 34px;margin-top:18px;font-family:'Podkova',serif;font-weight:700;font-size:17px}
+.extra span b{font-family:'Oswald',sans-serif;font-weight:600;font-size:21px;color:var(--red);margin-left:6px}
+
+/* the assistant: a printed Q and A */
+.ask{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:64px;align-items:start}
+.ask p.copy{margin:28px 0 0;max-width:470px;font-size:18px;color:#2b2a27}
+.qa{border-top:5px solid var(--ink);padding-top:6px}
+.q,.a{padding:16px 0;border-bottom:1.5px solid var(--ink)}
+.q span,.a span{display:block;font-family:'Oswald',sans-serif;font-weight:600;font-size:15px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.q span{color:var(--red)}
+.q p{margin:0;font-family:'Podkova',serif;font-weight:700;font-size:22px;line-height:1.3}
+.a p{margin:0;font-size:17px;line-height:1.55}
+.a p b{font-weight:600}
+
+/* close */
+.close{margin-top:84px;border-top:5px solid var(--ink);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+.close>div{padding:26px 26px 30px 0}
+.close>div+div{border-left:1.5px solid var(--ink);padding-left:26px}
+.close h3{margin:0;font-family:'Oswald',sans-serif;font-weight:700;font-size:54px;line-height:.9;text-transform:uppercase}
+.close p{margin:12px 0 0;font-family:'Podkova',serif;font-weight:700;font-size:19px;line-height:1.4}
+.close p small{display:block;font-family:'Golos Text',sans-serif;font-weight:400;font-size:15px;color:var(--grey);margin-top:6px}
+.final{margin:40px 0 0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:30px;align-items:center}
+.final .wood{font-size:clamp(3.4rem,8vw,7rem)}
+.ft{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:30px 0 44px;font-family:'Podkova',serif;font-weight:700;font-size:14px;color:var(--grey)}
+
+.launch{position:fixed;right:26px;bottom:26px;z-index:20;display:grid;place-items:center;width:78px;height:78px;border-radius:50%;background:var(--red);color:var(--paper);box-shadow:0 16px 30px -12px rgba(0,0,0,.55);transition:transform .25s cubic-bezier(.2,.9,.3,1)}
+.launch:hover{transform:rotate(-8deg) scale(1.05)}
+.launch span{display:flex;flex-direction:column;align-items:center;gap:2px;font-family:'Oswald',sans-serif;font-weight:600;font-size:13px;letter-spacing:.08em;text-transform:uppercase;line-height:1}
+.launch::after{content:'';position:absolute;inset:5px;border:1.5px dashed rgba(228,227,222,.6);border-radius:50%}
+
+@media (max-width:1100px){
+  .bill{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:36px}
+}
+@media (max-width:760px){
+  .sb{font-size:16px}
+  .wrap{padding:0 18px}
+  .hd{padding:14px 0 12px}
+  .logo{font-size:31px}
+  .nav{gap:0}.nav a.l{display:none}
+  .nav .tk{font-size:15px;padding:9px 13px 10px}
+  .bill{grid-template-columns:minmax(0,1fr);gap:32px;padding:22px 0 30px}
+  .stack .w1{font-size:28vw}
+  .stack .w2{font-size:15.6vw}
+  .stack .w3{font-size:13.9vw}
+  .lead{font-size:16.5px;margin-top:18px}
+  .bout{grid-template-columns:auto 1fr;gap:6px 14px;margin-top:20px}
+  .bout .t{font-size:26px}
+  .bout .vs{text-align:left}
+  .bout .c{grid-column:1 / -1;text-align:left;font-size:19px}
+  .ticket{grid-template-columns:minmax(0,1fr) 116px}
+  .ticket::before,.ticket::after{right:104px}
+  .ticket .main{padding:14px 16px 16px}
+  .ticket .main b{font-size:24px}
+  .ticket .stub{font-size:17px;padding:0 10px}
+  .photo{min-height:0;margin-right:16px}
+  .photo img{height:auto;aspect-ratio:4/5}
+  .sec{padding:64px 0 0}
+  .row{grid-template-columns:1fr;gap:6px;padding:14px 0}
+  .row .d{font-size:32px}
+  .row.main .d{font-size:44px}
+  .row .who{text-align:left}
+  .billing{margin-top:64px}
+  .billing img{height:520px}
+  .billing .on{padding:0 18px 28px}
+  .billing p{font-size:16px}
+  .prices{grid-template-columns:1fr}
+  .pcol+.pcol{border-left:0;border-top:1.5px solid var(--ink)}
+  .pcol{padding:20px 18px 22px}
+  .ask{grid-template-columns:1fr;gap:34px}
+  .ask p.copy{font-size:16.5px}
+  .q p{font-size:19px}
+  .close{grid-template-columns:1fr;margin-top:64px}
+  .close>div{padding:22px 0 24px}
+  .close>div+div{border-left:0;border-top:1.5px solid var(--ink);padding-left:0}
+  .close h3{font-size:44px}
+  .final{grid-template-columns:minmax(0,1fr);gap:18px}
+  .final .ticket{min-width:0!important}
+  .launch{right:14px;bottom:14px;width:66px;height:66px}
+}
+@media (prefers-reduced-motion:reduce){
+  .sb *{transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="sb">
+  <div class="wrap">
+    <div class="rule" aria-hidden="true"></div>
+    <header class="hd">
+      <a class="logo" href="#top" aria-label="Strike, бійцівський клуб"><i aria-hidden="true"></i>STRIKE</a>
+      <nav class="nav" aria-label="Розділи">
+        <a class="l" href="#karta">Розклад</a>
+        <a class="l" href="#tsiny">Ціни</a>
+        <a class="l" href="#kontakty">Як дістатися</a>
+        <a class="tk" href="#chat">Квиток на пробне</a>
+      </nav>
+    </header>
+    <div class="rule" aria-hidden="true"></div>
+
+    <main id="top">
+      <section class="bill" aria-labelledby="h1">
+        <div class="stack">
+          <h1 id="h1" class="wood over"><span class="w1">Перше</span><span class="w2">тренування</span><span class="w3">безкоштовно</span></h1>
+          <p class="lead">Бокс, тайський бокс, кікбоксинг, ММА, боротьба й джиу-джитсу. Тренери - чемпіони України й Європи, новачки займаються в тих самих групах.</p>
+          <div class="bout" aria-label="Найближче тренування">
+            <span class="t">Сьогодні · 19:00</span>
+            <span class="vs">бокс, 1,5 год</span>
+            <span class="c">Роман Ткач<small>чемпіон України й Києва</small></span>
+          </div>
+          <a class="ticket" href="#chat">
+            <span class="main"><span>Квиток · пробне тренування</span><b>0 грн · запис у чаті</b></span>
+            <span class="stub">Записатися
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </span>
+          </a>
+        </div>
+        <figure class="photo">
+          <span class="plate" aria-hidden="true"></span>
+          <img src="/sites/concepts/img/52508f36d375d0ebda42eb5763adfd7b.jpg" alt="Боксер у рингу під прожектором, вигляд зі спини">
+          <span class="dots" aria-hidden="true"></span>
+          <figcaption>Ваш перший раунд</figcaption>
+        </figure>
+      </section>
+      <div class="rule" aria-hidden="true"></div>
+
+      <section class="sec" id="karta" aria-labelledby="karta-h">
+        <h2 class="h2" id="karta-h">Карта тижня</h2>
+        <p class="sub">Дорослі групи - 1,5 години, дитячі - 1 година. Неділя - вихідний</p>
+        <div class="card">
+          <div class="row main"><span class="d">Бокс</span><span class="when"><span><b>Пн Ср Пт</b>7:00 · 19:00</span><span><b>Вт Чт</b>7:00 · 8:30 · 19:00</span><span><b>Сб</b>9:00 · 11:00</span></span><span class="who">Бондар · Ткач · Мельник · Литвин</span></div>
+          <div class="row"><span class="d">Тайський бокс</span><span class="when"><span><b>Пн Ср Пт</b>19:00</span><span><b>Вт Чт</b>18:30 · <b>Сб</b>12:00</span></span><span class="who">Савчук · Гончар</span></div>
+          <div class="row"><span class="d">Кікбоксинг<small>жіноча група</small></span><span class="when"><span><b>Вт Чт</b>8:00 · <b>Сб</b>10:00</span></span><span class="who">Руденко</span></div>
+          <div class="row"><span class="d">ММА</span><span class="when"><span><b>Пн Ср Пт</b>7:00</span><span><b>Вт Чт</b>19:00 · <b>Сб</b>12:00 - змішана група</span></span><span class="who">Поліщук · Марченко</span></div>
+          <div class="row"><span class="d">Боротьба / грепплінг</span><span class="when"><span><b>Пн Ср Пт</b>19:00</span></span><span class="who">Поліщук</span></div>
+          <div class="row"><span class="d">Джиу-джитсу<small>жіноча група</small></span><span class="when"><span><b>Вт Чт</b>18:30 · <b>Сб</b>11:00</span></span><span class="who">Кузьменко</span></div>
+          <div class="row"><span class="d">Стретчинг</span><span class="when"><span><b>Пн Ср Пт</b>8:30</span></span><span class="who">Білик</span></div>
+          <div class="row"><span class="d">Діти<small>4–14 років</small></span><span class="when"><span><b>Пн Ср Пт</b>16:30 бокс · 17:00 джиу-джитсу · 18:00 вільна боротьба</span><span><b>Вт Чт</b>17:00 · <b>Сб</b>10:00 - кікбоксинг</span></span><span class="who">Литвин · Кузьменко · Поліщук</span></div>
+          <div class="row"><span class="d">Підлітки</span><span class="when"><span><b>Вт Чт</b>17:30 · <b>Сб</b>11:30 - ММА</span></span><span class="who">Гончар</span></div>
+        </div>
+        <p class="note">Натисніть «Квиток на пробне» - асистент у чаті підбере групу під напрямок і вік і запише.</p>
+      </section>
+    </main>
+  </div>
+
+  <section class="billing" aria-labelledby="billing-h">
+    <img src="/sites/concepts/img/9fb00fc7f600d1c3553c9d78f72eb6b3.jpg" alt="Боксерські рукавички висять на мотузці біля цегляної стіни залу">
+    <div class="on">
+      <h2 id="billing-h">Тренери - чемпіони України й Європи</h2>
+      <p>Андрій Мельник · Сергій Бондар · <em>Роман Ткач</em> · Максим Литвин · Дмитро Савчук · <em>Артем Гончар</em> · Ірина Руденко · Віктор Поліщук · Денис Марченко · Юлія Кузьменко · Марта Білик</p>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <section class="sec" id="tsiny" aria-labelledby="tsiny-h">
+      <h2 class="h2" id="tsiny-h">Ціни квитків</h2>
+      <p class="sub">Абонемент - на всі напрямки, купується в клубі готівкою чи карткою</p>
+      <div class="prices">
+        <div class="pcol">
+          <h3>Дорослі</h3>
+          <ul>
+            <li class="free"><span>Пробне тренування</span><b>0 грн</b></li>
+            <li><span>Разове, діє 3 дні</span><b>500 грн</b></li>
+            <li><span>8 тренувань · 30 днів</span><b>3 200 грн</b></li>
+            <li><span>12 тренувань · 45 днів</span><b>4 300 грн</b></li>
+            <li><span>24 тренування · 90 днів</span><b>8 000 грн</b></li>
+          </ul>
+        </div>
+        <div class="pcol">
+          <h3>Безлім, щодня</h3>
+          <ul>
+            <li><span>1 місяць</span><b>4 900 грн</b></li>
+            <li><span>2 місяці</span><b>9 300 грн</b></li>
+            <li><span>3 місяці</span><b>13 200 грн</b></li>
+            <li><span>6 місяців</span><b>24 000 грн</b></li>
+          </ul>
+        </div>
+        <div class="pcol">
+          <h3>Діти 4–14 років</h3>
+          <ul>
+            <li><span>Разове</span><b>400 грн</b></li>
+            <li><span>8 тренувань</span><b>2 600 грн</b></li>
+            <li><span>12 тренувань</span><b>3 500 грн</b></li>
+            <li><span>24 тренування</span><b>6 600 грн</b></li>
+          </ul>
+        </div>
+      </div>
+      <div class="extra">
+        <span>Персональне<b>від 800 грн</b></span>
+        <span>Спліт, двоє з тренером<b>від 1 200 грн</b></span>
+        <span>Військовим з УБД<b>-50%</b></span>
+      </div>
+    </section>
+
+    <section class="sec" id="chat" aria-labelledby="chat-h">
+      <div class="ask">
+        <div>
+          <h2 class="h2" id="chat-h">Питайте хоч опівночі</h2>
+          <p class="copy">Асистент клубу в чаті відповідає за кілька секунд: підбере напрямок і групу, назве ціну й запише на тренування. Адміністратор одразу бачить запис.</p>
+          <a class="ticket" href="#chat" style="max-width:520px">
+            <span class="main"><span>Чат з асистентом</span><b>Відповідь за секунди</b></span>
+            <span class="stub">Написати
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </span>
+          </a>
+        </div>
+        <div class="qa" aria-label="Приклад розмови з асистентом">
+          <div class="q"><span>Ви · 23:41</span><p>Скільки коштує, якщо ходити тричі на тиждень?</p></div>
+          <div class="a"><span>Асистент Strike</span><p>Тоді найвигідніше <b>12 тренувань на 45 днів - 4 300 грн</b>, на всі напрямки. А почати можна з безкоштовного пробного: завтра о 19:00 бокс з Максимом Литвином. Записати вас?</p></div>
+          <div class="q"><span>Ви</span><p>Так, запишіть. Олена</p></div>
+          <div class="a"><span>Асистент Strike</span><p>Записав: четвер, 19:00, бокс. Візьміть форму, змінне взуття, рушник і воду - після тренування є душ.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="close" id="kontakty" aria-label="Як дістатися">
+      <div>
+        <h3>Де</h3>
+        <p>вул. Спортивна, 15, Київ<small>5 хвилин від метро «Палац спорту», вхід з торця будинку під червоною вивіскою</small></p>
+      </div>
+      <div>
+        <h3>Коли</h3>
+        <p>Пн–Пт 7:00–21:00<br>Сб - з 9:00 за розкладом<small>Неділя - вихідний</small></p>
+      </div>
+      <div>
+        <h3>Що взяти</h3>
+        <p>Форму, змінне взуття, рушник і воду<small>Рукавички клубу дамо, бинти й капу краще свої. Адміністратор: 044 000 90 12</small></p>
+      </div>
+    </section>
+    <div class="final">
+      <p class="wood" style="margin:0"><span style="display:block">До зустрічі</span><span class="red" style="display:block">в рингу</span></p>
+      <a class="ticket" href="#chat" style="margin-top:0;min-width:420px">
+        <span class="main"><span>Квиток</span><b>Пробне · 0 грн</b></span>
+        <span class="stub">Записатися</span>
+      </a>
+    </div>
+    <div class="rule" aria-hidden="true" style="margin-top:44px"></div>
+    <footer class="ft">
+      <span>Strike · бійцівський клуб · Київ</span>
+      <span>Демо-сайт · зроблено ПродавAI</span>
+    </footer>
+  </div>
+
+  <a class="launch" href="#chat" aria-label="Відкрити чат з асистентом">
+    <span><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1 1 21 12Z"/></svg>Чат</span>
+  </a>
+</div>
+</body>
+</html>

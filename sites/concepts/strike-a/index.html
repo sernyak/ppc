@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Strike · Бинти й тейп - концепт</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&amp;family=Golos+Text:wght@400;500;600&amp;family=Fira+Sans+Extra+Condensed:wght@700;800;900&amp;display=swap">
+<style>
+body{margin:0}
+.sa{--wall:#0f0f0e;--wall-2:#171716;--tape:#f1eee6;--tape-2:#e2ded2;--ink:#161514;--red:#d3261d;--mute:#a7a59d;--rule:rgba(255,255,255,.13);
+  background:var(--wall);color:#f4f2ec;font-family:'Golos Text',system-ui,sans-serif;font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.sa *{box-sizing:border-box}
+.sa ::selection{background:var(--red);color:#fff}
+.sa a{color:inherit;text-decoration:none}
+.sa .tape{color:var(--ink)}
+.sa a:focus-visible,.sa button:focus-visible{outline:3px solid var(--tape);outline-offset:4px}
+.wrap{max-width:1280px;margin:0 auto;padding:0 48px}
+.cond{font-family:'Fira Sans Extra Condensed',sans-serif;font-weight:800;letter-spacing:.01em;text-transform:uppercase;line-height:.9}
+.hand{font-family:'Caveat',cursive;font-weight:700;line-height:1.05}
+
+/* tape: cotton weave, straight cut ends at a slight angle, sitting on the wall with a soft shadow */
+.tape{position:relative;display:inline-block;background-color:var(--tape);
+  background-image:repeating-linear-gradient(90deg,rgba(40,30,10,.05) 0 1px,transparent 1px 3px),repeating-linear-gradient(0deg,rgba(40,30,10,.045) 0 1px,transparent 1px 4px);
+  color:var(--ink);clip-path:polygon(1.6% 0,100% 0,98.4% 100%,0 100%);filter:drop-shadow(0 2px 2px rgba(0,0,0,.45)) drop-shadow(0 12px 18px rgba(0,0,0,.35));transform:rotate(var(--r,-1.2deg))}
+.tape.r2{--r:1.4deg}.tape.r3{--r:-2.4deg}.tape.r0{--r:-.4deg}
+
+/* header */
+.hd{position:relative;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:22px 0}
+.logo{display:flex;align-items:baseline;gap:14px}
+.logo b{font-family:'Fira Sans Extra Condensed',sans-serif;font-weight:900;font-size:44px;letter-spacing:.04em;line-height:1;color:#fff}
+.logo .tape{font-family:'Caveat',cursive;font-weight:700;font-size:21px;padding:2px 14px 4px;--r:-3deg}
+.nav{display:flex;align-items:center;gap:34px}
+.nav a.l{font-family:'Fira Sans Extra Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.06em;text-transform:uppercase;color:#d9d6ce;transition:color .2s}
+.nav a.l:hover{color:#fff}
+.nav .tape{font-family:'Caveat',cursive;font-weight:700;font-size:24px;padding:6px 20px 8px;transition:transform .25s cubic-bezier(.2,.9,.3,1)}
+.nav .tape:hover{transform:rotate(0deg) translateY(-2px)}
+
+/* first viewport */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:56px;padding:18px 0 72px;align-items:start}
+.print{position:relative;transform:rotate(-1.1deg);margin:14px 6px 0}
+.print img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;object-position:52% 55%;border:10px solid #e9e6de;box-shadow:0 30px 60px -24px rgba(0,0,0,.9)}
+.print .corner{position:absolute;width:118px;height:34px}
+.print .c1{top:-14px;left:-28px;--r:-38deg}
+.print .c2{top:-12px;right:-26px;--r:34deg}
+.print .c3{bottom:-10px;right:-30px;--r:-30deg}
+.title{position:relative;z-index:2;margin:-118px 0 0 -10px;display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.title h1{margin:0;display:flex;flex-direction:column;align-items:flex-start;gap:12px;font-weight:700}
+.title h1 .tape{font-family:'Caveat',cursive;font-size:clamp(3.1rem,5.6vw,5.6rem);line-height:.98;padding:8px 34px 16px 30px}
+.title h1 .t2{--r:1.6deg;margin-left:46px}
+.title h1 u{text-decoration:none;background:linear-gradient(transparent 70%,rgba(211,38,29,.85) 70% 88%,transparent 88%)}
+.lead{max-width:580px;margin:30px 0 0;color:#d4d1c8;font-size:19px}
+.acts{display:flex;align-items:center;gap:28px;margin-top:30px;flex-wrap:wrap}
+.cta{display:inline-flex;align-items:center;gap:14px;font-family:'Caveat',cursive;font-weight:700;font-size:34px;line-height:1;padding:14px 30px 18px 28px;--r:-1.6deg;transition:transform .25s cubic-bezier(.2,.9,.3,1)}
+.cta:hover{transform:rotate(-.2deg) translateY(-3px)}
+.cta svg{flex:none}
+.ghost{font-family:'Fira Sans Extra Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.06em;text-transform:uppercase;border-bottom:2px solid rgba(255,255,255,.35);padding-bottom:3px;transition:border-color .2s}
+.ghost:hover{border-color:#fff}
+
+.today{padding-top:6px}
+.today .tape{font-family:'Caveat',cursive;font-size:30px;padding:4px 20px 8px;--r:-2deg}
+.today ul{list-style:none;margin:26px 0 0;padding:0;border-top:1px solid var(--rule)}
+.today li{border-bottom:1px solid var(--rule)}
+.slot{display:grid;grid-template-columns:96px minmax(0,1fr) 22px;align-items:center;gap:16px;padding:13px 0;transition:background-color .2s}
+.slot:hover{background:rgba(255,255,255,.04)}
+.slot time{font-family:'Fira Sans Extra Condensed',sans-serif;font-weight:800;font-size:46px;line-height:.9;font-variant-numeric:tabular-nums;color:#fff}
+.slot .what{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.slot .what .tape{font-size:24px;padding:1px 12px 4px;--r:-1deg;font-family:'Caveat',cursive}
+.slot:nth-child(even) .what .tape{--r:1deg}
+.slot .who{font-size:14px;color:var(--mute);padding-left:4px}
+.slot svg{color:#fff;opacity:.6;transition:opacity .2s,transform .2s}
+.slot:hover svg{opacity:1;transform:translateX(3px)}
+.today .note{margin:16px 0 0;font-size:14px;color:var(--mute)}
+
+/* sections */
+.sec{padding:96px 0 20px}
+.h2{margin:0;font-family:'Fira Sans Extra Condensed',sans-serif;font-weight:800;text-transform:uppercase;font-size:clamp(3rem,6vw,5.4rem);line-height:.88;letter-spacing:.005em;color:#fff}
+.sec-top{display:flex;align-items:flex-end;justify-content:space-between;gap:30px;flex-wrap:wrap;margin-bottom:46px}
+.sec-top .tape{font-family:'Caveat',cursive;font-size:26px;padding:3px 18px 7px}
+
+/* weekly timetable: a rigid cell grid, times at monumental scale */
+.tt{border-top:1px solid var(--rule)}
+.tt-row{display:grid;grid-template-columns:300px repeat(3,minmax(0,1fr));border-bottom:1px solid var(--rule)}
+.tt-row>*{padding:18px 20px;border-left:1px solid var(--rule)}
+.tt-row>*:first-child{border-left:0;padding-left:0}
+.tt-head{font-family:'Fira Sans Extra Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.tt-head>*{padding-top:4px;padding-bottom:12px}
+.dir .tape{font-family:'Caveat',cursive;font-size:27px;padding:2px 14px 6px;--r:-1.2deg}
+.tt-row:nth-child(odd) .dir .tape{--r:1deg}
+.cell{display:flex;flex-direction:column;gap:12px}
+.cell .t{display:flex;flex-direction:column;gap:2px}
+.cell .t b{font-family:'Fira Sans Extra Condensed',sans-serif;font-weight:800;font-size:40px;line-height:.9;font-variant-numeric:tabular-nums;color:#fff}
+.cell .t small{font-size:14px;color:var(--mute);line-height:1.35}
+.tt .dl{display:none}
+
+/* prices: a wall of tape */
+.prices{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:64px;align-items:start}
+.groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:52px 44px}
+.grp h3{margin:0 0 18px;font-family:'Fira Sans Extra Condensed',sans-serif;font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.grp ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;align-items:flex-start;gap:14px}
+.pr{display:flex;align-items:baseline;gap:16px;padding:6px 18px 9px 16px;--r:-.9deg}
+.grp li:nth-child(even) .pr{--r:1.1deg}
+.pr .hand{font-size:25px;white-space:nowrap}
+.pr b{font-family:'Fira Sans Extra Condensed',sans-serif;font-weight:800;font-size:30px;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pr.free{background-color:#fff}
+.pr.free b{color:var(--red)}
+.bag{position:relative;transform:rotate(1.3deg)}
+.bag img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;border:10px solid #e9e6de;box-shadow:0 30px 60px -24px rgba(0,0,0,.9)}
+.bag .corner{position:absolute;width:110px;height:32px}
+.bag .c1{top:-12px;left:50%;margin-left:-55px;--r:-4deg}
+.bag .advice{position:absolute;left:-46px;bottom:34px;max-width:300px;font-family:'Caveat',cursive;font-weight:700;font-size:25px;line-height:1.1;padding:12px 20px 16px;--r:-3deg}
+.vet{margin:44px 0 0;font-size:15px;color:var(--mute)}
+.vet b{color:#fff;font-weight:600}
+
+/* coaches: names on tape, as on the gloves */
+.coaches{display:flex;flex-wrap:wrap;gap:22px 26px}
+.coach{display:flex;flex-direction:column;align-items:flex-start;gap:6px;max-width:260px}
+.coach .tape{font-family:'Caveat',cursive;font-size:27px;padding:2px 14px 6px}
+.coach:nth-child(3n) .tape{--r:1.6deg}.coach:nth-child(3n+1) .tape{--r:-1.8deg}
+.coach span{font-size:14px;color:var(--mute);line-height:1.4;padding-left:4px}
+
+/* the assistant at work */
+.chat{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1fr);gap:72px;align-items:start}
+.chat p.copy{margin:26px 0 0;max-width:470px;color:#d4d1c8;font-size:19px}
+.chat .acts{margin-top:34px}
+.board{display:flex;flex-direction:column;gap:20px;padding:34px 30px 38px;background:var(--wall-2);border:1px solid var(--rule)}
+.msg{max-width:84%;display:flex;flex-direction:column;gap:5px}
+.msg .who{font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);font-weight:600}
+.msg .tape{font-family:'Golos Text',sans-serif;font-size:16.5px;line-height:1.5;padding:12px 18px 13px;--r:-.6deg}
+.msg.me{align-self:flex-end;align-items:flex-end}
+.msg.me .tape{--r:.7deg}
+.msg.bot .tape{background-color:#fff}
+.msg.bot .tape strong{font-weight:600}
+.typing{align-self:flex-start;display:flex;gap:6px;padding:6px 4px}
+.typing i{width:7px;height:7px;border-radius:50%;background:#77756e}
+
+/* close */
+.close{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:72px;padding:96px 0 64px;border-top:1px solid var(--rule);margin-top:96px}
+.addr{margin:0;font-family:'Fira Sans Extra Condensed',sans-serif;font-weight:800;font-size:clamp(3.4rem,7vw,6rem);line-height:.86;text-transform:uppercase;color:#fff}
+.how{margin:22px 0 0;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.how .tape{font-family:'Caveat',cursive;font-size:27px;padding:3px 16px 7px}
+.facts{list-style:none;margin:36px 0 0;padding:0;display:grid;gap:12px;color:#d4d1c8}
+.facts li{display:flex;gap:14px;align-items:flex-start}
+.facts svg{flex:none;margin-top:3px;color:#fff}
+.facts a{border-bottom:1px solid rgba(255,255,255,.3)}
+.bring{padding:30px 30px 34px;background:var(--wall-2);border:1px solid var(--rule)}
+.bring h3{margin:0 0 20px;font-family:'Fira Sans Extra Condensed',sans-serif;font-weight:800;font-size:40px;line-height:.9;text-transform:uppercase}
+.bring ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.bring li .tape{font-family:'Caveat',cursive;font-size:26px;padding:1px 14px 5px}
+.bring li:nth-child(even) .tape{--r:1.2deg}
+.bring p{margin:22px 0 0;font-size:15px;color:var(--mute)}
+.bring .cta{margin-top:30px}
+.ft{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:26px 0 40px;border-top:1px solid var(--rule);font-size:13.5px;color:#8e8c85}
+
+/* the chat launcher */
+.launch{position:fixed;right:28px;bottom:28px;z-index:20;display:flex;align-items:center;gap:0}
+.launch .tape{font-family:'Caveat',cursive;font-size:23px;padding:3px 16px 6px 14px;margin-right:-6px;--r:-3deg}
+.launch .btn{display:grid;place-items:center;width:66px;height:66px;border-radius:50%;background:#fff;color:var(--ink);box-shadow:0 14px 30px -10px rgba(0,0,0,.8);transition:transform .25s cubic-bezier(.2,.9,.3,1)}
+.launch:hover .btn{transform:scale(1.06)}
+.launch .dot{position:absolute;top:2px;right:2px;width:14px;height:14px;border-radius:50%;background:#3ccf7a;border:3px solid var(--wall)}
+
+@media (max-width:1100px){
+  .hero{grid-template-columns:minmax(0,1fr) 330px;gap:40px}
+  .prices{grid-template-columns:minmax(0,1fr) 320px}
+}
+@media (max-width:760px){
+  .sa{font-size:16px}
+  .wrap{padding:0 18px}
+  .hd{padding:16px 0}
+  .logo b{font-size:36px}
+  .logo .tape{display:none}
+  .nav{gap:0}.nav a.l{display:none}
+  .nav .tape{font-size:21px;padding:5px 14px 7px}
+  .hero{grid-template-columns:1fr;gap:34px;padding:8px 0 40px}
+  .print{margin:8px 4px 0}
+  .print img{aspect-ratio:16/11;border-width:7px}
+  .print .corner{width:84px;height:26px}
+  .print .c1{left:-20px}.print .c2{right:-18px}.print .c3{display:none}
+  .title{margin:-58px 0 0 -4px}
+  .title h1{gap:8px}
+  .title h1 .tape{font-size:2.85rem;padding:5px 18px 10px 18px}
+  .title h1 .t2{margin-left:22px}
+  .lead{font-size:16.5px;margin-top:22px}
+  .acts{margin-top:22px;gap:20px}
+  .cta{font-size:29px;padding:12px 22px 15px 20px}
+  .slot{grid-template-columns:76px minmax(0,1fr) 18px;gap:12px;padding:11px 0}
+  .slot time{font-size:38px}
+  .sec{padding:76px 0 20px}
+  .sec-top{margin-bottom:30px}
+  .tt-head{display:none}
+  .tt-row{grid-template-columns:1fr;padding:18px 0 16px}
+  .tt-row>*{border-left:0;padding:0}
+  .dir{margin-bottom:14px}
+  .cell{display:flex;flex-direction:row;flex-wrap:wrap;align-items:flex-start;gap:6px 22px;margin-bottom:14px}
+  .cell:empty{display:none}
+  .cell .t b{font-size:30px}
+  .tt .dl{display:block;flex-basis:100%;font-family:'Fira Sans Extra Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+  .pr .hand{white-space:normal}
+  .prices{grid-template-columns:1fr;gap:56px}
+  .groups{grid-template-columns:1fr;gap:38px}
+  .pr .hand{font-size:22px}.pr b{font-size:26px}
+  .bag{margin:0 14px}
+  .bag .advice{left:-12px;bottom:-28px;font-size:22px;max-width:250px}
+  .chat{grid-template-columns:1fr;gap:40px}
+  .chat p.copy{font-size:16.5px}
+  .board{padding:24px 16px 28px;margin:0 -2px}
+  .msg{max-width:92%}
+  .close{grid-template-columns:1fr;gap:48px;padding:76px 0 50px;margin-top:76px}
+  .addr{font-size:3.6rem}
+  .launch{right:16px;bottom:16px}
+  .launch .tape{display:none}
+  .launch .btn{width:60px;height:60px}
+}
+@media (prefers-reduced-motion:reduce){
+  .sa *{transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="sa">
+  <div class="wrap">
+    <header class="hd">
+      <a class="logo" href="#top" aria-label="Strike, бійцівський клуб"><b>STRIKE</b><span class="tape">бійцівський клуб</span></a>
+      <nav class="nav" aria-label="Розділи">
+        <a class="l" href="#rozklad">Розклад</a>
+        <a class="l" href="#tsiny">Абонементи</a>
+        <a class="l" href="#kontakty">Контакти</a>
+        <a class="tape r2" href="#chat">Пробне - безкоштовно</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="h1">
+        <div>
+          <figure class="print" style="margin-bottom:0">
+            <img src="/sites/concepts/img/782a8f1e2e71d13710e2028263ce492b.jpg" alt="Бинти, тейп і червоні рукавички на лаві в залі клубу">
+            <span class="tape corner c1" aria-hidden="true"></span>
+            <span class="tape corner c2" aria-hidden="true"></span>
+            <span class="tape corner c3" aria-hidden="true"></span>
+          </figure>
+          <div class="title">
+            <h1 id="h1"><span class="tape t1">Перше тренування</span><span class="tape t2">- <u>безкоштовно</u></span></h1>
+          </div>
+          <p class="lead">Бокс, тайський бокс, кікбоксинг, ММА, боротьба й джиу-джитсу для дорослих і дітей. Напишіть у чат, чим хочете займатися, - асистент підбере групу й запише на найближче тренування.</p>
+          <div class="acts">
+            <a class="tape cta" href="#chat">Записатися на пробне
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#d3261d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13c5-1 11-1 17-1"/><path d="M14 6l6 6-6 6"/></svg>
+            </a>
+            <a class="ghost" href="#rozklad">Розклад тижня</a>
+          </div>
+        </div>
+
+        <aside class="today" aria-labelledby="today-h">
+          <h2 id="today-h" class="tape" style="margin:0">Сьогодні · середа</h2>
+          <ul>
+            <li><a class="slot" href="#chat"><time>16:30</time><span class="what"><span class="tape">Бокс · діти</span><span class="who">Максим Литвин · 1 год</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+            <li><a class="slot" href="#chat"><time>17:00</time><span class="what"><span class="tape">Джиу-джитсу · діти</span><span class="who">Юлія Кузьменко · 1 год</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+            <li><a class="slot" href="#chat"><time>18:00</time><span class="what"><span class="tape">Вільна боротьба · діти</span><span class="who">Віктор Поліщук · 1 год</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+            <li><a class="slot" href="#chat"><time>19:00</time><span class="what"><span class="tape">Бокс</span><span class="who">Роман Ткач · 1,5 год</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+            <li><a class="slot" href="#chat"><time>19:00</time><span class="what"><span class="tape">Тайський бокс</span><span class="who">Дмитро Савчук · 1,5 год</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+            <li><a class="slot" href="#chat"><time>19:00</time><span class="what"><span class="tape">Боротьба / грепплінг</span><span class="who">Віктор Поліщук · 1,5 год</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+          </ul>
+          <p class="note">Натисніть на тренування - асистент у чаті запише вас на пробне.</p>
+        </aside>
+      </section>
+
+      <section class="sec" id="rozklad" aria-labelledby="rozklad-h">
+        <div class="sec-top">
+          <h2 class="h2" id="rozklad-h">Розклад тижня</h2>
+          <span class="tape r2">дорослі - 1,5 год, діти - 1 год</span>
+        </div>
+        <div class="tt" role="table" aria-label="Розклад групових тренувань">
+          <div class="tt-row tt-head" role="row"><span role="columnheader">Напрямок</span><span role="columnheader">Пн · Ср · Пт</span><span role="columnheader">Вт · Чт</span><span role="columnheader">Субота</span></div>
+          <div class="tt-row" role="row"><span class="dir" role="rowheader"><span class="tape">Бокс</span></span><div class="cell" role="cell"><span class="dl">Пн · Ср · Пт</span><span class="t"><b>07:00</b><small>Сергій Бондар</small></span><span class="t"><b>19:00</b><small>Роман Ткач</small></span></div><div class="cell" role="cell"><span class="dl">Вт · Чт</span><span class="t"><b>07:00 · 08:30</b><small>Андрій Мельник</small></span><span class="t"><b>19:00</b><small>Максим Литвин</small></span></div><div class="cell" role="cell"><span class="dl">Субота</span><span class="t"><b>09:00</b><small>Андрій Мельник</small></span><span class="t"><b>11:00</b><small>Максим Литвин</small></span></div></div>
+          <div class="tt-row" role="row"><span class="dir" role="rowheader"><span class="tape">Тайський бокс</span></span><div class="cell" role="cell"><span class="dl">Пн · Ср · Пт</span><span class="t"><b>19:00</b><small>Дмитро Савчук</small></span></div><div class="cell" role="cell"><span class="dl">Вт · Чт</span><span class="t"><b>18:30</b><small>Артем Гончар</small></span></div><div class="cell" role="cell"><span class="dl">Субота</span><span class="t"><b>12:00</b><small>Артем Гончар</small></span></div></div>
+          <div class="tt-row" role="row"><span class="dir" role="rowheader"><span class="tape">Кікбоксинг, жіноча група</span></span><div class="cell" role="cell"></div><div class="cell" role="cell"><span class="dl">Вт · Чт</span><span class="t"><b>08:00</b><small>Ірина Руденко</small></span></div><div class="cell" role="cell"><span class="dl">Субота</span><span class="t"><b>10:00</b><small>Ірина Руденко</small></span></div></div>
+          <div class="tt-row" role="row"><span class="dir" role="rowheader"><span class="tape">ММА</span></span><div class="cell" role="cell"><span class="dl">Пн · Ср · Пт</span><span class="t"><b>07:00</b><small>Віктор Поліщук</small></span></div><div class="cell" role="cell"><span class="dl">Вт · Чт</span><span class="t"><b>19:00</b><small>змішана група · Денис Марченко</small></span></div><div class="cell" role="cell"><span class="dl">Субота</span><span class="t"><b>12:00</b><small>змішана група · Денис Марченко</small></span></div></div>
+          <div class="tt-row" role="row"><span class="dir" role="rowheader"><span class="tape">Боротьба / грепплінг</span></span><div class="cell" role="cell"><span class="dl">Пн · Ср · Пт</span><span class="t"><b>19:00</b><small>Віктор Поліщук</small></span></div><div class="cell" role="cell"></div><div class="cell" role="cell"></div></div>
+          <div class="tt-row" role="row"><span class="dir" role="rowheader"><span class="tape">Джиу-джитсу, жіноча група</span></span><div class="cell" role="cell"></div><div class="cell" role="cell"><span class="dl">Вт · Чт</span><span class="t"><b>18:30</b><small>Юлія Кузьменко</small></span></div><div class="cell" role="cell"><span class="dl">Субота</span><span class="t"><b>11:00</b><small>Юлія Кузьменко</small></span></div></div>
+          <div class="tt-row" role="row"><span class="dir" role="rowheader"><span class="tape">Стретчинг</span></span><div class="cell" role="cell"><span class="dl">Пн · Ср · Пт</span><span class="t"><b>08:30</b><small>Марта Білик</small></span></div><div class="cell" role="cell"></div><div class="cell" role="cell"></div></div>
+          <div class="tt-row" role="row"><span class="dir" role="rowheader"><span class="tape">Діти 4–14</span></span><div class="cell" role="cell"><span class="dl">Пн · Ср · Пт</span><span class="t"><b>16:30</b><small>бокс · Максим Литвин</small></span><span class="t"><b>17:00</b><small>джиу-джитсу · Юлія Кузьменко</small></span><span class="t"><b>18:00</b><small>вільна боротьба · Віктор Поліщук</small></span></div><div class="cell" role="cell"><span class="dl">Вт · Чт</span><span class="t"><b>17:00</b><small>кікбоксинг</small></span></div><div class="cell" role="cell"><span class="dl">Субота</span><span class="t"><b>10:00</b><small>кікбоксинг</small></span></div></div>
+          <div class="tt-row" role="row"><span class="dir" role="rowheader"><span class="tape">Підлітки</span></span><div class="cell" role="cell"></div><div class="cell" role="cell"><span class="dl">Вт · Чт</span><span class="t"><b>17:30</b><small>ММА · Артем Гончар</small></span></div><div class="cell" role="cell"><span class="dl">Субота</span><span class="t"><b>11:30</b><small>ММА · Артем Гончар</small></span></div></div>
+        </div>
+      </section>
+
+      <section class="sec" id="tsiny" aria-labelledby="tsiny-h">
+        <div class="sec-top">
+          <h2 class="h2" id="tsiny-h">Абонементи</h2>
+          <span class="tape">на всі напрямки</span>
+        </div>
+        <div class="prices">
+          <div>
+            <div class="groups">
+              <div class="grp">
+                <h3>Дорослі</h3>
+                <ul>
+                  <li><span class="tape pr free"><span class="hand">Пробне тренування</span><b>0 грн</b></span></li>
+                  <li><span class="tape pr"><span class="hand">Разове · діє 3 дні</span><b>500 грн</b></span></li>
+                  <li><span class="tape pr"><span class="hand">8 тренувань · 30 днів</span><b>3 200 грн</b></span></li>
+                  <li><span class="tape pr"><span class="hand">12 тренувань · 45 днів</span><b>4 300 грн</b></span></li>
+                  <li><span class="tape pr"><span class="hand">24 тренування · 90 днів</span><b>8 000 грн</b></span></li>
+                </ul>
+              </div>
+              <div class="grp">
+                <h3>Безлім, щодня</h3>
+                <ul>
+                  <li><span class="tape pr"><span class="hand">1 місяць</span><b>4 900 грн</b></span></li>
+                  <li><span class="tape pr"><span class="hand">3 місяці</span><b>13 200 грн</b></span></li>
+                  <li><span class="tape pr"><span class="hand">6 місяців</span><b>24 000 грн</b></span></li>
+                </ul>
+              </div>
+              <div class="grp">
+                <h3>Діти 4–14 років</h3>
+                <ul>
+                  <li><span class="tape pr"><span class="hand">Разове</span><b>400 грн</b></span></li>
+                  <li><span class="tape pr"><span class="hand">8 тренувань</span><b>2 600 грн</b></span></li>
+                  <li><span class="tape pr"><span class="hand">12 тренувань</span><b>3 500 грн</b></span></li>
+                </ul>
+              </div>
+              <div class="grp">
+                <h3>З тренером</h3>
+                <ul>
+                  <li><span class="tape pr"><span class="hand">Персональне</span><b>від 800 грн</b></span></li>
+                  <li><span class="tape pr"><span class="hand">Спліт, двоє з тренером</span><b>від 1 200 грн</b></span></li>
+                </ul>
+              </div>
+            </div>
+            <p class="vet"><b>Військовим з посвідченням УБД - знижка 50%.</b> На які абонементи діє, підкаже адміністратор. Абонемент купується в клубі, готівкою чи карткою.</p>
+          </div>
+          <figure class="bag" style="margin:0">
+            <img src="/sites/concepts/img/3cbd3217896a5e771628c555a551a762.jpg" alt="Червона груша, залатана білим тейпом, у залі клубу">
+            <span class="tape corner c1" aria-hidden="true"></span>
+            <figcaption class="tape advice">2 рази на тиждень - бери 8, 3 рази - 12, частіше - безлім</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="sec" id="chat" aria-labelledby="chat-h">
+        <div class="chat">
+          <div>
+            <h2 class="h2" id="chat-h">Запишемо навіть опівночі</h2>
+            <p class="copy">Асистент клубу відповідає в чаті за кілька секунд, коли адміністратор уже спить: підбере напрямок і групу під вік, назве ціну й запише на найближче тренування. Адміністратор одразу отримує запис.</p>
+            <div class="acts">
+              <a class="tape cta" href="#chat">Написати в чат
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#d3261d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13c5-1 11-1 17-1"/><path d="M14 6l6 6-6 6"/></svg>
+              </a>
+            </div>
+          </div>
+          <div class="board" aria-label="Приклад розмови з асистентом">
+            <div class="msg me"><span class="who">Ви · 23:41</span><span class="tape">Хочу спробувати бокс, я новачок. Коли можна?</span></div>
+            <div class="msg bot"><span class="who">Асистент Strike</span><span class="tape">Новачки займаються в тих самих групах - тренер дає навантаження під ваш рівень. Пробне <strong>безкоштовне</strong>: завтра о 19:00 бокс з Максимом Литвином, 1,5 години. Записати вас?</span></div>
+            <div class="msg me"><span class="who">Ви</span><span class="tape">Так, я Ігор</span></div>
+            <div class="msg bot"><span class="who">Асистент Strike</span><span class="tape">Записав: четвер, 19:00, бокс · Максим Литвин. Візьміть форму, змінне взуття, рушник і воду - після тренування є душ.</span></div>
+            <div class="typing" aria-hidden="true"><i></i><i></i><i></i></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="close" id="kontakty" aria-labelledby="addr-h">
+        <div>
+          <h2 class="addr" id="addr-h">вул. Спортивна, 15</h2>
+          <div class="how">
+            <span class="tape r3">вхід з торця - під червоною вивіскою</span>
+            <span class="tape r2">5 хвилин від метро «Палац спорту»</span>
+          </div>
+          <ul class="facts">
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Пн–Пт 7:00–21:00 · Сб - з 9:00 за розкладом · Нд - вихідний</span></li>
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg><span>Адміністратор: <a href="#kontakty">044 000 90 12</a></span></li>
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10l8-6 8 6v10"/><path d="M9 20v-6h6v6"/></svg><span>Зал у підвальному приміщенні, є душ і де переодягнутися</span></li>
+          </ul>
+        </div>
+        <div class="bring">
+          <h3>Що взяти на пробне</h3>
+          <ul>
+            <li><span class="tape">спортивну форму</span></li>
+            <li><span class="tape">змінне взуття для залу</span></li>
+            <li><span class="tape">рушник і воду</span></li>
+            <li><span class="tape">бинти й капу - краще свої</span></li>
+          </ul>
+          <p>Рукавички й інший інвентар клубу можна брати на тренування.</p>
+          <a class="tape cta" href="#chat">Записатися на пробне
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#d3261d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13c5-1 11-1 17-1"/><path d="M14 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="ft">
+      <span>Strike · бійцівський клуб · Київ</span>
+      <span>Демо-сайт · зроблено ПродавAI</span>
+    </footer>
+  </div>
+
+  <a class="launch" href="#chat" aria-label="Відкрити чат з асистентом">
+    <span class="tape">Чат 24/7</span>
+    <span class="btn"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1 1 21 12Z"/></svg></span>
+    <span class="dot" aria-hidden="true"></span>
+  </a>
+</div>
+</body>
+</html>

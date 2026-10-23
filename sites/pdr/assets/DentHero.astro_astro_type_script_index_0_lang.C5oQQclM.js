@@ -1,0 +1,1 @@
+import{t as e}from"./hero-mount.B2fq7Kkw.js";e(`stage`);

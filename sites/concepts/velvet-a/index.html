@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Velvet · Книга запису - концепт</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ysabeau:wght@400;600;800;900&amp;family=Caveat:wght@500;700&amp;family=Golos+Text:wght@400;500;600;700&amp;display=swap">
+<style>
+body { margin: 0; background: #5f1130; }
+.va {
+  --cloth: #6b1435;
+  --cloth-deep: #4e0c26;
+  --page: #fcfcfd;
+  --rule: #d9e2f0;
+  --ink: #1d1a2b;
+  --pen: #24306e;
+  --muted: #5a5670;
+  --lime: #d9f45c;
+  --lime-deep: #b9d82f;
+  --rose: #f6dde7;
+  font-family: 'Golos Text', system-ui, sans-serif;
+  color: var(--ink);
+  background-color: var(--cloth);
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.028) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.06) 0 1px, transparent 1px 3px),
+    radial-gradient(120% 80% at 50% 0%, #7a1a40 0%, var(--cloth) 55%, var(--cloth-deep) 100%);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+.va ::selection { background: var(--lime); color: var(--ink); }
+.va a { color: inherit; }
+.va a:focus-visible, .va button:focus-visible { outline: 3px solid var(--lime); outline-offset: 3px; border-radius: 6px; }
+.va .hand { font-family: 'Caveat', cursive; }
+.va .wrap { max-width: 1240px; margin: 0 auto; padding: 0 40px; }
+
+/* header on the cloth */
+.va .top { display: flex; align-items: center; gap: 40px; padding: 26px 0 30px; color: var(--rose); }
+.va .brand { display: flex; align-items: baseline; gap: 12px; text-decoration: none; }
+.va .brand b { font-family: 'Ysabeau', serif; font-weight: 900; font-size: 34px; letter-spacing: -0.01em; color: #fff; }
+.va .brand span { font-size: 14px; color: #f0c7d6; }
+.va .top nav { display: flex; gap: 28px; margin-left: auto; }
+.va .top nav a { text-decoration: none; font-size: 15px; font-weight: 500; color: #f7e3ea; padding: 6px 0; border-bottom: 1px solid transparent; transition: border-color .2s ease; }
+.va .top nav a:hover { border-color: var(--lime); }
+.va .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 0 22px; border-radius: 999px; font-weight: 600; font-size: 16px; text-decoration: none; transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease; }
+.va .btn svg { width: 20px; height: 20px; flex: none; }
+.va .btn-lime { background: var(--lime); color: var(--ink); box-shadow: 0 10px 24px -12px rgba(10, 0, 5, 0.6); }
+.va .btn-lime:hover { background: #e6fb7a; transform: translateY(-1px); }
+.va .btn-berry { background: var(--cloth); color: #fff; box-shadow: 0 12px 24px -14px rgba(107, 20, 53, 0.9); }
+.va .btn-berry:hover { background: #7f1a42; transform: translateY(-1px); }
+.va .btn-line { color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+.va .btn-line:hover { background: rgba(29, 26, 43, 0.05); }
+
+/* the open book */
+.va .hero { position: relative; padding-bottom: 120px; }
+.va .book { position: relative; display: grid; grid-template-columns: 1.08fr 1fr; filter: drop-shadow(0 34px 40px rgba(25, 0, 10, 0.45)); }
+.va .book::before { content: ''; position: absolute; inset: 10px -6px -10px -6px; border-radius: 6px 6px 10px 10px; background: #e9e4ea; z-index: -1; box-shadow: 0 3px 0 #d4ccd6, 0 6px 0 #c4bac6; }
+.va .page { position: relative; background-color: var(--page); background-image: linear-gradient(transparent 39px, var(--rule) 39px, var(--rule) 40px); background-size: 100% 40px; background-position: 0 22px; }
+.va .page.left { border-radius: 6px 0 0 6px; padding: 34px 34px 40px 40px; box-shadow: inset -42px 0 46px -40px rgba(60, 20, 40, 0.38); }
+.va .page.right { border-radius: 0 6px 6px 0; padding: 54px 56px 48px 64px; box-shadow: inset 42px 0 46px -40px rgba(60, 20, 40, 0.38); display: flex; flex-direction: column; }
+.va .ribbon { position: absolute; top: -14px; left: 16px; width: 22px; height: calc(100% + 86px); background: linear-gradient(90deg, #c9e43e, var(--lime) 40%, #c4df37); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 94%, 0 100%); box-shadow: 0 6px 10px rgba(0, 0, 0, 0.18); z-index: 2; }
+
+.va .week-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.va .week-head .hand { font-size: 30px; font-weight: 700; color: var(--pen); }
+.va .legend { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.va .legend i { display: inline-block; width: 26px; height: 12px; background: var(--lime); border-radius: 3px 8px 4px 9px; transform: rotate(-3deg); }
+.va .tabs { display: none; }
+.va .week { display: grid; grid-template-columns: 54px repeat(6, minmax(0, 1fr)); column-gap: 6px; row-gap: 0; }
+.va .week .dh { padding: 4px 4px 10px; font-weight: 700; font-size: 13px; letter-spacing: 0.02em; color: var(--ink); text-transform: uppercase; border-bottom: 2px solid var(--ink); }
+.va .week .dh small { display: block; font-weight: 500; font-size: 12px; text-transform: none; letter-spacing: 0; color: var(--muted); }
+.va .week .t { padding-top: 16px; font-variant-numeric: tabular-nums; font-size: 14px; font-weight: 600; color: var(--muted); }
+.va .week .c { height: 92px; padding: 12px 4px 0; border-bottom: 1px dashed #c9d3e4; }
+.va .week .busy { font-family: 'Caveat', cursive; font-size: 21px; line-height: 1.05; color: var(--pen); transform: rotate(-1.5deg); }
+.va .week .busy em { display: block; font-style: normal; font-size: 18px; color: #4f5a8f; }
+.va .week .free { position: relative; display: inline-flex; flex-direction: column; text-decoration: none; padding: 8px 8px 9px; margin-top: 2px; font-family: 'Caveat', cursive; font-weight: 700; font-size: 22px; line-height: 1; color: var(--ink); isolation: isolate; transition: transform .2s ease; }
+.va .week .free::before { content: ''; position: absolute; inset: 2px -4px 0 -6px; background: var(--lime); border-radius: 4px 14px 6px 12px; transform: rotate(-2.5deg) skewX(-6deg); z-index: -1; box-shadow: 0 0 0 1px rgba(150, 175, 20, 0.25); }
+.va .week .free small { font-family: 'Golos Text', sans-serif; font-weight: 600; font-size: 12px; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px; }
+.va .week .free small svg { width: 13px; height: 13px; }
+.va .week .free:hover { transform: rotate(-1deg) scale(1.04); }
+
+.va h1 { font-family: 'Ysabeau', serif; font-weight: 900; font-size: 74px; line-height: 0.96; letter-spacing: -0.025em; margin: 0 0 26px; color: var(--ink); text-wrap: balance; }
+.va h1 mark { background: none; color: var(--cloth); }
+.va .lead { font-size: 19px; line-height: 1.55; color: #3d3a52; margin: 0 0 30px; max-width: 30em; }
+.va .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.va .notes { list-style: none; margin: 36px 0 0; padding: 0; display: grid; gap: 4px; }
+.va .notes li { display: flex; align-items: center; gap: 10px; font-family: 'Caveat', cursive; font-size: 25px; color: var(--pen); }
+.va .notes svg { width: 20px; height: 20px; color: var(--cloth); flex: none; }
+
+.va .launcher { position: absolute; right: 24px; bottom: 28px; display: inline-flex; align-items: center; gap: 12px; padding: 10px 20px 10px 10px; border-radius: 999px; background: var(--lime); color: var(--ink); text-decoration: none; font-weight: 700; font-size: 15px; box-shadow: 0 18px 34px -14px rgba(10, 0, 5, 0.7); z-index: 5; }
+.va .launcher .ic { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--ink); color: var(--lime); }
+.va .launcher .ic svg { width: 22px; height: 22px; }
+.va .launcher .dot { width: 9px; height: 9px; border-radius: 50%; background: #23a35a; box-shadow: 0 0 0 3px rgba(35, 163, 90, 0.25); }
+
+/* prices pasted into the book */
+.va .sec { padding: 110px 0; }
+.va .sec.tight { padding-top: 20px; }
+.va .sec-head { color: #fff; margin: 0 0 44px; }
+.va h2 { font-family: 'Ysabeau', serif; font-weight: 900; font-size: 56px; line-height: 1; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+.va .sec-head p { margin: 14px 0 0; font-size: 18px; color: #f1cfdc; max-width: 34em; line-height: 1.5; }
+.va .board { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 56px; align-items: start; }
+.va .card { position: relative; background: var(--page); background-image: linear-gradient(transparent 47px, var(--rule) 47px, var(--rule) 48px); background-size: 100% 48px; border-radius: 4px; padding: 46px 48px 40px; transform: rotate(-1deg); box-shadow: 0 30px 50px -24px rgba(25, 0, 10, 0.6); }
+.va .tape { position: absolute; width: 120px; height: 34px; background: rgba(217, 244, 92, 0.7); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); }
+.va .card .tape { top: -16px; left: 50%; transform: translateX(-50%) rotate(2deg); }
+.va .card h3 { font-family: 'Ysabeau', serif; font-weight: 800; font-size: 30px; margin: 0 0 22px; letter-spacing: -0.01em; }
+.va .price { list-style: none; margin: 0; padding: 0; }
+.va .price li { display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; gap: 14px; padding: 12px 0 13px; }
+.va .price .nm { font-weight: 600; font-size: 19px; }
+.va .price .nm small { display: block; font-weight: 400; font-size: 14px; color: var(--muted); margin-top: 3px; }
+.va .price .dots { border-bottom: 2px dotted #a9b2c8; transform: translateY(-6px); }
+.va .price .pr { font-family: 'Ysabeau', serif; font-weight: 800; font-size: 26px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.va .card .foot { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 22px; font-family: 'Caveat', cursive; font-size: 24px; color: var(--pen); }
+.va .card .foot span { display: inline-flex; align-items: center; gap: 8px; }
+.va .card .foot svg { width: 18px; height: 18px; color: var(--cloth); }
+
+.va .polaroid { position: relative; background: #fff; padding: 14px 14px 64px; transform: rotate(2.4deg); box-shadow: 0 28px 44px -22px rgba(25, 0, 10, 0.65); }
+.va .polaroid img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+.va .polaroid figcaption { position: absolute; left: 22px; right: 18px; bottom: 16px; font-family: 'Caveat', cursive; font-size: 26px; color: var(--pen); }
+.va .polaroid .tape { top: -14px; right: 26px; transform: rotate(-8deg); width: 96px; }
+.va .tags { display: grid; gap: 12px; margin-top: 46px; }
+.va .tag { display: flex; align-items: center; gap: 14px; color: #fff; }
+.va .tag b { font-family: 'Ysabeau', serif; font-weight: 800; font-size: 24px; }
+.va .tag span { color: #f1cfdc; font-size: 15px; }
+.va .tag i { width: 10px; height: 38px; background: var(--lime); border-radius: 0 0 3px 3px; flex: none; }
+
+/* the assistant in the margins */
+.va .sheet { position: relative; background: var(--page); background-image: linear-gradient(90deg, transparent 150px, #f2a9bf 150px, #f2a9bf 152px, transparent 152px), linear-gradient(transparent 47px, var(--rule) 47px, var(--rule) 48px); background-size: 100% 100%, 100% 48px; border-radius: 6px; padding: 64px 64px 56px 0; box-shadow: 0 34px 60px -26px rgba(25, 0, 10, 0.6); }
+.va .sheet h2 { color: var(--ink); padding-left: 190px; max-width: 13em; }
+.va .sheet .sub { padding-left: 190px; margin: 16px 0 40px; font-size: 18px; color: #3d3a52; max-width: 40em; line-height: 1.5; }
+.va .talk { display: grid; gap: 22px; }
+.va .row { display: grid; grid-template-columns: 150px 1fr; align-items: start; }
+.va .row .when { font-family: 'Caveat', cursive; font-size: 24px; color: #9d5671; text-align: right; padding: 4px 26px 0 0; }
+.va .row .msg { padding-left: 40px; max-width: 46em; }
+.va .row.client .msg { font-family: 'Caveat', cursive; font-size: 30px; line-height: 1.15; color: var(--pen); }
+.va .row.bot .msg { font-size: 18px; line-height: 1.6; color: var(--ink); }
+.va .row.bot .msg b { font-weight: 700; }
+.va .row.bot .who { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--cloth); margin-bottom: 4px; }
+.va .row.bot .slot { background: linear-gradient(transparent 22%, var(--lime) 22%, var(--lime) 88%, transparent 88%); padding: 0 3px; font-weight: 700; }
+.va .booked { display: inline-flex; align-items: center; gap: 12px; margin-top: 10px; padding: 12px 18px; border-radius: 14px; background: #f1f6d6; box-shadow: inset 0 0 0 1.5px #c8e04c; font-size: 16px; font-weight: 600; }
+.va .booked svg { width: 20px; height: 20px; color: #3f7d1e; }
+.va .steps { list-style: none; margin: 46px 0 0; padding: 30px 0 0 190px; border-top: 2px solid var(--ink); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; margin-right: 0; }
+.va .steps li { font-size: 16px; line-height: 1.5; color: #3d3a52; }
+.va .steps b { display: block; font-family: 'Caveat', cursive; font-size: 30px; font-weight: 700; color: var(--pen); margin-bottom: 6px; }
+
+/* close */
+.va .close { padding: 40px 0 70px; color: #fff; }
+.va .close-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+.va .close h2 { font-size: 96px; letter-spacing: -0.035em; }
+.va .close dl { display: grid; grid-template-columns: auto 1fr; gap: 12px 22px; margin: 34px 0 34px; font-size: 18px; }
+.va .close dt { display: flex; align-items: center; gap: 10px; color: #f1cfdc; }
+.va .close dt svg { width: 20px; height: 20px; color: var(--lime); }
+.va .close dd { margin: 0; color: #fff; font-weight: 500; }
+.va .photo-taped { position: relative; padding: 12px; background: #fff; transform: rotate(-1.6deg); box-shadow: 0 30px 50px -24px rgba(25, 0, 10, 0.7); }
+.va .photo-taped img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
+.va .photo-taped .tape { top: -16px; left: 30px; transform: rotate(-5deg); }
+.va .foot-line { margin-top: 70px; padding-top: 22px; border-top: 1px solid rgba(255, 255, 255, 0.18); display: flex; justify-content: space-between; gap: 20px; font-size: 14px; color: #e9bccd; }
+
+@media (max-width: 760px) {
+  .va .wrap { padding: 0 16px; }
+  .va .top { gap: 14px; padding: 18px 0 20px; }
+  .va .top nav { display: none; }
+  .va .brand b { font-size: 28px; }
+  .va .brand span { display: none; }
+  .va .top .btn { margin-left: auto; min-height: 44px; padding: 0 16px; font-size: 15px; }
+  .va .hero { padding-bottom: 96px; }
+  .va .book { grid-template-columns: 1fr; }
+  .va .book::before { inset: 8px -4px -8px -4px; }
+  .va .page.right { order: -1; border-radius: 6px 6px 0 0; padding: 30px 22px 26px; box-shadow: inset 0 -30px 30px -32px rgba(60, 20, 40, 0.3); min-height: 0; }
+  .va .page.left { border-radius: 0 0 6px 6px; padding: 22px 18px 28px; box-shadow: none; min-height: 0; }
+  .va .ribbon { left: auto; right: 18px; height: 58px; top: -12px; }
+  .va h1 { font-size: 46px; margin-bottom: 16px; }
+  .va .lead { font-size: 17px; margin-bottom: 22px; }
+  .va .actions .btn { flex: 1 1 auto; }
+  .va .notes { padding-top: 18px; }
+  .va .notes li { font-size: 22px; }
+  .va .week-head { flex-direction: column; gap: 4px; margin-bottom: 12px; }
+  .va .week-head .hand { font-size: 26px; }
+  .va .tabs { display: flex; gap: 6px; margin: 4px 0 14px; overflow-x: auto; }
+  .va .tabs button { flex: 1 0 auto; min-width: 44px; min-height: 44px; border: 0; border-radius: 10px; background: #eef1f7; font: 600 14px 'Golos Text', sans-serif; color: var(--muted); }
+  .va .tabs button.on { background: var(--ink); color: #fff; }
+  .va .week { grid-template-columns: 48px repeat(2, minmax(0, 1fr)); column-gap: 10px; }
+  .va .week .d1, .va .week .d2, .va .week .d3, .va .week .d4 { display: none; }
+  .va .week .c { height: 84px; }
+  .va .launcher { right: 16px; bottom: 22px; padding: 0; }
+  .va .launcher .lbl, .va .launcher .dot { display: none; }
+  .va .launcher .ic { width: 58px; height: 58px; background: var(--lime); color: var(--ink); }
+  .va .sec { padding: 72px 0; }
+  .va h2 { font-size: 38px; }
+  .va .board { grid-template-columns: 1fr; gap: 50px; }
+  .va .card { padding: 36px 22px 28px; }
+  .va .card h3 { font-size: 26px; }
+  .va .price li { grid-template-columns: 1fr auto; }
+  .va .price .dots { display: none; }
+  .va .price .nm { font-size: 17px; }
+  .va .price .pr { font-size: 22px; }
+  .va .polaroid { margin: 0 12px; }
+  .va .sheet { background-image: linear-gradient(90deg, transparent 20px, #f2a9bf 20px, #f2a9bf 22px, transparent 22px), linear-gradient(transparent 47px, var(--rule) 47px, var(--rule) 48px); padding: 40px 18px 34px 0; }
+  .va .sheet h2, .va .sheet .sub { padding-left: 40px; }
+  .va .sheet .sub { font-size: 16px; margin-bottom: 26px; }
+  .va .row { grid-template-columns: 1fr; }
+  .va .row .when { text-align: left; padding: 0 0 2px 40px; font-size: 20px; }
+  .va .row .msg { padding-left: 40px; }
+  .va .row.client .msg { font-size: 26px; }
+  .va .row.bot .msg { font-size: 16px; }
+  .va .steps { grid-template-columns: 1fr; padding-left: 40px; gap: 18px; }
+  .va .close-grid { grid-template-columns: 1fr; gap: 44px; }
+  .va .close h2 { font-size: 60px; }
+  .va .close dl { font-size: 16px; }
+  .va .foot-line { flex-direction: column; margin-top: 50px; }
+}
+</style>
+</head>
+<body>
+<div class="va">
+  <div class="wrap">
+    <header class="top">
+      <a class="brand" href="#top"><b>Velvet</b><span>студія краси · Зелена, 12</span></a>
+      <nav aria-label="Розділи">
+        <a href="#price">Ціни</a>
+        <a href="#masters">Майстрині</a>
+        <a href="#chat">Як записатися</a>
+        <a href="#contacts">Контакти</a>
+      </nav>
+      <a class="btn btn-lime" href="#chat">Записатися в чаті</a>
+    </header>
+
+    <section class="hero" id="top">
+      <div class="book">
+        <div class="page left" aria-label="Книга запису на тиждень">
+          <div class="week-head">
+            <span class="hand">Тиждень 26 - 31 жовтня</span>
+            <span class="legend"><i></i>вільне вікно - натисніть, щоб записатися</span>
+          </div>
+          <div class="tabs" aria-label="Дні тижня">
+            <button type="button">Пн</button><button type="button">Вт</button><button type="button">Ср</button><button type="button">Чт</button><button type="button" class="on">Пт</button><button type="button" class="on">Сб</button>
+          </div>
+          <div class="week">
+            <span></span>
+            <span class="dh d1">Пн<small>26 жовт</small></span>
+            <span class="dh d2">Вт<small>27 жовт</small></span>
+            <span class="dh d3">Ср<small>28 жовт</small></span>
+            <span class="dh d4">Чт<small>29 жовт</small></span>
+            <span class="dh d5">Пт<small>30 жовт</small></span>
+            <span class="dh d6">Сб<small>31 жовт</small></span>
+
+            <span class="t">10:00</span>
+            <div class="c d1"><span class="busy">Олена<em>манікюр</em></span></div>
+            <div class="c d2"><a class="free" href="#chat">вільно<small>10:00 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></small></a></div>
+            <div class="c d3"><span class="busy">Катерина<em>брови</em></span></div>
+            <div class="c d4"><span class="busy">Олена<em>манікюр</em></span></div>
+            <div class="c d5"><span class="busy">Катерина<em>брови</em></span></div>
+            <div class="c d6"><a class="free" href="#chat">вільно<small>10:00 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></small></a></div>
+
+            <span class="t">12:00</span>
+            <div class="c d1"><span class="busy">Катерина<em>брови</em></span></div>
+            <div class="c d2"><span class="busy">Олена<em>манікюр</em></span></div>
+            <div class="c d3"><a class="free" href="#chat">вільно<small>12:00 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></small></a></div>
+            <div class="c d4"><span class="busy">Катерина<em>вії 2D</em></span></div>
+            <div class="c d5"><span class="busy">Олена<em>педикюр</em></span></div>
+            <div class="c d6"><span class="busy">Олена<em>манікюр</em></span></div>
+
+            <span class="t">14:30</span>
+            <div class="c d1"><a class="free" href="#chat">вільно<small>14:30 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></small></a></div>
+            <div class="c d2"><span class="busy">Катерина<em>вії 2D</em></span></div>
+            <div class="c d3"><span class="busy">Олена<em>педикюр</em></span></div>
+            <div class="c d4"><span class="busy">Олена<em>манікюр</em></span></div>
+            <div class="c d5"><a class="free" href="#chat">вільно<small>14:30 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></small></a></div>
+            <div class="c d6"><a class="free" href="#chat">вільно<small>14:30 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></small></a></div>
+
+            <span class="t">17:00</span>
+            <div class="c d1"><span class="busy">Олена<em>педикюр</em></span></div>
+            <div class="c d2"><span class="busy">Олена<em>манікюр</em></span></div>
+            <div class="c d3"><span class="busy">Катерина<em>вії 2D</em></span></div>
+            <div class="c d4"><a class="free" href="#chat">вільно<small>17:00 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></small></a></div>
+            <div class="c d5"><span class="busy">Олена<em>манікюр</em></span></div>
+            <div class="c d6"><span class="busy">Катерина<em>брови</em></span></div>
+          </div>
+        </div>
+        <div class="page right">
+          <span class="ribbon" aria-hidden="true"></span>
+          <h1>Вільне вікно в суботу <mark>ще є</mark></h1>
+          <p class="lead">Манікюр, педикюр, брови й вії на Зеленій, 12. Напишіть у чат будь-коли, навіть уночі, - асистент назве ціну й запише вас у вільне вікно.</p>
+          <div class="actions">
+            <a class="btn btn-berry" href="#chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1 1 21 12Z"/></svg>Записатися в чаті</a>
+            <a class="btn btn-line" href="#price">Ціни</a>
+          </div>
+          <ul class="notes">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>без передоплати</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>перенести чи скасувати - за 3 години</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Пн–Сб 9:00–20:00</li>
+          </ul>
+        </div>
+      </div>
+      <a class="launcher" href="#chat" aria-label="Відкрити чат з асистентом">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1 1 21 12Z"/></svg></span>
+        <span class="lbl">Запис 24/7</span><span class="dot" aria-hidden="true"></span>
+      </a>
+    </section>
+  </div>
+
+  <section class="sec" id="price">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Ціна відома ще до запису</h2>
+        <p>Чотири послуги, дві майстрині. Асистент у чаті назве ту саму ціну й одразу покаже вільний час.</p>
+      </div>
+      <div class="board">
+        <div class="card">
+          <span class="tape" aria-hidden="true"></span>
+          <h3>Прайс Velvet</h3>
+          <ul class="price">
+            <li><span class="nm">Манікюр з покриттям<small>1,5 год · Олена</small></span><span class="dots"></span><span class="pr">950 грн</span></li>
+            <li><span class="nm">Педикюр з покриттям<small>1,5 год · Олена</small></span><span class="dots"></span><span class="pr">1 150 грн</span></li>
+            <li><span class="nm">Брови: корекція + фарбування<small>40 хв · Катерина</small></span><span class="dots"></span><span class="pr">650 грн</span></li>
+            <li><span class="nm">Нарощування вій 2D<small>2 год · Катерина</small></span><span class="dots"></span><span class="pr">900 грн</span></li>
+          </ul>
+          <div class="foot">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>передоплати немає</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>скасувати - за 3 години</span>
+          </div>
+        </div>
+        <div id="masters">
+          <figure class="polaroid">
+            <span class="tape" aria-hidden="true"></span>
+            <img src="/sites/concepts/img/5f8432006da38be3f3cfc7263de345de.jpg" alt="Студія Velvet: манікюрний стіл з лампою, оксамитове крісло кольору малини, полиця з лаками">
+            <figcaption>наша студія на Зеленій</figcaption>
+          </figure>
+          <div class="tags">
+            <div class="tag"><i aria-hidden="true"></i><b>Олена</b><span>манікюр і педикюр</span></div>
+            <div class="tag"><i aria-hidden="true"></i><b>Катерина</b><span>брови й вії</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec tight" id="chat">
+    <div class="wrap">
+      <div class="sheet">
+        <h2>Поки ми з клієнткою, асистент записує вас</h2>
+        <p class="sub">Він відповідає в чаті на сайті за кілька секунд: називає ціну, бачить вільні вікна Олени й Катерини та записує. Ось розмова, що прийшла о 23:41.</p>
+        <div class="talk">
+          <div class="row client"><span class="when">23:41</span><p class="msg">Скільки коштує манікюр з покриттям? Є щось на суботу?</p></div>
+          <div class="row bot"><span class="when">23:41</span><div class="msg"><span class="who">Асистент Velvet</span><br>Манікюр з покриттям - <b>950 грн</b>, близько 1,5 години, робить Олена. У суботу вільно <span class="slot">о 10:00 і 14:30</span>. Записати вас?</div></div>
+          <div class="row client"><span class="when">23:42</span><p class="msg">О 14:30, будь ласка. Мене звати Ірина</p></div>
+          <div class="row bot"><span class="when">23:42</span><div class="msg"><span class="who">Асистент Velvet</span><br>Готово, Ірино: субота, 31 жовтня, 14:30, манікюр з покриттям у Олени. Передоплати немає, перенести можна тут, у чаті, за 3 години до візиту.<br><span class="booked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Запис у книзі: Сб 14:30 · Олена · манікюр</span></div></div>
+        </div>
+        <ol class="steps">
+          <li><b>1. Напишіть</b>Будь-коли, навіть о другій ночі. Відповідь - за кілька секунд.</li>
+          <li><b>2. Оберіть вікно</b>Асистент покаже лише вільний час майстринь.</li>
+          <li><b>3. Приходьте</b>Нагадаємо в Telegram за 2 години до візиту.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="close" id="contacts">
+    <div class="wrap">
+      <div class="close-grid">
+        <div>
+          <h2>Зелена, 12</h2>
+          <dl>
+            <dt><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>Адреса</dt><dd>вул. Зелена, 12, Київ</dd>
+            <dt><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Години</dt><dd>Пн–Сб 9:00–20:00, неділя - вихідний</dd>
+            <dt><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1 1 21 12Z"/></svg>Запис</dt><dd>у чаті на сайті, цілодобово</dd>
+          </dl>
+          <a class="btn btn-lime" href="#chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1 1 21 12Z"/></svg>Записатися в чаті</a>
+        </div>
+        <figure class="photo-taped">
+          <span class="tape" aria-hidden="true"></span>
+          <img src="/sites/concepts/img/67289f002d5f1b567c17df3f505caf22.jpg" alt="Відкрита книга запису на рожевому мармурі поруч із лаками й сухоцвітами">
+        </figure>
+      </div>
+      <p class="foot-line"><span>Velvet · студія краси · вул. Зелена, 12, Київ</span><span>Демо-сайт · зроблено ПродавAI</span></p>
+    </div>
+  </section>
+</div>
+</body>
+</html>

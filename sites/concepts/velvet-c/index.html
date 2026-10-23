@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Velvet · Журнал сезону - концепт</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:wght@500;700;900&amp;family=Golos+Text:wght@400;500;600;700&amp;display=swap">
+<style>
+body { margin: 0; background: #fff; }
+.vc {
+  --spot: #2b35e0;
+  --spot-deep: #1f27b8;
+  --ink: #101014;
+  --muted: #55555f;
+  --line: #dcdce3;
+  font-family: 'Golos Text', system-ui, sans-serif;
+  color: var(--ink);
+  background: #fff;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+.vc ::selection { background: var(--spot); color: #fff; }
+.vc a { color: inherit; }
+.vc a:focus-visible, .vc button:focus-visible { outline: 3px solid var(--spot); outline-offset: 3px; }
+.vc .wrap { max-width: 1280px; margin: 0 auto; padding: 0 48px; }
+.vc .serif { font-family: 'Noto Serif Display', serif; }
+.vc .mark { display: inline-block; width: 22px; height: 22px; color: var(--spot); vertical-align: middle; }
+
+/* cover */
+.vc .bar { display: flex; align-items: center; gap: 28px; padding: 22px 0 18px; font-size: 14px; }
+.vc .bar nav { display: flex; gap: 26px; }
+.vc .bar nav a { text-decoration: none; font-weight: 500; padding: 4px 0; border-bottom: 2px solid transparent; transition: border-color .2s ease; }
+.vc .bar nav a:hover { border-color: var(--spot); }
+.vc .bar .right { margin-left: auto; display: flex; align-items: center; gap: 18px; }
+.vc .bar .btn-sm { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; background: var(--spot); color: #fff; font-weight: 600; text-decoration: none; transition: background-color .2s ease; }
+.vc .bar .btn-sm:hover { background: var(--spot-deep); }
+.vc .masthead { position: relative; margin: 0; font-family: 'Noto Serif Display', serif; font-weight: 900; font-size: 17.4vw; line-height: 0.8; letter-spacing: -0.04em; text-align: center; padding-top: 8px; }
+.vc .masthead .mark { position: absolute; width: 1.6vw; height: 1.6vw; min-width: 16px; min-height: 16px; right: 18.6%; top: 22%; }
+.vc .issue { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; margin-top: 18px; padding: 14px 0; border-top: 5px solid var(--ink); border-bottom: 1px solid var(--ink); font-size: 15px; font-weight: 600; }
+.vc .issue span:nth-child(2) { color: var(--spot); }
+.vc .issue span:last-child { text-align: right; }
+.vc .cover { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; padding: 36px 0 90px; }
+.vc .cover figure { margin: 0; position: relative; }
+.vc .cover figure img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+.vc .cover figure figcaption { margin-top: 10px; font-size: 13px; color: var(--muted); }
+.vc .lines { display: flex; flex-direction: column; }
+.vc .cl { display: block; padding: 22px 0 24px; border-bottom: 1px solid var(--line); text-decoration: none; transition: color .2s ease; }
+.vc .cl:first-child { padding-top: 0; }
+.vc .cl:hover { color: var(--spot); }
+.vc .cl .big { display: block; font-family: 'Noto Serif Display', serif; font-weight: 700; font-size: 48px; line-height: 1.02; letter-spacing: -0.02em; text-wrap: balance; }
+.vc .cl .sm { display: block; margin-top: 10px; font-size: 16px; color: var(--muted); }
+.vc .cl.spot .big { color: var(--spot); }
+.vc .cta { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 30px; padding: 22px 26px; background: var(--spot); color: #fff; text-decoration: none; font-weight: 600; font-size: 19px; transition: background-color .2s ease; }
+.vc .cta:hover { background: var(--spot-deep); }
+.vc .cta svg { width: 26px; height: 26px; }
+.vc .note { margin-top: 16px; font-size: 14px; color: var(--muted); display: flex; gap: 18px; flex-wrap: wrap; }
+
+.vc .launcher { position: absolute; right: 28px; bottom: 28px; display: inline-flex; align-items: center; gap: 12px; padding: 0 22px 0 0; height: 58px; background: var(--ink); color: #fff; text-decoration: none; font-weight: 600; font-size: 15px; box-shadow: 0 18px 34px -14px rgba(0, 0, 0, 0.55); z-index: 5; }
+.vc .launcher .ic { display: grid; place-items: center; width: 58px; height: 58px; background: var(--spot); }
+.vc .launcher svg { width: 24px; height: 24px; }
+.vc .hero { position: relative; }
+
+/* contents */
+.vc .contents { border-top: 5px solid var(--ink); padding: 70px 0 110px; }
+.vc .two { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; }
+.vc h2 { font-family: 'Noto Serif Display', serif; font-weight: 900; font-size: 64px; line-height: 0.98; letter-spacing: -0.03em; margin: 0 0 30px; text-wrap: balance; }
+.vc .drop { font-size: 19px; line-height: 1.65; color: #26262e; max-width: 32em; margin: 0 0 22px; }
+.vc .drop::first-letter { float: left; font-family: 'Noto Serif Display', serif; font-weight: 900; font-size: 128px; line-height: 0.78; color: var(--spot); margin: 10px 14px 0 0; }
+.vc .sign { display: flex; gap: 30px; margin-top: 30px; }
+.vc .sign div { border-top: 1px solid var(--ink); padding-top: 12px; min-width: 180px; }
+.vc .sign b { display: block; font-family: 'Noto Serif Display', serif; font-size: 26px; font-weight: 700; }
+.vc .sign span { font-size: 14px; color: var(--muted); }
+.vc .toc { list-style: none; margin: 0; padding: 0; }
+.vc .toc li { border-top: 1px solid var(--ink); }
+.vc .toc li:last-child { border-bottom: 1px solid var(--ink); }
+.vc .toc a { display: grid; grid-template-columns: 74px 1fr auto; align-items: baseline; gap: 18px; padding: 22px 0; text-decoration: none; transition: background-color .2s ease; }
+.vc .toc a:hover .t { color: var(--spot); }
+.vc .toc .pg { font-family: 'Noto Serif Display', serif; font-weight: 900; font-size: 40px; color: var(--spot); font-variant-numeric: tabular-nums; line-height: 1; }
+.vc .toc .t { font-family: 'Noto Serif Display', serif; font-weight: 700; font-size: 28px; line-height: 1.1; transition: color .2s ease; }
+.vc .toc .t small { display: block; font-family: 'Golos Text', sans-serif; font-weight: 500; font-size: 15px; color: var(--muted); margin-top: 6px; }
+.vc .toc .pr { font-weight: 700; font-size: 22px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* interview */
+.vc .interview { background: #f3f3f7; padding: 110px 0; }
+.vc .iv { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 64px; align-items: start; }
+.vc .iv figure { margin: 0; position: sticky; top: 30px; }
+.vc .iv figure img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
+.vc .iv figure figcaption { margin-top: 10px; font-size: 13px; color: var(--muted); }
+.vc .qa { margin-top: 10px; }
+.vc .q { margin: 0; padding-top: 18px; border-top: 6px solid var(--ink); font-family: 'Noto Serif Display', serif; font-weight: 700; font-size: 27px; line-height: 1.2; }
+.vc .a { margin: 14px 0 38px; font-size: 18px; line-height: 1.65; color: #26262e; max-width: 34em; }
+.vc .a b { color: var(--spot); }
+.vc .a .who { font-weight: 700; color: var(--ink); }
+.vc .booked { display: inline-flex; align-items: center; gap: 12px; margin-top: 4px; padding: 14px 20px; background: #fff; font-weight: 600; font-size: 16px; box-shadow: 0 10px 24px -16px rgba(0, 0, 0, 0.4); }
+.vc .booked svg { width: 22px; height: 22px; color: var(--spot); }
+
+/* close */
+.vc .close { background: var(--spot); color: #fff; padding: 100px 0 40px; }
+.vc .close h2 { font-size: 92px; margin-bottom: 40px; }
+.vc .close .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 5px solid #fff; }
+.vc .close .grid3 div { padding: 22px 28px 0 0; font-size: 18px; line-height: 1.5; }
+.vc .close .grid3 div + div { padding-left: 28px; border-left: 1px solid rgba(255, 255, 255, 0.4); }
+.vc .close .grid3 b { display: block; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; color: #dfe1ff; }
+.vc .close .big-cta { display: inline-flex; align-items: center; gap: 14px; margin-top: 56px; padding: 22px 30px; background: #fff; color: var(--spot); font-weight: 700; font-size: 19px; text-decoration: none; transition: transform .2s ease; }
+.vc .close .big-cta:hover { transform: translateY(-2px); }
+.vc .close .big-cta svg { width: 24px; height: 24px; }
+.vc .foot-line { margin-top: 90px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.35); display: flex; justify-content: space-between; gap: 20px; font-size: 14px; color: #dfe1ff; }
+
+@media (max-width: 760px) {
+  .vc .wrap { padding: 0 16px; }
+  .vc .bar { padding: 16px 0 12px; }
+  .vc .bar nav { display: none; }
+  .vc .bar .right .txt { display: none; }
+  .vc .masthead { font-size: 22.4vw; padding-top: 4px; }
+  .vc .issue { grid-template-columns: 1fr; gap: 4px; font-size: 13px; padding: 10px 0; }
+  .vc .issue span:last-child { text-align: left; }
+  .vc .cover { grid-template-columns: 1fr; gap: 30px; padding: 24px 0 70px; }
+  .vc .cover figure { order: 2; }
+  .vc .cl { padding: 16px 0 18px; }
+  .vc .cl .big { font-size: 32px; }
+  .vc .cl .sm { font-size: 15px; }
+  .vc .cta { font-size: 17px; padding: 18px 20px; }
+  .vc .launcher { right: 16px; bottom: 20px; padding: 0; height: 56px; }
+  .vc .launcher .txt { display: none; }
+  .vc .launcher .ic { width: 56px; height: 56px; }
+  .vc .contents { padding: 50px 0 70px; }
+  .vc .two { grid-template-columns: 1fr; gap: 44px; }
+  .vc h2 { font-size: 42px; margin-bottom: 22px; }
+  .vc .drop { font-size: 17px; }
+  .vc .drop::first-letter { font-size: 96px; }
+  .vc .sign { flex-direction: column; gap: 16px; }
+  .vc .toc a { grid-template-columns: 52px 1fr; gap: 6px 14px; }
+  .vc .toc .pr { grid-column: 2; font-size: 19px; }
+  .vc .toc .pg { font-size: 30px; }
+  .vc .toc .t { font-size: 22px; }
+  .vc .interview { padding: 70px 0; }
+  .vc .iv { grid-template-columns: 1fr; gap: 36px; }
+  .vc .iv figure { position: static; }
+  .vc .q { font-size: 22px; }
+  .vc .a { font-size: 16px; }
+  .vc .close { padding: 70px 0 34px; }
+  .vc .close h2 { font-size: 48px; }
+  .vc .close .grid3 { grid-template-columns: 1fr; }
+  .vc .close .grid3 div + div { padding-left: 0; border-left: 0; border-top: 1px solid rgba(255, 255, 255, 0.4); margin-top: 18px; }
+  .vc .close .big-cta { width: 100%; justify-content: center; box-sizing: border-box; }
+  .vc .foot-line { flex-direction: column; margin-top: 56px; }
+}
+</style>
+</head>
+<body>
+<div class="vc">
+  <section class="hero" id="top">
+    <div class="wrap">
+      <div class="bar">
+        <nav aria-label="Розділи">
+          <a href="#contents">Зміст</a>
+          <a href="#interview">Запис</a>
+          <a href="#contacts">Де ми</a>
+        </nav>
+        <div class="right"><span class="txt">Студія краси · Київ</span><a class="btn-sm" href="#interview">Записатися</a></div>
+      </div>
+      <h1 class="masthead" aria-label="Velvet">VELVET<svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 12c-2.6-3.8-6.6-5.4-8.2-3.9-1.5 1.4 0 5.6 3.8 6.3L5.2 20h2.6l3.1-4.8.6-.2.6.2 3.1 4.8h2.6l-2.4-5.6c3.8-.7 5.3-4.9 3.8-6.3C17.4 6.6 14.6 8.2 12 12Z"/></svg></h1>
+      <div class="issue"><span>Осінь 2026 · Випуск 4</span><span>Студія краси на вул. Зелена, 12</span><span>Пн–Сб 9:00–20:00</span></div>
+
+      <div class="cover">
+        <figure>
+          <img src="/sites/concepts/img/0926a56e994dc6e4159e143831f36822.jpg" alt="Оксамитове крісло кольору бордо біля високого арочного дзеркала в студії, бічне світло з вікна">
+          <figcaption>Крісло, у якому чекають на манікюр. Студія Velvet, Зелена, 12</figcaption>
+        </figure>
+        <div class="lines">
+          <a class="cl" href="#contents"><span class="big">Манікюр з покриттям&nbsp;- 950&nbsp;грн</span><span class="sm">півтори години в Олени, без передоплати</span></a>
+          <a class="cl" href="#contents"><span class="big">Брови й вії&nbsp;- у Катерини</span><span class="sm">корекція з фарбуванням 650 грн, вії 2D 900 грн</span></a>
+          <a class="cl spot" href="#interview"><span class="big">Вільно в суботу о 14:30</span><span class="sm">асистент у чаті запише вас за хвилину, навіть уночі</span></a>
+          <a class="cta" href="#interview"><span>Записатися в чаті</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <p class="note"><span>Перенести чи скасувати - за 3 години</span><span>Неділя - вихідний</span></p>
+        </div>
+      </div>
+    </div>
+    <a class="launcher" href="#interview" aria-label="Відкрити чат з асистентом"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1 1 21 12Z"/></svg></span><span class="txt">Асистент онлайн</span></a>
+  </section>
+
+  <section class="contents" id="contents">
+    <div class="wrap two">
+      <div>
+        <h2>У цьому випуску</h2>
+        <p class="drop">Велвет - невелика студія на Зеленій, 12, де кожна майстриня робить свою справу. Олена відповідає за руки й стопи, Катерина - за брови й вії. Ціну ви знаєте до запису, передоплати немає, а скасувати візит можна за три години. Записатися можна будь-коли: у чаті на сайті відповідає асистент, навіть коли студія зачинена.</p>
+        <div class="sign">
+          <div><b>Олена</b><span>манікюр і педикюр</span></div>
+          <div><b>Катерина</b><span>брови й вії</span></div>
+        </div>
+      </div>
+      <ul class="toc">
+        <li><a href="#interview"><span class="pg">04</span><span class="t">Манікюр з покриттям<small>1,5 год · Олена</small></span><span class="pr">950 грн</span></a></li>
+        <li><a href="#interview"><span class="pg">08</span><span class="t">Педикюр з покриттям<small>1,5 год · Олена</small></span><span class="pr">1 150 грн</span></a></li>
+        <li><a href="#interview"><span class="pg">12</span><span class="t">Брови: корекція + фарбування<small>40 хв · Катерина</small></span><span class="pr">650 грн</span></a></li>
+        <li><a href="#interview"><span class="pg">16</span><span class="t">Нарощування вій 2D<small>2 год · Катерина</small></span><span class="pr">900 грн</span></a></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="interview" id="interview">
+    <div class="wrap iv">
+      <figure>
+        <img src="/sites/concepts/img/c3cc5ad0f2a25c1090aa7a43476526de.jpg" alt="Флакон вишневого лаку й скляна пляшечка на травертині, засушена троянда, різкі тіні">
+        <figcaption>Розмова прийшла о 23:41. Студія була зачинена</figcaption>
+      </figure>
+      <div>
+        <h2>Розмова, після якої ви записані</h2>
+        <div class="qa">
+          <p class="q">Скільки коштує манікюр з покриттям і чи є час у суботу?</p>
+          <p class="a"><span class="who">Асистент Velvet:</span> Манікюр з покриттям - <b>950 грн</b>, близько півтори години, робить Олена. У суботу вільно о 10:00 і о 14:30. Записати вас?</p>
+          <p class="q">О 14:30. Чи потрібна передоплата?</p>
+          <p class="a"><span class="who">Асистент Velvet:</span> Ні, передоплати немає. Записала вас на суботу, 31 жовтня, о 14:30 до Олени. Якщо плани зміняться, напишіть сюди за три години - перенесу.</p>
+          <span class="booked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Сб, 31 жовтня, 14:30 · манікюр з покриттям · Олена</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="close" id="contacts">
+    <div class="wrap">
+      <h2>Наступна сторінка&nbsp;- ваш візит</h2>
+      <div class="grid3">
+        <div><b>Адреса</b>вул. Зелена, 12, Київ</div>
+        <div><b>Години</b>Пн–Сб 9:00–20:00, неділя - вихідний</div>
+        <div><b>Запис</b>у чаті на сайті, цілодобово, без передоплати</div>
+      </div>
+      <a class="big-cta" href="#interview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1 1 21 12Z"/></svg>Записатися в чаті</a>
+      <p class="foot-line"><span>Velvet · студія краси · вул. Зелена, 12, Київ</span><span>Демо-сайт · зроблено ПродавAI</span></p>
+    </div>
+  </section>
+</div>
+</body>
+</html>

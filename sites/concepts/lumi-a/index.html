@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lumi Dental · Картка візиту - концепт</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#f4f6f9}
+.lu{--paper:#f4f6f9;--card:#ffffff;--ink:#13203a;--muted:#4a5875;--cobalt:#1f4fd1;--cobalt-d:#173da6;--rule:#cdd6e6;--rule-s:#e3e8f1;--oak:#b88a57;position:relative;background:var(--paper);color:var(--ink);font-family:'Golos Text',system-ui,sans-serif;font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;overflow-x:clip}
+.lu *{box-sizing:border-box}
+.lu ::selection{background:var(--cobalt);color:#fff}
+.lu a{color:var(--cobalt-d);text-underline-offset:3px}
+.lu a:focus-visible,.lu button:focus-visible{outline:3px solid #8fb0ff;outline-offset:3px;border-radius:8px}
+.lu h1,.lu h2,.lu h3{font-family:'Commissioner',sans-serif;margin:0;color:var(--ink)}
+.wrap{max-width:1280px;margin:0 auto;padding:0 48px}
+.btn{display:inline-flex;align-items:center;gap:10px;min-height:48px;padding:0 22px;border-radius:10px;background:var(--cobalt);color:#fff!important;font:600 16px/1 'Golos Text',sans-serif;text-decoration:none;border:0;cursor:pointer;box-shadow:0 10px 24px -10px rgba(31,79,209,.6);transition:background .2s ease,transform .2s ease}
+.btn:hover{background:var(--cobalt-d);transform:translateY(-1px)}
+.btn svg{flex:none}
+.btn-ghost{background:transparent;color:var(--ink)!important;box-shadow:inset 0 0 0 1.5px var(--rule)}
+.btn-ghost:hover{background:#fff}
+
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:22px 0}
+.brand{display:flex;align-items:baseline;gap:12px;text-decoration:none;color:var(--ink)!important}
+.brand b{font:800 25px/1 'Commissioner',sans-serif;letter-spacing:-.02em}
+.brand b i{font-style:normal;color:var(--cobalt)}
+.brand span{font-size:13px;color:var(--muted)}
+.nav{display:flex;align-items:center;gap:32px}
+.nav a{color:var(--ink);text-decoration:none;font-size:15px;font-weight:500}
+.nav a:hover{color:var(--cobalt)}
+
+/* first viewport */
+.intro{display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);gap:48px;align-items:end;padding:26px 0 34px}
+.intro h1{font-size:clamp(40px,4.7vw,68px);line-height:1.02;letter-spacing:-.035em;font-weight:800}
+.intro h1 span{display:block;color:var(--cobalt)}
+.intro p{margin:0;color:var(--muted);font-size:18px;max-width:40ch}
+.intro p b{color:var(--ink);font-weight:600}
+.stage{position:relative;max-width:1440px;margin:0 auto}
+.stage .photo{display:block;width:100%;height:600px;object-fit:cover;object-position:50% 58%}
+.ticket{position:absolute;left:max(48px,calc((100% - 1280px)/2 + 48px));top:250px;width:min(800px,calc(100% - 96px));filter:drop-shadow(0 28px 34px rgba(13,28,66,.30)) drop-shadow(0 2px 4px rgba(13,28,66,.18))}
+.card{display:grid;grid-template-columns:minmax(0,1fr) 250px;background:var(--card);border-radius:8px;transform:rotate(-1.4deg);-webkit-mask:radial-gradient(circle 13px at calc(100% - 250px) 0,transparent 97%,#000 100%) top/100% 51% no-repeat,radial-gradient(circle 13px at calc(100% - 250px) 100%,transparent 97%,#000 100%) bottom/100% 51% no-repeat;mask:radial-gradient(circle 13px at calc(100% - 250px) 0,transparent 97%,#000 100%) top/100% 51% no-repeat,radial-gradient(circle 13px at calc(100% - 250px) 100%,transparent 97%,#000 100%) bottom/100% 51% no-repeat}
+.card-main{padding:26px 30px 24px}
+.card-head{display:flex;justify-content:space-between;align-items:center;padding-bottom:14px;border-bottom:2px solid var(--cobalt);font:700 13px/1 'Commissioner',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--cobalt)}
+.card-head em{font-style:normal;letter-spacing:.04em;color:var(--muted);font-weight:500}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:28px}
+.f{padding:12px 0 10px;border-bottom:1px solid var(--rule)}
+.f.wide{grid-column:1/-1}
+.f small{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.f strong{display:block;font:600 18px/1.3 'Golos Text',sans-serif}
+.f .free{display:inline-block;margin-left:8px;padding:3px 9px;border-radius:999px;background:#e6edff;color:var(--cobalt-d);font-size:13px;font-weight:600;vertical-align:2px}
+.f .time{font:800 46px/1 'Commissioner',sans-serif;letter-spacing:-.03em;color:var(--cobalt)}
+.f .time span{font:600 18px/1 'Golos Text',sans-serif;letter-spacing:0;color:var(--ink);margin-right:10px}
+.more{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:14px;font-size:14px;color:var(--muted)}
+.more a{display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border-radius:8px;box-shadow:inset 0 0 0 1.5px var(--rule);color:var(--ink);text-decoration:none;font-weight:600;font-size:15px;transition:box-shadow .2s ease,color .2s ease}
+.more a:hover{box-shadow:inset 0 0 0 1.5px var(--cobalt);color:var(--cobalt)}
+.stub{position:relative;display:flex;flex-direction:column;justify-content:space-between;gap:18px;padding:26px 26px 24px 30px;background:#f7f9fd;border-left:2px dashed #b9c6e2}
+.stub small{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.stub .when{font:700 20px/1.25 'Commissioner',sans-serif}
+.stub .when b{display:block;font-size:40px;font-weight:800;letter-spacing:-.03em;color:var(--cobalt)}
+.stub .btn{justify-content:center;width:100%;white-space:nowrap;padding:0 16px}
+.stub p{margin:0;font-size:13px;line-height:1.4;color:var(--muted)}
+
+/* launcher: where it sits on the first screen */
+.launch{position:absolute;right:28px;top:800px;z-index:5;display:flex;align-items:center;gap:10px;height:58px;padding:0 22px 0 18px;border-radius:14px;background:var(--ink);color:#fff;font:600 16px/1 'Golos Text',sans-serif;text-decoration:none;box-shadow:0 18px 34px -12px rgba(13,28,66,.55)}
+.launch i{position:absolute;top:-4px;right:-4px;width:14px;height:14px;border-radius:50%;background:#2fd17a;box-shadow:0 0 0 3px var(--paper)}
+
+/* sections */
+.sec{padding:120px 0 0}
+.doc{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:72px;align-items:center;padding-top:150px}
+.doc img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:6px}
+.doc h2,.prices h2,.ask h2,.find h2{font-size:clamp(32px,3.6vw,52px);line-height:1.05;letter-spacing:-.03em;font-weight:800;text-wrap:balance}
+.doc .lead{margin:20px 0 32px;color:var(--muted);max-width:56ch}
+.spec{margin:0;border-top:2px solid var(--ink)}
+.spec div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:24px;padding:15px 0;border-bottom:1px solid var(--rule)}
+.spec dt{font:700 15px/1.5 'Commissioner',sans-serif;color:var(--cobalt)}
+.spec dd{margin:0;font-size:16px}
+
+.prices{padding-top:130px}
+.prices-head{display:flex;justify-content:space-between;align-items:end;gap:40px;margin-bottom:36px}
+.prices-head p{margin:0;max-width:42ch;color:var(--muted)}
+.form{background:var(--card);border-radius:6px;padding:38px 44px 30px;box-shadow:0 30px 60px -40px rgba(13,28,66,.35),0 1px 0 var(--rule-s)}
+.form-top{display:grid;grid-template-columns:minmax(0,1fr) auto;padding-bottom:12px;border-bottom:2px solid var(--cobalt);font:700 13px/1 'Commissioner',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--cobalt)}
+.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:56px}
+.grp h3{font-size:15px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--ink);padding:26px 0 8px;border-bottom:1px solid var(--ink)}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--rule)}
+.row span{font-size:16px}
+.row span small{display:block;font-size:13px;color:var(--muted)}
+.row b{font:700 17px/1.2 'Commissioner',sans-serif;white-space:nowrap}
+.row b.z{color:var(--cobalt)}
+.form-foot{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;margin-top:28px;font-size:14px;color:var(--muted)}
+
+.ask{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:80px;align-items:start;padding-top:140px}
+.ask p{color:var(--muted);margin:20px 0 0;max-width:46ch}
+.alarm{margin-top:28px;padding:16px 18px;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1.5px #f1c5c5;font-size:15px;color:#7a1d1d}
+.chat{background:var(--card);border-radius:14px;overflow:hidden;box-shadow:0 34px 60px -36px rgba(13,28,66,.5),0 1px 0 var(--rule-s)}
+.chat-top{display:flex;align-items:center;gap:12px;padding:16px 20px;background:var(--cobalt);color:#fff}
+.chat-top .av{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.18);font:800 15px/1 'Commissioner',sans-serif}
+.chat-top b{display:block;font-size:16px}
+.chat-top small{font-size:13px;opacity:.85}
+.chat-body{display:flex;flex-direction:column;gap:12px;padding:24px 20px;background:#f6f8fc}
+.m{max-width:82%;padding:12px 16px;border-radius:16px;font-size:15.5px;line-height:1.45}
+.m.u{align-self:flex-end;background:var(--ink);color:#fff;border-bottom-right-radius:5px}
+.m.a{align-self:flex-start;background:#fff;box-shadow:0 1px 2px rgba(13,28,66,.08);border-bottom-left-radius:5px}
+.quick{display:flex;gap:8px;flex-wrap:wrap;align-self:flex-start}
+.quick a{display:inline-flex;align-items:center;min-height:38px;padding:0 14px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--cobalt);color:var(--cobalt-d);font-size:14px;font-weight:600;text-decoration:none}
+.mini{align-self:flex-start;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;width:84%;padding:14px 18px;border-radius:8px;background:#fff;border-top:3px solid var(--cobalt);box-shadow:0 10px 24px -14px rgba(13,28,66,.4)}
+.mini small{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.mini strong{font-size:16px}
+.mini b{font:800 28px/1 'Commissioner',sans-serif;color:var(--cobalt)}
+.chat-in{display:flex;gap:10px;padding:14px 16px;border-top:1px solid var(--rule-s);background:#fff}
+.chat-in label{flex:1;display:flex}
+.chat-in input{flex:1;min-width:0;height:46px;padding:0 16px;border-radius:999px;border:0;background:#eef2f8;font:16px 'Golos Text',sans-serif;color:var(--ink)}
+.chat-in button{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;border:0;background:var(--cobalt);color:#fff;cursor:pointer}
+
+.find{padding:140px 0 110px}
+.find-grid{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:72px;margin-top:40px}
+.addr{font:700 clamp(26px,2.6vw,38px)/1.2 'Commissioner',sans-serif;letter-spacing:-.02em}
+.addr small{display:block;margin-top:10px;font:400 17px/1.5 'Golos Text',sans-serif;color:var(--muted);letter-spacing:0}
+.hours{margin:0;border-top:2px solid var(--ink)}
+.hours div{display:flex;justify-content:space-between;gap:20px;padding:14px 0;border-bottom:1px solid var(--rule);font-size:17px}
+.hours dd{margin:0;font-weight:600}
+.hours .off dd{color:var(--muted);font-weight:400}
+.contact{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:32px}
+.contact a.tel{font:700 20px/1 'Commissioner',sans-serif;color:var(--ink);text-decoration:none}
+.foot{padding:26px 0 30px;border-top:1px solid var(--rule);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+@media (max-width:760px){
+.lu{font-size:16px}
+.wrap{padding:0 18px}
+.top{padding:14px 0}
+.brand span,.nav a:not(.btn){display:none}
+.nav .btn{min-height:42px;padding:0 14px;font-size:14px}
+.intro{grid-template-columns:1fr;gap:14px;padding:18px 0 22px}
+.intro h1{font-size:36px;letter-spacing:-.03em}
+.intro p{font-size:15.5px}
+.stage .photo{height:210px;object-position:40% 55%}
+.ticket{position:relative;left:auto;top:auto;width:auto;margin:-44px 14px 0}
+.card{grid-template-columns:1fr;transform:none;-webkit-mask:radial-gradient(circle 11px at 0 calc(100% - 128px),transparent 97%,#000 100%) left/51% 100% no-repeat,radial-gradient(circle 11px at 100% calc(100% - 128px),transparent 97%,#000 100%) right/51% 100% no-repeat;mask:radial-gradient(circle 11px at 0 calc(100% - 128px),transparent 97%,#000 100%) left/51% 100% no-repeat,radial-gradient(circle 11px at 100% calc(100% - 128px),transparent 97%,#000 100%) right/51% 100% no-repeat}
+.card-main{padding:18px 18px 14px}
+.card-head{font-size:11px;padding-bottom:10px}
+.fields{grid-template-columns:1fr}
+.f{padding:9px 0 8px}
+.f.hide-m{display:none}
+.f .time{font-size:34px}
+.f strong{font-size:16px}
+.more{display:none}
+.more a{min-height:34px;padding:0 12px;font-size:14px}
+.stub{height:128px;flex-direction:row;align-items:center;gap:14px;padding:16px 18px;border-left:0;border-top:2px dashed #b9c6e2}
+.stub > div{flex:none}
+.stub .when{font-size:13px}
+.stub .when b{font-size:24px}
+.stub small,.stub p{display:none}
+.stub .btn{flex:1;min-height:50px;padding:0 12px;font-size:15px}
+.launch{top:332px;right:14px;width:56px;height:56px;padding:0;justify-content:center;border-radius:50%}
+.launch span{display:none}
+.doc{grid-template-columns:1fr;gap:28px;padding-top:88px}
+.doc img{aspect-ratio:4/3.4}
+.spec div{grid-template-columns:96px minmax(0,1fr);gap:14px}
+.spec dt{font-size:14px}
+.spec dd{font-size:15px}
+.prices{padding-top:88px}
+.prices-head{flex-direction:column;align-items:start;gap:12px;margin-bottom:22px}
+.form{padding:22px 18px 20px;margin:0 -4px}
+.form-top{font-size:11px}
+.cols{grid-template-columns:1fr}
+.grp h3{font-size:13px;padding-top:20px}
+.row span{font-size:15px}
+.row b{font-size:16px}
+.ask{grid-template-columns:1fr;gap:28px;padding-top:88px}
+.m{font-size:15px;max-width:88%}
+.mini{width:92%}
+.find{padding:88px 0 70px}
+.find-grid{grid-template-columns:1fr;gap:32px;margin-top:24px}
+}
+</style>
+</head>
+<body>
+<div class="lu">
+  <div class="wrap">
+    <header class="top">
+      <a class="brand" href="#"><b>Lumi<i>·</i>Dental</b><span>сімейна стоматологія з 2016 року</span></a>
+      <nav class="nav" aria-label="Розділи">
+        <a href="#prices">Послуги й ціни</a>
+        <a href="#doctor">Лікар</a>
+        <a href="#find">Як дістатися</a>
+        <a class="btn" href="#chat">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1 1 21 12Z"></path></svg>
+          Записатися в чаті
+        </a>
+      </nav>
+    </header>
+    <section class="intro">
+      <h1>Запис до стоматолога <span>навіть уночі</span></h1>
+      <p>Сімейна стоматологія біля метро «Лівобережна». Оберіть час на картці - асистент у чаті запише вас одразу. <b>Перший огляд і план лікування - безкоштовно.</b></p>
+    </section>
+  </div>
+
+  <div class="stage">
+    <img class="photo" src="/sites/concepts/img/b57666f32b0cd5a34367712f94e8c8ed.jpg" alt="Кабінет Lumi Dental: стоматологічне крісло, синя стіна, світле дерево й велике вікно в сад">
+    <div class="ticket">
+      <div class="card" role="group" aria-label="Картка візиту: найближчий вільний час">
+        <div class="card-main">
+          <div class="card-head">Lumi Dental · картка візиту <em>вул. Світла, 9</em></div>
+          <div class="fields">
+            <div class="f wide"><small>Послуга</small><strong>Огляд і план лікування <span class="free">безкоштовно</span></strong></div>
+            <div class="f"><small>Найближчий час</small><div class="time"><span>Завтра</span>09:00</div></div>
+            <div class="f hide-m"><small>Лікар</small><strong>Андрій Миколайович Мороз</strong><small style="margin:2px 0 0;text-transform:none;letter-spacing:0">головний лікар</small></div>
+          </div>
+          <div class="more">Ще вільно завтра: <a href="#chat">10:00</a><a href="#chat">11:00</a><a href="#chat">14:00</a></div>
+        </div>
+        <div class="stub">
+          <div>
+            <small>Талон</small>
+            <div class="when">завтра <b>09:00</b></div>
+          </div>
+          <a class="btn" href="#chat">Записатися в чаті</a>
+          <p>Асистент відповідає одразу, удень і вночі</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <a class="launch" href="#chat" aria-label="Чат з асистентом Lumi Dental">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1 1 21 12Z"></path></svg>
+    <span>Запитати асистента</span><i></i>
+  </a>
+
+  <div class="wrap">
+    <section class="doc" id="doctor">
+      <img src="/sites/concepts/img/96a34b0323a3dd15cee75c3f7ac2fc95.jpg" alt="Рецепція Lumi Dental: дубова стійка, зелені гілки у вазі, синя стіна">
+      <div>
+        <h2>Спершу огляд і план - ціну знаєте до лікування</h2>
+        <p class="lead">Головний лікар Андрій Миколайович Мороз оглядає, складає план лікування й називає точну вартість. Складне лікування плануємо разом: у клініці терапевт, ортопед, хірург-імплантолог, ортодонт і дитячий стоматолог.</p>
+        <dl class="spec">
+          <div><dt>Канали</dt><dd>Лікуємо під мікроскопом: кофердам, 3D-пломбування гарячою гутаперчею, рентген-контроль</dd></div>
+          <div><dt>Пломби</dt><dd>Японський композит GC G-aenial</dd></div>
+          <div><dt>Діти</dt><dd>Дитячий кабінет, огляд дитини - безкоштовно</dd></div>
+          <div><dt>Профілактика</dt><dd>Огляд і професійна гігієна кожні 6 місяців, на свою роботу клініка дає гарантію</dd></div>
+          <div><dt>Оплата</dt><dd>Готівкою або карткою</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="prices" id="prices">
+      <div class="prices-head">
+        <h2>Послуги й ціни</h2>
+        <p>Ціни орієнтовні: точну вартість лікар називає після огляду, а перший огляд - безкоштовний.</p>
+      </div>
+      <div class="form">
+        <div class="form-top"><span>Lumi Dental · прайс</span><span>грн</span></div>
+        <div class="cols">
+          <div>
+            <div class="grp">
+              <h3>Діагностика й гігієна</h3>
+              <div class="row"><span>Огляд і консультація з планом лікування</span><b class="z">безкоштовно</b></div>
+              <div class="row"><span>Прицільний знімок зуба</span><b>300</b></div>
+              <div class="row"><span>Панорамний знімок (ОПТГ)</span><b>650</b></div>
+              <div class="row"><span>Професійна гігієна<small>ультразвук, Air Flow, полірування, 2 щелепи</small></span><b>2 000</b></div>
+              <div class="row"><span>Гігієна при сильному нальоті й камені</span><b>2 500</b></div>
+            </div>
+            <div class="grp">
+              <h3>Лікування зубів</h3>
+              <div class="row"><span>Пломба GC G-aenial, поверхневий карієс</span><b>1 500</b></div>
+              <div class="row"><span>Пломба, середній карієс</span><b>1 800</b></div>
+              <div class="row"><span>Пломба, глибокий карієс</span><b>2 200</b></div>
+              <div class="row"><span>Допомога при гострому болю</span><b>від 1 000</b></div>
+              <div class="row"><span>Лікування каналу під мікроскопом<small>за 1 канал, постійна пломба окремо</small></span><b>від 2 500</b></div>
+            </div>
+            <div class="grp">
+              <h3>Діти</h3>
+              <div class="row"><span>Огляд дитини</span><b class="z">безкоштовно</b></div>
+              <div class="row"><span>Пломба в молочному зубі</span><b>від 1 000</b></div>
+            </div>
+          </div>
+          <div>
+            <div class="grp">
+              <h3>Протезування</h3>
+              <div class="row"><span>Металокерамічна коронка</span><b>6 000</b></div>
+              <div class="row"><span>Коронка з цирконію</span><b>9 500</b></div>
+              <div class="row"><span>Вініри, за зуб</span><b>від 12 000</b></div>
+            </div>
+            <div class="grp">
+              <h3>Хірургія й імпланти</h3>
+              <div class="row"><span>Видалення зуба, просте</span><b>1 200</b></div>
+              <div class="row"><span>Зуб мудрості чи атипове видалення</span><b>від 3 000</b></div>
+              <div class="row"><span>Імплант під ключ з коронкою<small>систему й ціну хірург називає після знімка</small></span><b>від 25 000</b></div>
+            </div>
+            <div class="grp">
+              <h3>Ортодонтія й відбілювання</h3>
+              <div class="row"><span>Консультація ортодонта</span><b>500</b></div>
+              <div class="row"><span>Брекети металеві, за щелепу</span><b>від 18 000</b></div>
+              <div class="row"><span>Кабінетне відбілювання</span><b>від 6 000</b></div>
+            </div>
+          </div>
+        </div>
+        <div class="form-foot"><span>Повний прайс і вільний час - у чаті, асистент знає кожен рядок</span><a class="btn" href="#chat">Запитати ціну в чаті</a></div>
+      </div>
+    </section>
+
+    <section class="ask" id="chat">
+      <div>
+        <h2>Болить зуб о 22:40? Напишіть у чат</h2>
+        <p>Асистент Lumi Dental відповідає одразу: називає ціну, показує вільний час і записує. Адміністратор зранку бачить готову картку візиту.</p>
+        <div class="alarm">Набряк обличчя, що збільшується, висока температура, важко ковтати чи дихати - не чекайте запису, телефонуйте 103.</div>
+      </div>
+      <div class="chat" role="group" aria-label="Приклад розмови з асистентом">
+        <div class="chat-top"><span class="av" aria-hidden="true">L</span><div><b>Lumi Dental</b><small>AI-асистент · онлайн</small></div></div>
+        <div class="chat-body">
+          <div class="m u">Болить зуб, реагує на холодне. Можна завтра зранку?</div>
+          <div class="m a">Так, завтра є 09:00 і 10:00. Огляд лікаря безкоштовний, допомога при гострому болю - від 1 000 грн. Записати вас на 09:00?</div>
+          <div class="quick"><a href="#chat">Так, на 09:00</a><a href="#chat">Інший час</a></div>
+          <div class="m u">Так, на 09:00. Олена, 067 123 45 67</div>
+          <div class="mini"><div><small>Записано</small><strong>Огляд лікаря · болить зуб</strong></div><b>09:00</b></div>
+        </div>
+        <form class="chat-in" action="#">
+          <label><input type="text" placeholder="Напишіть повідомлення" aria-label="Повідомлення"></label>
+          <button type="button" aria-label="Надіслати"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+        </form>
+      </div>
+    </section>
+
+    <section class="find" id="find">
+      <h2>Як нас знайти</h2>
+      <div class="find-grid">
+        <div>
+          <div class="addr">вул. Світла, 9, Київ<small>5 хвилин пішки від метро «Лівобережна»</small></div>
+          <div class="contact"><a class="btn" href="#chat">Записатися в чаті</a><a class="tel" href="#">044 000 12 34</a></div>
+        </div>
+        <dl class="hours">
+          <div><dt>Понеділок - пʼятниця</dt><dd>9:00 - 19:00</dd></div>
+          <div><dt>Субота</dt><dd>9:00 - 15:00</dd></div>
+          <div class="off"><dt>Неділя</dt><dd>вихідний, запис у чаті працює</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <footer class="foot"><span>Lumi Dental · вул. Світла, 9, Київ</span><span>Демо-сайт · зроблено ПродавAI</span></footer>
+  </div>
+</div>
+</body>
+</html>

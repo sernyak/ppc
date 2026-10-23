@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Garage One · Боковина шини - концепт</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Unbounded:wght@500;700;800;900&display=swap">
+<style>
+body{margin:0;background:#0b0c0d}
+.ga{--ink:#0b0c0d;--rub:#131517;--rub2:#1b1e21;--mould:#7a8088;--txt:#e8eaed;--mut:#a9afb7;--line:rgba(255,255,255,.08);--y:#ffd23f;--y2:#ffe27a;
+  font-family:'Golos Text',system-ui,-apple-system,sans-serif;color:var(--txt);background:var(--ink);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+.ga *{box-sizing:border-box}
+.ga ::selection{background:var(--y);color:#111}
+.ga a{color:inherit;text-decoration:none}
+.ga a:focus-visible,.ga button:focus-visible{outline:2px solid var(--y);outline-offset:3px;border-radius:8px}
+.ga .wrap{max-width:1280px;margin:0 auto;padding:0 48px}
+.ga .rubber{background:var(--rub) radial-gradient(rgba(255,255,255,.035) 1px,transparent 1.5px) 0 0/6px 6px}
+.ga .mould{font-family:'Unbounded',sans-serif;font-weight:800;color:var(--mould);
+  text-shadow:0 -1px 0 rgba(255,255,255,.34),0 1px 1px rgba(0,0,0,.95),0 5px 12px rgba(0,0,0,.6)}
+
+/* header */
+.ga .hd{position:relative;z-index:3;border-bottom:1px solid var(--line)}
+.ga .hd-in{display:flex;align-items:center;gap:40px;height:76px}
+.ga .brand{display:flex;align-items:center;gap:12px;font-family:'Unbounded',sans-serif;font-weight:800;font-size:17px;letter-spacing:.02em;color:var(--txt)}
+.ga .brand svg{flex:none}
+.ga .codes{display:flex;gap:28px;margin-left:auto;font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--mut)}
+.ga .codes a{padding:8px 0;border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
+.ga .codes a:hover{color:var(--txt);border-color:var(--y)}
+.ga .btn-y{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:56px;padding:0 28px;border-radius:999px;background:var(--y);color:#141414;font-weight:700;font-size:17px;
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,.18),0 10px 26px -10px rgba(255,210,63,.55);transition:background .2s,transform .2s}
+.ga .btn-y:hover{background:var(--y2);transform:translateY(-1px)}
+.ga .btn-y.sm{min-height:44px;padding:0 20px;font-size:15px}
+.ga .btn-line{display:inline-flex;align-items:center;gap:10px;min-height:56px;padding:0 24px;border-radius:999px;border:1.5px solid rgba(255,255,255,.22);font-weight:600;font-size:16px;transition:border-color .2s}
+.ga .btn-line:hover{border-color:var(--y)}
+
+/* hero */
+.ga .hero{position:relative;min-height:800px;overflow:hidden}
+.ga .hero-img{position:absolute;top:0;right:0;width:70%;height:100%;object-fit:cover;object-position:38% 50%;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 34%);mask-image:linear-gradient(90deg,transparent 0,#000 34%)}
+.ga .hero-in{position:relative;z-index:2;padding-top:72px;padding-bottom:88px}
+.ga .h1{margin:0;font-size:clamp(44px,5.4vw,80px);line-height:1.02;letter-spacing:-.025em;max-width:11.5em}
+.ga .h1 .lit{display:block;color:var(--y);text-shadow:0 -1px 0 rgba(255,255,255,.35),0 2px 0 rgba(120,90,0,.65),0 8px 20px rgba(0,0,0,.6)}
+.ga .lead{max-width:30em;margin:28px 0 0;font-size:19px;line-height:1.55;color:#cfd3d8}
+.ga .lead b{color:var(--txt);font-weight:600}
+.ga .board{display:grid;grid-template-columns:auto auto;justify-content:start;align-items:center;gap:12px 22px;margin-top:30px;padding:18px 22px;width:fit-content;max-width:100%;border-radius:18px;
+  background:rgba(19,21,23,.78);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -2px 0 rgba(0,0,0,.6),0 18px 40px -18px rgba(0,0,0,.8);backdrop-filter:blur(2px)}
+.ga .board-l{grid-column:1/-1;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);display:flex;align-items:center;gap:10px}
+.ga .live{width:9px;height:9px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 4px rgba(74,222,128,.16)}
+.ga .day{font-family:'Unbounded',sans-serif;font-size:13px;font-weight:700;color:var(--mut);min-width:64px}
+.ga .slots{display:flex;gap:8px;align-items:center}
+.ga .slot{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:12px;font-family:'Unbounded',sans-serif;font-weight:700;font-size:16px;color:var(--txt);
+  background:var(--rub2);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 -2px 0 rgba(0,0,0,.55);transition:box-shadow .2s,color .2s}
+.ga .slot:hover{color:var(--y);box-shadow:inset 0 0 0 1.5px var(--y)}
+.ga .acts{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+.ga .code{margin:36px 0 0;font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;letter-spacing:.22em;color:#81878f}
+.ga .launch{position:absolute;right:40px;bottom:36px;z-index:4;display:flex;align-items:flex-end;gap:14px}
+.ga .tease{max-width:250px;padding:14px 16px;border-radius:16px 16px 4px 16px;background:#f4f5f6;color:#15171a;font-size:14px;line-height:1.4;box-shadow:0 18px 40px -14px rgba(0,0,0,.7)}
+.ga .tease b{display:block;font-size:12px;color:#5b6168;font-weight:600;margin-bottom:4px}
+.ga .fab{display:grid;place-items:center;width:64px;height:64px;border-radius:50%;background:var(--y);color:#141414;box-shadow:inset 0 -3px 0 rgba(0,0,0,.2),0 14px 30px -10px rgba(255,210,63,.6)}
+
+/* sidewall price band */
+.ga .sec{padding:92px 0}
+.ga .h2{margin:0;font-size:clamp(34px,4vw,56px);line-height:1.05;letter-spacing:-.02em}
+.ga .note{margin:18px 0 0;max-width:36em;font-size:17px;line-height:1.55;color:var(--mut)}
+.ga .wall{position:relative;margin-top:56px;border-radius:28px;padding:44px 48px 40px;box-shadow:inset 0 2px 0 rgba(255,255,255,.06),inset 0 -3px 0 rgba(0,0,0,.6),0 30px 60px -30px rgba(0,0,0,.9)}
+.ga .wall::before{content:'';position:absolute;left:0;right:0;top:0;height:16px;border-radius:28px 28px 0 0;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 14px,transparent 14px 34px)}
+.ga .wall-h{display:flex;justify-content:space-between;align-items:baseline;gap:20px;font-family:'Unbounded',sans-serif;font-size:13px;font-weight:700;letter-spacing:.18em;color:#8d939b}
+.ga .sizes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin-top:22px}
+.ga .size{padding:18px 22px 20px;border-left:1px solid var(--line)}
+.ga .size:first-child{border-left:0;padding-left:0}
+.ga .size .r{display:block;font-size:clamp(30px,3.3vw,46px);line-height:1.1}
+.ga .size .p{display:block;margin-top:10px;font-family:'Unbounded',sans-serif;font-weight:700;font-size:19px;color:var(--y)}
+.ga .size .j{display:block;margin-top:6px;font-size:14px;color:var(--mut)}
+.ga .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 64px;margin-top:64px}
+.ga .grp h3{margin:0 0 6px;font-family:'Unbounded',sans-serif;font-size:13px;font-weight:700;letter-spacing:.18em;color:#8d939b;padding:30px 0 12px;border-bottom:1px solid var(--line)}
+.ga .row{display:flex;align-items:baseline;gap:12px;padding:15px 0;border-bottom:1px solid var(--line);font-size:17px}
+.ga .row .n{flex:1;color:#dfe2e6}
+.ga .row .n small{display:block;margin-top:4px;font-size:14px;color:var(--mut)}
+.ga .row .v{font-family:'Unbounded',sans-serif;font-weight:700;font-size:16px;color:var(--y);white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* steps over the lift photo */
+.ga .lift{position:relative;overflow:hidden}
+.ga .lift-in{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:72px;align-items:center}
+.ga .lift-img{width:100%;height:760px;object-fit:cover;object-position:50% 40%;
+  -webkit-mask-image:radial-gradient(120% 90% at 50% 45%,#000 55%,transparent 100%);mask-image:radial-gradient(120% 90% at 50% 45%,#000 55%,transparent 100%)}
+.ga .steps{list-style:none;margin:40px 0 0;padding:0;display:grid;gap:30px}
+.ga .step{display:grid;grid-template-columns:58px 1fr;gap:20px;align-items:start}
+.ga .ring{display:grid;place-items:center;width:58px;height:58px;border-radius:50%;border:2.5px solid var(--y);font-family:'Unbounded',sans-serif;font-weight:800;font-size:20px;color:var(--y)}
+.ga .step h3{margin:6px 0 6px;font-size:21px;font-weight:600}
+.ga .step p{margin:0;font-size:16px;line-height:1.55;color:var(--mut);max-width:30em}
+.ga .facts{display:flex;flex-wrap:wrap;gap:10px;margin-top:40px}
+.ga .fact{display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:0 16px;border-radius:12px;font-size:15px;color:#d7dade;background:var(--rub2);box-shadow:inset 0 1px 0 rgba(255,255,255,.09),inset 0 -2px 0 rgba(0,0,0,.55)}
+.ga .fact svg{color:var(--y)}
+
+/* assistant */
+.ga .chat-in{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:72px;align-items:center}
+.ga .phone{border-radius:30px;padding:22px;box-shadow:inset 0 2px 0 rgba(255,255,255,.07),inset 0 -3px 0 rgba(0,0,0,.6),0 40px 80px -40px rgba(0,0,0,.95)}
+.ga .ph-top{display:flex;align-items:center;gap:12px;padding:4px 6px 18px;border-bottom:1px solid var(--line)}
+.ga .av{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--y);color:#141414}
+.ga .ph-top b{display:block;font-size:16px}
+.ga .ph-top span{font-size:13px;color:var(--mut);display:flex;align-items:center;gap:6px}
+.ga .msgs{display:flex;flex-direction:column;gap:12px;padding:22px 4px 6px}
+.ga .m{max-width:84%;padding:14px 16px;border-radius:18px;font-size:16px;line-height:1.5}
+.ga .m.u{align-self:flex-end;background:#2b2f34;border-bottom-right-radius:6px}
+.ga .m.b{align-self:flex-start;background:#eceef0;color:#16181b;border-bottom-left-radius:6px}
+.ga .m.b strong{font-weight:700}
+.ga .qr{display:flex;gap:8px;flex-wrap:wrap;padding:6px 4px 4px}
+.ga .q{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:999px;border:1.5px solid rgba(255,210,63,.6);font-size:15px;font-weight:600;color:var(--y)}
+.ga .inp{display:flex;align-items:center;gap:10px;margin-top:14px;padding:6px 6px 6px 18px;border-radius:999px;background:#0e1012;box-shadow:inset 0 2px 4px rgba(0,0,0,.6)}
+.ga .inp .ph{flex:1;font-size:15px;color:#8a9097}
+.ga .send{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--y);color:#141414}
+
+/* close */
+.ga .close{border-top:1px solid var(--line)}
+.ga .close-in{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:64px;align-items:end}
+.ga .addr{display:grid;gap:18px;margin:36px 0 0;padding:0;list-style:none}
+.ga .addr li{display:flex;gap:14px;font-size:18px;line-height:1.45}
+.ga .addr li svg{flex:none;margin-top:3px;color:var(--y)}
+.ga .addr small{display:block;font-size:15px;color:var(--mut)}
+.ga .final{border-radius:24px;padding:36px;box-shadow:inset 0 2px 0 rgba(255,255,255,.07),inset 0 -3px 0 rgba(0,0,0,.6)}
+.ga .final p{margin:0 0 22px;font-size:18px;line-height:1.5;color:#d3d7dc}
+.ga .foot{margin-top:80px;padding:28px 0 40px;font-size:13px;color:#878d95;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;border-top:1px solid var(--line)}
+
+@media (max-width:1100px){
+  .ga .sizes{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ga .size:nth-child(3){border-left:0;padding-left:0}
+  .ga .lift-in,.ga .chat-in,.ga .close-in{grid-template-columns:1fr;gap:48px}
+}
+@media (max-width:760px){
+  .ga .wrap{padding:0 20px}
+  .ga .hd-in{height:64px;gap:12px}
+  .ga .codes{display:none}
+  .ga .brand{font-size:15px}
+  .ga .hd .btn-y{margin-left:auto}
+  .ga .hero{min-height:0}
+  .ga .hero-img{position:relative;width:100%;height:250px;object-position:62% 40%;
+    -webkit-mask-image:linear-gradient(180deg,#000 55%,transparent 100%);mask-image:linear-gradient(180deg,#000 55%,transparent 100%)}
+  .ga .hero-in{padding-top:0;margin-top:-58px;padding-bottom:108px}
+  .ga .h1{font-size:38px}
+  .ga .lead{font-size:16.5px;margin-top:18px}
+  .ga .board{padding:16px;gap:10px 14px;margin-top:22px;width:100%}
+  .ga .day{min-width:58px;font-size:12px}
+  .ga .slot{font-size:15px;padding:0 14px}
+  .ga .acts{margin-top:22px}
+  .ga .acts .btn-y{flex:1 1 100%}
+  .ga .acts .btn-line{flex:1 1 100%;justify-content:center}
+  .ga .code{font-size:10px;letter-spacing:.16em;line-height:1.8;margin-top:28px}
+  .ga .launch{right:16px;bottom:20px}
+  .ga .tease{display:none}
+  .ga .fab{width:58px;height:58px}
+  .ga .sec{padding:80px 0}
+  .ga .wall{padding:30px 20px 24px;border-radius:22px;margin-top:36px}
+  .ga .wall-h{flex-direction:column;gap:6px;font-size:11px}
+  .ga .size{padding:14px 12px 16px}
+  .ga .size:nth-child(2n+1){border-left:0;padding-left:0}
+  .ga .size .p{font-size:16px}
+  .ga .grid{grid-template-columns:1fr;margin-top:28px}
+  .ga .row{font-size:16px}
+  .ga .row .v{font-size:14px}
+  .ga .lift-img{height:420px}
+  .ga .phone{padding:16px;border-radius:24px}
+  .ga .m{font-size:15px;max-width:90%}
+  .ga .final{padding:26px 22px}
+  .ga .addr li{font-size:17px}
+}
+</style>
+</head>
+<body>
+<div class="ga">
+  <header class="hd">
+    <div class="wrap hd-in">
+      <a class="brand" href="#top" aria-label="Garage One - на головну">
+        <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="14.5" fill="none" stroke="#ffd23f" stroke-width="3"/><circle cx="17" cy="17" r="7" fill="none" stroke="#7a8088" stroke-width="2.5"/><g stroke="#ffd23f" stroke-width="2.5" stroke-linecap="round"><path d="M17 1.5v4"/><path d="M17 28.5v4"/><path d="M1.5 17h4"/><path d="M28.5 17h4"/></g></svg>
+        GARAGE ONE
+      </a>
+      <nav class="codes" aria-label="Послуги">
+        <a href="#prices">ТО</a><a href="#prices">ДІАГНОСТИКА</a><a href="#prices">ХОДОВА</a><a href="#tyres">ШИНОМОНТАЖ</a>
+      </nav>
+      <a class="btn-y sm" href="#chat">Записатися</a>
+    </div>
+  </header>
+
+  <section class="hero" id="top">
+    <img class="hero-img" src="/sites/concepts/img/a40b374ce6934023e1ec07d951fe7528.jpg" alt="Боковина нової шини з рельєфним маркуванням у бічному світлі">
+    <div class="wrap hero-in">
+      <h1 class="h1 mould">Ціну знаєте до&nbsp;ремонту <span class="lit">запис - цілодобово</span></h1>
+      <p class="lead">Заміна оливи - <b>600 грн</b> за роботу, планове ТО - <b>від 1 600 грн</b>. Напишіть у чат, що з авто: асистент назве ціну й покаже вільний час на підйомнику, навіть уночі.</p>
+      <div class="acts">
+        <a class="btn-y" href="#chat"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1 1 21 12Z"/></svg>Записатися в чаті</a>
+        <a class="btn-line" href="#prices">Усі ціни</a>
+      </div>
+      <div class="board" role="group" aria-label="Найближчий вільний час">
+        <span class="board-l"><span class="live" aria-hidden="true"></span>Вільно на підйомнику</span>
+        <span class="day">Завтра</span>
+        <span class="slots"><a class="slot" href="#chat">10:00</a><a class="slot" href="#chat">14:00</a></span>
+        <span class="day">Субота</span>
+        <span class="slots"><a class="slot" href="#chat">11:00</a><a class="slot" href="#chat">15:00</a></span>
+      </div>
+      <p class="code">МОТОРНА 7 · ЩОДНЯ 9:00–19:00 · БЕЗ ВИХІДНИХ · ГАРАНТІЯ 1 РІК</p>
+    </div>
+    <div class="launch">
+      <p class="tease"><b>Асистент Garage One · онлайн</b>Скажіть марку авто - назву ціну заміни оливи за хвилину</p>
+      <a class="fab" href="#chat" aria-label="Відкрити чат з асистентом"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1 1 21 12Z"/></svg></a>
+    </div>
+  </section>
+
+  <section class="sec" id="prices">
+    <div class="wrap">
+      <h2 class="h2 mould">Ціни за роботу</h2>
+      <p class="note">«Від» - мінімальна ціна, точну майстер називає після огляду. Запчастини й олива - окремо, оригінал або аналог на ваш вибір: погоджуємо з вами до заміни.</p>
+
+      <div class="wall rubber" id="tyres">
+        <div class="wall-h"><span>ШИНОМОНТАЖ · ЛЕГКОВІ</span><span>ЗНЯТТЯ, МОНТАЖ, БАЛАНСУВАННЯ · ДО 40 ХВ</span></div>
+        <div class="sizes">
+          <div class="size"><span class="r mould">R13–14</span><span class="p">900 грн</span></div>
+          <div class="size"><span class="r mould">R15–16</span><span class="p">1 100 грн</span><span class="j">джип - 1 200 грн</span></div>
+          <div class="size"><span class="r mould">R17</span><span class="p">1 300 грн</span><span class="j">джип - 1 400 грн</span></div>
+          <div class="size"><span class="r mould">R18</span><span class="p">1 300 грн</span><span class="j">джип - 1 400 грн, R19 - 1 500 грн</span></div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="grp">
+          <h3>ОЛИВА І ТО</h3>
+          <div class="row"><span class="n">Заміна моторної оливи<small>злив, масляний фільтр, заливка; олива MOTUL - від 605 грн/л</small></span><span class="v">600 грн</span></div>
+          <div class="row"><span class="n">Планове ТО «Базовий»<small>олива, повітряний і салонний фільтри, ходова за 30 параметрами</small></span><span class="v">1 600 грн</span></div>
+          <div class="row"><span class="n">Планове ТО «Максимальний»<small>+ розвал-сходження, паливний фільтр, ремені, акумулятор</small></span><span class="v">2 100 грн</span></div>
+          <div class="row"><span class="n">Заправка кондиціонера<small>+ фреон 140 грн за 100 г</small></span><span class="v">700 грн</span></div>
+          <div class="row"><span class="n">Заміна ременя ГРМ</span><span class="v">від 5 000 грн</span></div>
+        </div>
+        <div class="grp">
+          <h3>ДІАГНОСТИКА І ХОДОВА</h3>
+          <div class="row"><span class="n">Комп’ютерна діагностика<small>двигун, ходова, АКПП, коди помилок</small></span><span class="v">від 500 грн</span></div>
+          <div class="row"><span class="n">Комплексна діагностика<small>письмовий висновок з вартістю усунення</small></span><span class="v">1 000 грн</span></div>
+          <div class="row"><span class="n">Розвал-сходження 3D<small>джип, кросовер - 1 500 грн</small></span><span class="v">1 000 грн</span></div>
+          <div class="row"><span class="n">Передні гальмівні колодки<small>задні - від 1 000 грн</small></span><span class="v">від 800 грн</span></div>
+          <div class="row"><span class="n">Передній амортизатор<small>стійка стабілізатора - від 400 грн</small></span><span class="v">від 1 000 грн</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec lift rubber">
+    <div class="wrap lift-in">
+      <img class="lift-img" src="/sites/concepts/img/9d9143d08ca31170b68870f51e7d58b5.jpg" alt="Сріблястий хетчбек на двостійковому підйомнику в чистому боксі СТО">
+      <div>
+        <h2 class="h2 mould">Від повідомлення до&nbsp;підйомника</h2>
+        <ol class="steps">
+          <li class="step"><span class="ring" aria-hidden="true">1</span><div><h3>Напишіть у чат</h3><p>Будь-коли, навіть уночі: що з авто, марка й модель. Асистент відповість за кілька секунд і назве ціну.</p></div></li>
+          <li class="step"><span class="ring" aria-hidden="true">2</span><div><h3>Оберіть вільний час</h3><p>Він покаже лише вільні години на СТО й запише машину - без дзвінків і очікування на лінії.</p></div></li>
+          <li class="step"><span class="ring" aria-hidden="true">3</span><div><h3>Приїжджайте на Моторну, 7</h3><p>Майстер погодить ціну перед роботою, а коли авто готове - зателефонує менеджер.</p></div></li>
+        </ol>
+        <div class="facts">
+          <span class="fact"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V7l8-4 8 4v14"/><path d="M9 21v-6h6v6"/></svg>4 підйомники</span>
+          <span class="fact"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>3D-стенд розвалу</span>
+          <span class="fact"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5Z"/><path d="M17 11h1.5a2.5 2.5 0 0 1 0 5H17"/></svg>Кава й Wi-Fi</span>
+          <span class="fact"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6Z"/></svg>Гарантія 1 рік</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="chat">
+    <div class="wrap chat-in">
+      <div>
+        <h2 class="h2 mould">Ціна - ще до того, як&nbsp;ви приїдете</h2>
+        <p class="note">Асистент СТО відповідає на сайті цілодобово: назве ціну роботи з прайсу, підкаже, яка діагностика потрібна, і запише на вільний час. Майстер отримує запис одразу.</p>
+      </div>
+      <div class="phone rubber" role="group" aria-label="Приклад розмови з асистентом СТО">
+        <div class="ph-top">
+          <span class="av" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1 1 21 12Z"/></svg></span>
+          <div><b>Garage One</b><span><span class="live" aria-hidden="true"></span>асистент · відповідає одразу</span></div>
+        </div>
+        <div class="msgs">
+          <p class="m u">Скільки коштує заміна масла на Skoda Octavia?</p>
+          <p class="m b">Робота - <strong>600 грн</strong>: злив, заміна фільтра й заливка нової оливи. Олива MOTUL 8100 Eco-lite 5W-30 - <strong>605 грн за літр</strong>, об’єм під ваш двигун підбере майстер.</p>
+          <p class="m b">Завтра вільно о <strong>10:00</strong> і <strong>14:00</strong>. Записати вашу Octavia?</p>
+        </div>
+        <div class="qr"><span class="q">Так, на 10:00</span><span class="q">Інший день</span></div>
+        <div class="inp"><span class="ph">Напишіть повідомлення…</span><span class="send" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3.4 20.4 21 12 3.4 3.6 3 10l12 2-12 2z"/></svg></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec close rubber">
+    <div class="wrap close-in">
+      <div>
+        <h2 class="h2 mould">Моторна, 7 · щодня</h2>
+        <ul class="addr">
+          <li><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>вул. Моторна, 7, Київ<small>10 хвилин від метро «Шулявська», власна безпечна парковка</small></span></li>
+          <li><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Щодня 9:00–19:00, без вихідних<small>записатися в чаті можна цілодобово</small></span></li>
+          <li><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg><span>044 000 56 78<small>оплата готівкою або карткою</small></span></li>
+        </ul>
+      </div>
+      <div class="final">
+        <p>Стукає підвіска, загорілась лампа чи просто час на ТО - напишіть, асистент назве ціну й знайде вільний підйомник.</p>
+        <a class="btn-y" href="#chat"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1 1 21 12Z"/></svg>Записатися в чаті</a>
+      </div>
+    </div>
+    <div class="wrap"><div class="foot"><span>© Garage One · СТО у Києві</span><span>Демо-сайт · зроблено ПродавAI</span></div></div>
+  </section>
+</div>
+</body>
+</html>

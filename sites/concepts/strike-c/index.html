@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Strike · Вказівники залу - концепт</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+.sc{--y:#ffd100;--ink:#111111;--ink-2:#3a3a3a;--grey:#666666;--line:#dcdcd8;--soft:#f1f1ee;
+  background:#fff;color:var(--ink);font-family:'Fira Sans',system-ui,sans-serif;font-size:18px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.sc *{box-sizing:border-box}
+.sc ::selection{background:var(--y);color:var(--ink)}
+.sc a{color:inherit;text-decoration:none}
+.sc a:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.sc .board a:focus-visible{outline-color:#fff}
+.sc :where(h1,h2,h3,p,ul,ol,dl,dd,figure){margin:0;padding:0}
+.sc :where(ul,ol){list-style:none}
+.sc svg{display:block}
+.wrap{max-width:1280px;margin:0 auto;padding:0 48px}
+.tab{font-variant-numeric:tabular-nums}
+
+/* the sign system: yellow panels, black pictogram squares, arrows locked to the right edge, hung on rods from a 3px ceiling rule */
+.rods{position:relative;height:44px}
+.rods::before,.rods::after{content:"";position:absolute;top:0;bottom:0;width:4px;background:var(--ink)}
+.rods::before{left:12%}
+.rods::after{right:12%}
+.ceil{border-bottom:3px solid var(--ink)}
+.sign{position:relative;display:grid;align-items:stretch;background:var(--y);color:var(--ink)}
+.pic{display:grid;place-items:center;background:var(--ink);color:#fff}
+.sign .edge{display:grid;place-items:center;border-left:3px solid var(--ink)}
+.row .edge{display:grid;place-items:center;border-left:3px solid var(--ink)}
+.sign .edge svg,.row .edge svg{transition:transform .25s cubic-bezier(.2,.7,.2,1)}
+.sign:hover .edge svg,.row:hover .edge svg{transform:translateX(8px)}
+.stretch::after{content:"";position:absolute;inset:0}
+.mini{flex:none;width:40px;height:40px}
+.mini svg{width:24px;height:24px}
+
+/* header */
+.hd{display:flex;align-items:center;gap:40px;padding:22px 0}
+.brand{display:flex;align-items:center;gap:14px;margin-right:auto}
+.brand .pic{width:48px;height:48px}
+.brand .pic svg{width:30px;height:30px}
+.brand b{display:block;font-size:30px;font-weight:700;letter-spacing:-.01em;line-height:1}
+.brand small{display:block;font-size:14px;color:var(--grey);margin-top:4px;line-height:1.2}
+.nav{display:flex;gap:30px;font-size:17px;font-weight:500}
+.nav a{padding:6px 0;border-bottom:2px solid transparent}
+.nav a:hover{border-bottom-color:var(--ink)}
+.tel{font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}
+
+/* hero: the overhead sign */
+.big{grid-template-columns:200px minmax(0,1fr) 150px;min-height:200px}
+.big .pic svg{width:116px;height:116px}
+.big .txt{display:flex;flex-direction:column;justify-content:center;padding:30px 40px}
+.big .l1{display:block;font-size:clamp(40px,6vw,86px);font-weight:700;letter-spacing:-.028em;line-height:1}
+.big .l2{display:block;margin-top:12px;font-size:clamp(19px,2.3vw,32px);font-weight:500;line-height:1.15}
+.big .edge svg{width:84px;height:84px}
+/* the gym under the hung bands */
+.hall{position:relative;margin-top:40px}
+.hall>img{display:block;width:100%;height:540px;object-fit:cover}
+.today{position:absolute;top:0;right:40px;width:610px}
+.today .rods{height:56px}
+.today .rods::before{left:15%}
+.today .rods::after{right:15%}
+.today-h{display:flex;align-items:center;gap:12px;background:var(--ink);color:#fff;font-size:20px;font-weight:600;line-height:1.2;padding:12px 18px}
+.today-h svg{width:22px;height:22px}
+.stack{display:grid;gap:4px;margin-top:4px}
+.band{grid-template-columns:84px 168px minmax(0,1fr) 72px;min-height:84px}
+.band .pic svg{width:50px;height:50px}
+.band .t{align-self:center;padding-left:20px;font-size:52px;font-weight:700;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+.band .n{align-self:center;padding:10px 16px 10px 4px;line-height:1.2}
+.band .n b{display:block;font-size:22px;font-weight:600}
+.band .n small{display:block;font-size:16px;color:var(--ink-2);margin-top:3px}
+.band .edge svg{width:40px;height:40px}
+.lead{position:absolute;left:0;bottom:0;max-width:540px;background:var(--ink);color:#fff;font-size:20px;line-height:1.45;padding:22px 28px 24px}
+
+/* sections */
+.sec{padding-top:104px}
+.sec-hd{display:flex;align-items:flex-end;justify-content:space-between;gap:24px 48px;flex-wrap:wrap;padding-bottom:20px}
+.sec-hd h2{font-size:clamp(40px,5vw,72px);font-weight:700;letter-spacing:-.028em;line-height:1}
+.sec-hd p{font-size:19px;color:var(--grey);max-width:46ch}
+
+/* weekly directory */
+.dir{background:var(--y)}
+.dir-top,.row{display:grid;grid-template-columns:88px minmax(0,300px) minmax(0,1fr) 76px}
+.dir-top{border-bottom:3px solid var(--ink);font-size:15px;font-weight:600}
+.dir-top>span{padding:14px 20px 12px}
+.dir-top .days{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:0}
+.dir-top .days span{padding:14px 20px 12px;border-left:2px solid rgba(17,17,17,.2)}
+.row{position:relative;border-bottom:2px solid var(--ink);min-height:74px}
+.row:last-child{border-bottom:0}
+.row .pic{width:50px;height:50px;align-self:center;justify-self:center}
+.row .pic svg{width:32px;height:32px}
+.row .nm{align-self:center;padding:10px 20px}
+.row h3{font-size:25px;font-weight:700;letter-spacing:-.012em;line-height:1.1}
+.row .nm p{font-size:14px;color:var(--ink-2);margin-top:4px;line-height:1.3}
+.times{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.times>div{display:flex;align-items:center;padding:10px 20px;border-left:2px solid rgba(17,17,17,.2)}
+.times dt{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.times dd{display:flex;flex-wrap:wrap;gap:0 16px;font-size:25px;font-weight:600;line-height:1.3;font-variant-numeric:tabular-nums}
+.times dd i{font-style:normal;font-size:14px;font-weight:500;color:var(--ink-2);margin-left:5px}
+.times .none dd{color:rgba(17,17,17,.4)}
+.row .edge svg{width:36px;height:36px}
+.dir-note{font-size:16px;color:var(--grey);margin-top:16px}
+
+/* prices */
+.pr-grid{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:56px;align-items:start;margin-top:36px}
+.trial{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding-bottom:26px;border-bottom:3px solid var(--ink)}
+.trial .lbl{font-size:30px;font-weight:600;line-height:1.15}
+.trial .lbl small{display:block;font-size:17px;font-weight:400;color:var(--grey);margin-top:8px}
+.big-n{font-size:160px;font-weight:700;letter-spacing:-.045em;line-height:.78;font-variant-numeric:tabular-nums;white-space:nowrap}
+.big-n small{font-size:36px;font-weight:600;letter-spacing:0;margin-left:12px}
+.fares{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px 48px;margin-top:36px}
+.fare h3{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:700;line-height:1.2;padding-bottom:12px;border-bottom:2px solid var(--ink)}
+.fare h3 .mini{width:34px;height:34px}
+.fare h3 .mini svg{width:21px;height:21px}
+.fare dl>div{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid var(--line)}
+.fare dt{font-size:17px;line-height:1.3}
+.fare dd{font-size:33px;font-weight:700;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.fare dd small{font-size:16px;font-weight:500;letter-spacing:0;margin-left:5px;color:var(--grey)}
+.fare .more{font-size:15px;color:var(--grey);margin-top:10px;line-height:1.4}
+.pr-photo img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover}
+.ubd{display:flex;align-items:center;gap:20px;background:var(--ink);color:#fff;padding:20px 24px}
+.ubd b{font-size:48px;font-weight:700;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.ubd span{font-size:16px;line-height:1.4}
+.guide{grid-template-columns:84px minmax(0,1fr) 84px;margin-top:44px;min-height:96px}
+.guide .pic svg{width:46px;height:46px}
+.segs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.seg{display:flex;flex-direction:column;justify-content:center;padding:16px 24px;line-height:1.2}
+.seg+.seg{border-left:2px solid rgba(17,17,17,.2)}
+.seg b{font-size:17px;font-weight:500}
+.seg span{display:flex;align-items:center;gap:10px;font-size:26px;font-weight:700;margin-top:6px;letter-spacing:-.01em}
+.seg span svg{width:22px;height:22px;flex:none}
+.guide .edge svg{width:40px;height:40px}
+
+/* coaches: the staff directory board */
+.board{background:var(--ink);color:#fff;padding:40px 44px 28px}
+.board-hd{display:flex;align-items:flex-end;justify-content:space-between;gap:24px 48px;flex-wrap:wrap;padding-bottom:20px;border-bottom:3px solid #fff}
+.board-hd h2{font-size:clamp(40px,4.4vw,64px);font-weight:700;letter-spacing:-.028em;line-height:1}
+.board-hd p{font-size:18px;color:#c4c4c4;max-width:44ch}
+.staff{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:40px}
+.staff li{display:grid;grid-template-columns:minmax(0,1fr) auto;align-content:start;gap:4px 14px;padding:16px 0;border-bottom:1px solid #3a3a3a}
+.staff b{font-size:21px;font-weight:600;line-height:1.2}
+.staff .dis{align-self:center;justify-self:end;background:#fff;color:var(--ink);font-size:14px;font-weight:600;line-height:1.2;padding:3px 8px;white-space:nowrap}
+.staff .reg{grid-column:1 / -1;font-size:15px;color:#b8b8b8;line-height:1.4}
+
+/* information desk */
+.desk-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:64px;align-items:start}
+.big-i{width:96px;height:96px}
+.big-i svg{width:60px;height:60px}
+.desk-l h2{font-size:clamp(36px,4.1vw,58px);font-weight:700;letter-spacing:-.028em;line-height:1.02;margin-top:28px}
+.desk-l>p{font-size:19px;margin-top:18px;max-width:34ch}
+.act{grid-template-columns:minmax(0,1fr) 76px;margin-top:28px;min-height:72px;max-width:440px}
+.act .lbl{align-self:center;padding:0 24px;font-size:24px;font-weight:600}
+.act .edge svg{width:36px;height:36px}
+.asks{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.asks a{font-size:16px;font-weight:500;padding:9px 14px;border:2px solid var(--ink);transition:background .2s,color .2s}
+.asks a:hover{background:var(--ink);color:#fff}
+.screen{border:3px solid var(--ink)}
+.screen-hd{display:flex;align-items:center;gap:12px;background:var(--ink);color:#fff;font-size:17px;font-weight:600;padding:14px 20px}
+.screen-hd svg{width:22px;height:22px}
+.screen-hd small{margin-left:auto;font-size:15px;font-weight:400;color:#c4c4c4}
+.log{display:grid;gap:12px;padding:24px}
+.msg{max-width:86%;padding:12px 16px;font-size:17px;line-height:1.45}
+.msg time{display:block;font-size:13px;color:var(--grey);margin-top:6px;font-variant-numeric:tabular-nums}
+.msg.me{justify-self:end;background:var(--soft)}
+.msg.bot{justify-self:start;border:2px solid var(--ink)}
+.msg .who{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;margin-bottom:6px}
+.msg .who .pic{width:22px;height:22px}
+.msg .who .pic svg{width:15px;height:15px}
+
+/* the way in */
+.way{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--y)}
+.step{position:relative;display:flex;align-items:center;gap:14px;min-height:100px;padding:16px 52px 16px 16px}
+.step+.step{border-left:3px solid var(--ink)}
+.step .pic{flex:none;width:56px;height:56px}
+.step .pic svg{width:34px;height:34px}
+.step b{display:block;font-size:20px;font-weight:600;line-height:1.2}
+.step small{display:block;font-size:15px;color:var(--ink-2);margin-top:4px;line-height:1.3}
+.step .go{position:absolute;right:16px;top:50%;width:30px;height:30px;transform:translateY(-50%)}
+.info{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:40px;margin-top:48px}
+.info h3{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:700;line-height:1.2;padding-bottom:12px;border-bottom:2px solid var(--ink);margin-bottom:14px}
+.info h3 .mini{width:34px;height:34px}
+.info h3 .mini svg{width:21px;height:21px}
+.info p{font-size:17px;line-height:1.5}
+.info p+p{margin-top:6px}
+.info .num{font-size:30px;font-weight:700;letter-spacing:-.01em;line-height:1.1;font-variant-numeric:tabular-nums}
+.fin-wrap{padding-top:96px}
+.ft{display:flex;justify-content:space-between;gap:8px 24px;flex-wrap:wrap;margin-top:72px;padding:26px 0 40px;border-top:1px solid var(--line);font-size:15px;color:var(--grey)}
+
+/* corner launcher: a yellow square sign */
+.launch{position:fixed;right:24px;bottom:24px;z-index:20;display:flex;align-items:stretch;box-shadow:0 0 0 3px var(--ink),0 14px 30px rgba(0,0,0,.22)}
+.launch .lt{display:flex;align-items:center;background:var(--ink);color:#fff;font-size:16px;font-weight:600;padding:0 16px}
+.launch .sq{display:grid;place-items:center;width:64px;height:64px;background:var(--y);color:var(--ink)}
+.launch .sq svg{width:32px;height:32px}
+
+@media (prefers-reduced-motion:reduce){
+.sc *{transition:none !important}
+}
+
+@media (max-width:760px){
+.wrap{padding:0 16px}
+.sc{font-size:17px}
+.hd{gap:12px;padding:14px 0}
+.nav{display:none}
+.brand{gap:10px}
+.brand .pic{width:40px;height:40px}
+.brand .pic svg{width:24px;height:24px}
+.brand b{font-size:24px}
+.brand small{font-size:12px}
+.tel{font-size:15px}
+.rods{height:28px}
+.big{grid-template-columns:minmax(0,1fr) 60px;grid-template-areas:"pic edge" "txt edge";min-height:0}
+.big .pic{grid-area:pic;width:64px;height:64px;margin:14px 0 0 14px}
+.big .pic svg{width:42px;height:42px}
+.big .txt{grid-area:txt;padding:14px 14px 18px}
+.big .l1{font-size:46px}
+.big .l2{font-size:19px;margin-top:10px}
+.big .edge{grid-area:edge}
+.big .edge svg{width:34px;height:34px}
+.mini{width:36px;height:36px}
+.mini svg{width:22px;height:22px}
+.hall{display:flex;flex-direction:column;margin-top:44px}
+.hall>img{height:auto;aspect-ratio:4/3;object-position:28% center}
+.today{position:static;order:-1;width:auto}
+.today .rods{display:none}
+.today-h{font-size:17px;padding:10px 14px}
+.band{grid-template-columns:56px 94px minmax(0,1fr) 44px;min-height:64px}
+.band .pic svg{width:34px;height:34px}
+.band .t{padding-left:12px;font-size:30px}
+.band .n{padding:8px 8px 8px 2px}
+.band .n b{font-size:17px}
+.band .n small{font-size:14px}
+.band .edge{border-left-width:2px}
+.band .edge svg{width:24px;height:24px}
+.lead{position:static;max-width:none;font-size:17px;padding:16px 16px 18px}
+.sec{padding-top:80px}
+.sec-hd{padding-bottom:16px}
+.sec-hd h2{font-size:42px}
+.sec-hd p{font-size:16px}
+.dir-top{display:none}
+.row{grid-template-columns:60px minmax(0,1fr) 52px;grid-template-areas:"pic nm edge" "times times times";min-height:0}
+.row .pic{grid-area:pic;width:44px;height:44px;justify-self:end}
+.row .pic svg{width:28px;height:28px}
+.row .nm{grid-area:nm;padding:14px 12px}
+.row h3{font-size:22px}
+.row .nm p{font-size:14px}
+.row .edge{grid-area:edge;border-left:0}
+.row .edge svg{width:28px;height:28px}
+.times{grid-area:times;grid-template-columns:minmax(0,1fr);padding:0 14px 14px 16px}
+.times>div{align-items:baseline;gap:12px;padding:3px 0;border-left:0}
+.times dt{position:static;flex:none;width:72px;height:auto;overflow:visible;clip:auto;font-size:14px;font-weight:600;color:var(--ink-2)}
+.times .none{display:none}
+.times dd{font-size:20px;gap:2px 12px}
+.times dd i{font-size:13px}
+.dir-note{font-size:14px}
+.pr-grid{grid-template-columns:minmax(0,1fr);gap:40px;margin-top:20px}
+.trial{flex-direction:column;align-items:flex-start;gap:20px}
+.trial .lbl{font-size:24px;max-width:none}
+.big-n{font-size:120px}
+.big-n small{font-size:28px}
+.fares{grid-template-columns:minmax(0,1fr);gap:36px;margin-top:32px}
+.fare dt{font-size:16px}
+.fare dd{font-size:30px}
+.ubd{padding:16px 18px;gap:16px}
+.ubd b{font-size:38px}
+.ubd span{font-size:15px}
+.guide{grid-template-columns:minmax(0,1fr) 56px;margin-top:40px}
+.guide>.pic{display:none}
+.segs{grid-template-columns:minmax(0,1fr)}
+.seg{padding:12px 16px}
+.seg+.seg{border-left:0;border-top:2px solid rgba(17,17,17,.2)}
+.seg span{font-size:22px}
+.guide .edge svg{width:28px;height:28px}
+.board{padding:28px 18px 20px}
+.board-hd h2{font-size:42px}
+.board-hd p{font-size:16px}
+.staff{grid-template-columns:minmax(0,1fr)}
+.staff li{grid-template-columns:minmax(0,1fr);padding:14px 0}
+.staff b{font-size:20px}
+.staff .dis{justify-self:start;font-size:13px}
+.staff .reg{font-size:15px}
+.desk-grid{grid-template-columns:minmax(0,1fr);gap:36px}
+.big-i{width:84px;height:84px}
+.big-i svg{width:52px;height:52px}
+.desk-l h2{font-size:36px;margin-top:24px}
+.desk-l>p{font-size:17px}
+.act{grid-template-columns:minmax(0,1fr) 60px;min-height:64px;max-width:none;margin-top:26px}
+.act .lbl{font-size:20px;padding:0 18px}
+.act .edge svg{width:28px;height:28px}
+.asks a{font-size:15px;padding:8px 12px}
+.log{padding:16px;gap:12px}
+.msg{max-width:92%;font-size:16px;padding:12px 14px}
+.screen-hd{font-size:15px;padding:12px 14px}
+.screen-hd small{font-size:13px}
+.way{grid-template-columns:minmax(0,1fr)}
+.step{min-height:84px;padding:14px 52px 14px 14px}
+.step+.step{border-left:0;border-top:3px solid var(--ink)}
+.step .pic{width:52px;height:52px}
+.step .pic svg{width:32px;height:32px}
+.step b{font-size:19px}
+.step small{font-size:14px}
+.step .go{right:14px;width:24px;height:24px;transform:translateY(-50%) rotate(90deg)}
+.info{grid-template-columns:minmax(0,1fr);gap:30px;margin-top:40px}
+.info .num{font-size:28px}
+.fin-wrap{padding-top:80px}
+.ft{flex-direction:column;margin-top:64px;padding-bottom:96px;font-size:14px}
+.launch{right:16px;bottom:16px}
+.launch .lt{display:none}
+.launch .sq{width:56px;height:56px}
+.launch .sq svg{width:28px;height:28px}
+}
+</style>
+</head>
+<body>
+<div class="sc">
+  <header class="wrap">
+    <div class="hd ceil">
+      <a class="brand" href="#top" aria-label="Strike, на початок сторінки">
+        <span class="pic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.6 2.5 5.5 13.6h6.1l-1.2 7.9 8.1-11.2h-6.2Z" fill="currentColor"/></svg></span>
+        <span><b>Strike</b><small>бійцівський клуб · Київ</small></span>
+      </a>
+      <nav class="nav" aria-label="Розділи сайту">
+        <a href="#schedule">Розклад</a>
+        <a href="#prices">Ціни</a>
+        <a href="#coaches">Тренери</a>
+        <a href="#route">Як дійти</a>
+      </nav>
+      <a class="tel" href="tel:+380440009012">044 000 90 12</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="wrap" id="top">
+      <div class="rods" aria-hidden="true"></div>
+      <div class="sign big">
+        <span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 14.5V9.2A5.2 5.2 0 0 1 12.7 4h.6A5.7 5.7 0 0 1 19 9.7v1.8a4.5 4.5 0 0 1-4.5 4.5H9"/><path d="M7.5 11.2H6.4a1.9 1.9 0 0 0-1.9 1.9v.2A2.7 2.7 0 0 0 7.2 16H9"/><path d="M8 16v4.2h8.5V16"/><path d="M11 10.2h5"/></svg></span>
+        <h1 class="txt"><span class="l1">Перше тренування</span><span class="l2">безкоштовно · запис у чаті</span></h1>
+        <a class="edge stretch" href="#chat" aria-label="Записатися на перше безкоштовне тренування в чаті"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg></a>
+      </div>
+
+      <div class="hall">
+        <img src="/sites/concepts/img/989b2cd7355aba2fadd96e5c23238820.jpg" alt="Зал клубу: ринг, ряд боксерських груш і гантелі">
+        <div class="today">
+          <div class="rods" aria-hidden="true"></div>
+          <h2 class="today-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Сьогодні, середа</h2>
+          <ul class="stack">
+            <li><a class="sign band" href="#chat" aria-label="Записатися: 16:30, бокс для дітей, тренер Литвин Максим"><span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="4.4" r="1.9"/><path d="M8 7v7M8 14l-2 6.2M8 14l2 6.2M8 9.4l-2.6 3"/><path d="m8 9.4 5.6 3.3"/><circle cx="16.5" cy="10" r="1.5"/><path d="M16.5 12v4.3M16.5 16.3l-1.6 3.9M16.5 16.3l1.6 3.9M16.5 13.2l-2.9-.5"/></svg></span><span class="t">16:30</span><span class="n"><b>Діти · бокс</b><small>Литвин Максим</small></span><span class="edge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg></span></a></li>
+            <li><a class="sign band" href="#chat" aria-label="Записатися: 19:00, бокс, тренер Ткач Роман"><span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 14.5V9.2A5.2 5.2 0 0 1 12.7 4h.6A5.7 5.7 0 0 1 19 9.7v1.8a4.5 4.5 0 0 1-4.5 4.5H9"/><path d="M7.5 11.2H6.4a1.9 1.9 0 0 0-1.9 1.9v.2A2.7 2.7 0 0 0 7.2 16H9"/><path d="M8 16v4.2h8.5V16"/><path d="M11 10.2h5"/></svg></span><span class="t">19:00</span><span class="n"><b>Бокс</b><small>Ткач Роман</small></span><span class="edge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg></span></a></li>
+            <li><a class="sign band" href="#chat" aria-label="Записатися: 19:00, тайський бокс, тренер Савчук Дмитро"><span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7" cy="4.6" r="1.9"/><path d="M7.6 7.2 9 13"/><path d="m9 13-2.6 7.5"/><path d="m9 13 5.2-3.2 5.8-1.8"/><path d="M7.8 8.6 4.6 11"/><path d="m8 8.5 3.6-.6"/></svg></span><span class="t">19:00</span><span class="n"><b>Тайський бокс</b><small>Савчук Дмитро</small></span><span class="edge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg></span></a></li>
+            <li><a class="sign band" href="#chat" aria-label="Записатися: 19:00, боротьба й грепплінг, тренер Поліщук Віктор"><span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6.5" cy="5" r="1.8"/><circle cx="17.5" cy="5" r="1.8"/><path d="m7.4 7.4 3.1 5.6M16.6 7.4 13.5 13"/><path d="M8.6 9.6h6.8"/><path d="m10.5 13-3 7M13.5 13l3 7"/></svg></span><span class="t">19:00</span><span class="n"><b>Боротьба</b><small>і грепплінг · Поліщук Віктор</small></span><span class="edge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg></span></a></li>
+          </ul>
+        </div>
+        <p class="lead">Бокс, тайський бокс, кікбоксинг, ММА, боротьба й джиу-джитсу для дорослих і дітей. Тренери - чемпіони України, Європи й світу, а новачки займаються в тих самих групах: навантаження тренер дає під ваш рівень.</p>
+      </div>
+    </section>
+
+    <section class="sec wrap" id="schedule">
+      <div class="sec-hd ceil">
+        <h2>Розклад тижня</h2>
+        <p>Дорослі групи - 1,5 години, дитячі - 1 година. Неділя - вихідний.</p>
+      </div>
+      <div class="rods" aria-hidden="true"></div>
+      <div class="dir">
+        <div class="dir-top" aria-hidden="true"><span></span><span>Напрямок</span><span class="days"><span>Пн Ср Пт</span><span>Вт Чт</span><span>Сб</span></span><span></span></div>
+        <ul>
+          <li class="row">
+            <span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 14.5V9.2A5.2 5.2 0 0 1 12.7 4h.6A5.7 5.7 0 0 1 19 9.7v1.8a4.5 4.5 0 0 1-4.5 4.5H9"/><path d="M7.5 11.2H6.4a1.9 1.9 0 0 0-1.9 1.9v.2A2.7 2.7 0 0 0 7.2 16H9"/><path d="M8 16v4.2h8.5V16"/><path d="M11 10.2h5"/></svg></span>
+            <div class="nm"><h3>Бокс</h3><p>Бондар · Ткач · Мельник · Литвин</p></div>
+            <dl class="times"><div><dt>Пн Ср Пт</dt><dd><span>7:00</span><span>19:00</span></dd></div><div><dt>Вт Чт</dt><dd><span>7:00</span><span>8:30</span><span>19:00</span></dd></div><div><dt>Сб</dt><dd><span>9:00</span><span>11:00</span></dd></div></dl>
+            <a class="edge stretch" href="#chat" aria-label="Записатися на бокс"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg></a>
+          </li>
+          <li class="row">
+            <span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7" cy="4.6" r="1.9"/><path d="M7.6 7.2 9 13"/><path d="m9 13-2.6 7.5"/><path d="m9 13 5.2-3.2 5.8-1.8"/><path d="M7.8 8.6 4.6 11"/><path d="m8 8.5 3.6-.6"/></svg></span>
+            <div class="nm"><h3>Тайський бокс</h3><p>Савчук · Гончар</p></div>
+            <dl class="times"><div><dt>Пн Ср Пт</dt><dd><span>19:00</span></dd></div><div><dt>Вт Чт</dt><dd><span>18:30</span></dd></div><div><dt>Сб</dt><dd><span>12:00</span></dd></div></dl>
+            <a class="edge stretch" href="#chat" aria-label="Записатися на тайський бокс"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg></a>
+          </li>
+          <li class="row">
+            <span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7" cy="4.6" r="1.9"/><path d="M7.6 7.2 9 13"/><path d="m9 13-2.6 7.5"/><path d="m9 13 5.2-3.2 5.8-1.8"/><path d="M7.8 8.6 4.6 11"/><path d="m8 8.5 3.6-.6"/></svg></span>
+            <div class="nm"><h3>Кікбоксинг</h3><p>Жіноча група · Руденко Ірина</p></div>
+            <dl class="times"><div class="none"><dt>Пн Ср Пт</dt><dd>-</dd></div><div><dt>Вт Чт</dt><dd><span>8:00</span></dd></div><div><dt>Сб</dt><dd><span>10:00</span></dd></div></dl>
+            <a class="edge stretch" href="#chat" aria-label="Записатися на кікбоксинг, жіноча група"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg></a>
+          </li>
+          <li class="row">
+            <span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.6 3h6.8L21 8.6v6.8L15.4 21H8.6L3 15.4V8.6Z"/><path d="M10.2 7.5h3.6l2.7 2.7v3.6l-2.7 2.7h-3.6l-2.7-2.7v-3.6Z"/></svg></span>
+            <div class="nm"><h3>ММА</h3><p>Поліщук · Марченко</p></div>
+            <dl class="times"><div><dt>Пн Ср Пт</dt><dd><span>7:00</span></dd></div><div><dt>Вт Чт</dt><dd><span>19:00</span></dd></div><div><dt>Сб</dt><dd><span>12:00</span></dd></div></dl>
+            <a class="edge stretch" href="#chat" aria-label="Записатися на ММА"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg></a>
+          </li>
+          <li class="row">
+            <span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6.5" cy="5" r="1.8"/><circle cx="17.5" cy="5" r="1.8"/><path d="m7.4 7.4 3.1 5.6M16.6 7.4 13.5 13"/><path d="M8.6 9.6h6.8"/><path d="m10.5 13-3 7M13.5 13l3 7"/></svg></span>
+            <div class="nm"><h3>Боротьба й грепплінг</h3><p>Поліщук Віктор</p></div>
+            <dl class="times"><div><dt>Пн Ср Пт</dt><dd><span>19:00</span></dd></div><div class="none"><dt>Вт Чт</dt><dd>-</dd></div><div class="none"><dt>Сб</dt><dd>-</dd></div></dl>
+            <a class="edge stretch" href="#chat" aria-label="Записатися на боротьбу й грепплінг"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg></a>
+          </li>
+          <li class="row">
+            <span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5h7.2M13.8 8.5H21M3 12h7.2M13.8 12H21"/><rect x="10.2" y="7" width="3.6" height="6.4" rx="1"/><path d="m11 13.4-2.2 6.6M13 13.4l2.2 6.6"/></svg></span>
+            <div class="nm"><h3>Джиу-джитсу</h3><p>Жіноча група · Кузьменко Юлія</p></div>
+            <dl class="times"><div class="none"><dt>Пн Ср Пт</dt><dd>-</dd></div><div><dt>Вт Чт</dt><dd><span>18:30</span></dd></div><div><dt>Сб</dt><dd><span>11:00</span></dd></div></dl>
+            <a class="edge stretch" href="#chat" aria-label="Записатися на джиу-джитсу, жіноча група"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg></a>
+          </li>
+          <li class="row">
+            <span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="4.4" r="1.9"/><path d="M12 7v6.5"/><path d="m12 13.5-6.5 6M12 13.5l6.5 6"/><path d="M12 9 7 6.5M12 9l5-2.5"/></svg></span>
+            <div class="nm"><h3>Стретчинг</h3><p>Індивідуально · Білик Марта</p></div>
+            <dl class="times"><div><dt>Пн Ср Пт</dt><dd><span>8:30</span></dd></div><div class="none"><dt>Вт Чт</dt><dd>-</dd></div><div class="none"><dt>Сб</dt><dd>-</dd></div></dl>
+            <a class="edge stretch" href="#chat" aria-label="Записатися на стретчинг"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg></a>
+          </li>
+          <li class="row">
+            <span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="4.4" r="1.9"/><path d="M8 7v7M8 14l-2 6.2M8 14l2 6.2M8 9.4l-2.6 3"/><path d="m8 9.4 5.6 3.3"/><circle cx="16.5" cy="10" r="1.5"/><path d="M16.5 12v4.3M16.5 16.3l-1.6 3.9M16.5 16.3l1.6 3.9M16.5 13.2l-2.9-.5"/></svg></span>
+            <div class="nm"><h3>Діти 4–14</h3><p>Литвин · Кузьменко · Поліщук</p></div>
+            <dl class="times"><div><dt>Пн Ср Пт</dt><dd><span>16:30<i>бокс</i></span><span>17:00<i>джиу-джитсу</i></span><span>18:00<i>боротьба</i></span></dd></div><div><dt>Вт Чт</dt><dd><span>17:00<i>кікбоксинг</i></span></dd></div><div><dt>Сб</dt><dd><span>10:00<i>кікбоксинг</i></span></dd></div></dl>
+            <a class="edge stretch" href="#chat" aria-label="Записати дитину на тренування"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg></a>
+          </li>
+          <li class="row">
+            <span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="4.4" r="1.9"/><path d="M12 7v7M12 14l-3 6.2M12 14l3 6.2"/><path d="M12 9.2 9 11.4l.6-3.8M12 9.2l3 2.2-.6-3.8"/></svg></span>
+            <div class="nm"><h3>Підлітки · ММА</h3><p>Гончар Артем</p></div>
+            <dl class="times"><div class="none"><dt>Пн Ср Пт</dt><dd>-</dd></div><div><dt>Вт Чт</dt><dd><span>17:30</span></dd></div><div><dt>Сб</dt><dd><span>11:30</span></dd></div></dl>
+            <a class="edge stretch" href="#chat" aria-label="Записати підлітка на ММА"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg></a>
+          </li>
+        </ul>
+      </div>
+      <p class="dir-note">Персональні тренування з тренером - Пн-Пт 20:00, Сб 16:00. Групи для чоловіків, жінок і дітей, для новачків і професіоналів.</p>
+    </section>
+
+    <section class="sec wrap" id="prices">
+      <div class="sec-hd ceil">
+        <h2>Ціни</h2>
+        <p>Абонемент - на всі напрямки. Купити можна в клубі, готівкою чи карткою.</p>
+      </div>
+      <div class="pr-grid">
+        <div>
+          <div class="trial">
+            <p class="lbl">Пробне групове тренування<small>будь-який напрямок, для новачків теж</small></p>
+            <p class="big-n">0<small>грн</small></p>
+          </div>
+          <div class="fares">
+            <div class="fare">
+              <h3><span class="pic mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 14.5V9.2A5.2 5.2 0 0 1 12.7 4h.6A5.7 5.7 0 0 1 19 9.7v1.8a4.5 4.5 0 0 1-4.5 4.5H9"/><path d="M7.5 11.2H6.4a1.9 1.9 0 0 0-1.9 1.9v.2A2.7 2.7 0 0 0 7.2 16H9"/><path d="M8 16v4.2h8.5V16"/><path d="M11 10.2h5"/></svg></span>Дорослі</h3>
+              <dl>
+                <div><dt>Разове · діє 3 дні</dt><dd>500<small>грн</small></dd></div>
+                <div><dt>8 тренувань · 30 днів</dt><dd>3 200<small>грн</small></dd></div>
+                <div><dt>12 тренувань · 45 днів</dt><dd>4 300<small>грн</small></dd></div>
+                <div><dt>24 тренування · 90 днів</dt><dd>8 000<small>грн</small></dd></div>
+              </dl>
+              <p class="more">Ще 36, 72 і 144 тренування - 11 000, 19 900 і 36 000 грн, з заморозкою на 72 і 144</p>
+            </div>
+            <div class="fare">
+              <h3><span class="pic mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="1.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></span>Безлім, щодня</h3>
+              <dl>
+                <div><dt>1 місяць</dt><dd>4 900<small>грн</small></dd></div>
+                <div><dt>2 місяці</dt><dd>9 300<small>грн</small></dd></div>
+                <div><dt>3 місяці</dt><dd>13 200<small>грн</small></dd></div>
+                <div><dt>6 місяців</dt><dd>24 000<small>грн</small></dd></div>
+              </dl>
+            </div>
+            <div class="fare">
+              <h3><span class="pic mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="4.4" r="1.9"/><path d="M8 7v7M8 14l-2 6.2M8 14l2 6.2M8 9.4l-2.6 3"/><path d="m8 9.4 5.6 3.3"/><circle cx="16.5" cy="10" r="1.5"/><path d="M16.5 12v4.3M16.5 16.3l-1.6 3.9M16.5 16.3l1.6 3.9M16.5 13.2l-2.9-.5"/></svg></span>Діти 4–14</h3>
+              <dl>
+                <div><dt>Разове</dt><dd>400<small>грн</small></dd></div>
+                <div><dt>8 тренувань</dt><dd>2 600<small>грн</small></dd></div>
+                <div><dt>12 тренувань</dt><dd>3 500<small>грн</small></dd></div>
+              </dl>
+              <p class="more">24 тренування - 6 600 грн, є абонементи до 144 тренувань</p>
+            </div>
+            <div class="fare">
+              <h3><span class="pic mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="4.4" r="1.9"/><path d="M12 7v7M12 14l-3 6.2M12 14l3 6.2"/><path d="M12 9.2 9 11.4l.6-3.8M12 9.2l3 2.2-.6-3.8"/></svg></span>З тренером</h3>
+              <dl>
+                <div><dt>Персональне</dt><dd>від 800<small>грн</small></dd></div>
+                <div><dt>10 персональних · 45 днів</dt><dd>від 7 500<small>грн</small></dd></div>
+                <div><dt>Спліт, двоє з тренером</dt><dd>від 1 200<small>грн</small></dd></div>
+              </dl>
+              <p class="more">Ціна залежить від категорії тренера</p>
+            </div>
+          </div>
+        </div>
+        <figure class="pr-photo">
+          <img src="/sites/concepts/img/36064cccbd12a43e0ef60926be948ef8.jpg" alt="Червоні боксерські рукавички на настилі рингу">
+          <figcaption class="ubd"><b>-50%</b><span>Військовим з посвідченням УБД. На які абонементи - підкаже адміністратор</span></figcaption>
+        </figure>
+      </div>
+      <a class="sign guide" href="#chat" aria-label="Підібрати абонемент у чаті">
+        <span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="1.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></span>
+        <span class="segs">
+          <span class="seg"><b>Ходите 2 рази на тиждень</b><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg>8 тренувань</span></span>
+          <span class="seg"><b>3 рази на тиждень</b><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg>12 тренувань</span></span>
+          <span class="seg"><b>Частіше</b><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg>безлім на місяць</span></span>
+        </span>
+        <span class="edge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg></span>
+      </a>
+    </section>
+
+    <section class="sec wrap" id="coaches">
+      <div class="board">
+        <div class="board-hd">
+          <h2>Тренери</h2>
+          <p>Чемпіони України, Європи й світу. Готують і до професійних боїв, і тих, хто прийшов уперше.</p>
+        </div>
+        <ol class="staff">
+          <li><b>Мельник Андрій</b><span class="dis">Бокс</span><span class="reg">Майстер спорту міжнародного класу, тренує 15 років</span></li>
+          <li><b>Бондар Сергій</b><span class="dis">Бокс</span><span class="reg">Майстер спорту України, понад 200 боїв</span></li>
+          <li><b>Ткач Роман</b><span class="dis">Бокс</span><span class="reg">Чемпіон України й Києва, КМС з тайського боксу</span></li>
+          <li><b>Литвин Максим</b><span class="dis">Бокс · діти й дорослі</span><span class="reg">Фіналіст чемпіонату України з кікбоксингу WAKO</span></li>
+          <li><b>Савчук Дмитро</b><span class="dis">Тайський бокс</span><span class="reg">Тренує з 2002 року, вихованці - чемпіони світу</span></li>
+          <li><b>Гончар Артем</b><span class="dis">Тайський бокс · ММА</span><span class="reg">Чемпіон Європи з панкратіону, веде підлітків</span></li>
+          <li><b>Руденко Ірина</b><span class="dis">Кікбоксинг</span><span class="reg">Майстер спорту, чемпіонка України, веде жіночу групу</span></li>
+          <li><b>Поліщук Віктор</b><span class="dis">Боротьба · ММА</span><span class="reg">Чемпіон України, бронзовий призер чемпіонату Європи</span></li>
+          <li><b>Марченко Денис</b><span class="dis">ММА</span><span class="reg">КМС з грепплінгу, професійний рекорд у ММА 4-1</span></li>
+          <li><b>Кузьменко Юлія</b><span class="dis">Джиу-джитсу</span><span class="reg">Чемпіонка України, синій пояс</span></li>
+          <li><b>Білик Марта</b><span class="dis">Стретчинг</span><span class="reg">Понад 5 років досвіду</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="sec wrap" id="chat">
+      <div class="desk-grid">
+        <div class="desk-l">
+          <span class="pic big-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="6.2" r="1.7" fill="currentColor" stroke="none"/><path d="M9.6 10h2.6v8.5M9.4 18.5h5.4" stroke-width="2.4" stroke-linecap="square" stroke-linejoin="miter"/></svg></span>
+          <h2>Відповідь за секунди, навіть опівночі</h2>
+          <p>Асистент клубу знає розклад, ціни й тренерів і одразу записує на пробне. Адміністратор одразу бачить ваш запис.</p>
+          <a class="sign act" href="#chat"><span class="lbl">Поставити питання</span><span class="edge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg></span></a>
+          <div class="asks">
+            <a href="#chat">Скільки коштує абонемент?</a>
+            <a href="#chat">Що взяти на пробне?</a>
+            <a href="#chat">Є група для дитини 7 років?</a>
+          </div>
+        </div>
+        <div class="screen" aria-label="Приклад розмови з асистентом клубу">
+          <div class="screen-hd"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 11.5a7.8 7.8 0 0 1-11.3 7L4 20l1.5-4.8a7.8 7.8 0 1 1 15-3.7Z"/><path d="M8.6 11.6h.01M12.4 11.6h.01M16.2 11.6h.01" stroke-width="2.6"/></svg></span>Strike · інформація<small>відповідає 24/7</small></div>
+          <div class="log">
+            <div class="msg me"><p>Добрий вечір. Я ніколи не займався, можна одразу на бокс?</p><time>23:41</time></div>
+            <div class="msg bot"><span class="who"><span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="6.2" r="1.7" fill="currentColor" stroke="none"/><path d="M9.6 10h2.6v8.5M9.4 18.5h5.4" stroke-width="2.4" stroke-linecap="square" stroke-linejoin="miter"/></svg></span>Асистент Strike</span><p>Можна - новачки займаються в тих самих групах, тренер дасть навантаження під вас. Перше тренування безкоштовне. Завтра, у четвер: 7:00 чи 8:30 - Мельник Андрій, 19:00 - Литвин Максим. Який час зручніший?</p><time>23:41</time></div>
+            <div class="msg me"><p>Давайте 19:00</p><time>23:42</time></div>
+            <div class="msg bot"><span class="who"><span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="6.2" r="1.7" fill="currentColor" stroke="none"/><path d="M9.6 10h2.6v8.5M9.4 18.5h5.4" stroke-width="2.4" stroke-linecap="square" stroke-linejoin="miter"/></svg></span>Асистент Strike</span><p>Записав: четвер, 19:00, бокс, тренер Литвин Максим. Візьміть форму, змінне взуття, рушник і воду - після тренування є душ. До зустрічі!</p><time>23:42</time></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec wrap" id="route">
+      <div class="sec-hd ceil">
+        <h2>Як дійти</h2>
+        <p>вул. Спортивна, 15, Київ</p>
+      </div>
+      <div class="rods" aria-hidden="true"></div>
+      <ol class="way">
+        <li class="step"><span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M7.5 16.5V8l4.5 6 4.5-6v8.5"/></svg></span><span><b>Метро «Палац спорту»</b></span><span class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg></span></li>
+        <li class="step"><span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13" cy="4.3" r="1.8"/><path d="m12.4 7.2-1.6 5.8 2.6 2.6.9 4.9"/><path d="m10.8 13-2.1 7.2"/><path d="M12.2 8.2 9 10.3l-1 3"/><path d="m12.3 8.4 2.1 2.9 3 1"/></svg></span><span><b>5 хвилин пішки</b></span><span class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg></span></li>
+        <li class="step"><span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></svg></span><span><b>вул. Спортивна, 15</b><small>Київ</small></span><span class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg></span></li>
+        <li class="step"><span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 21V8.5h11V21"/><path d="M4 21h16"/><path d="M14.4 15h.01" stroke-width="2.6"/><path d="M5.5 4.5h13" stroke="#e5322d" stroke-width="2.8"/></svg></span><span><b>Вхід з торця будинку</b><small>під червоною вивіскою</small></span></li>
+      </ol>
+      <div class="info">
+        <div>
+          <h3><span class="pic mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span>Години</h3>
+          <p class="tab">Пн-Пт 7:00-21:00</p>
+          <p class="tab">Сб - заняття з 9:00, зал до 17:00</p>
+          <p>Нд - вихідний</p>
+        </div>
+        <div>
+          <h3><span class="pic mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h3.5L10 8 8 9.5A11 11 0 0 0 14.5 16l1.5-2 4 1.5V19a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg></span>Адміністратор</h3>
+          <p><a class="num" href="tel:+380440009012">044 000 90 12</a></p>
+          <p>Або пишіть у чат - він працює й уночі</p>
+        </div>
+        <div>
+          <h3><span class="pic mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h16l-1.2 11H5.2Z"/><path d="M9 9V7a3 3 0 0 1 6 0v2"/></svg></span>Що взяти</h3>
+          <p>Форму, змінне взуття, рушник і воду. Рукавички можна взяти клубні, бинти й капу краще мати свої.</p>
+        </div>
+        <div>
+          <h3><span class="pic mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V7a3 3 0 0 1 3-3h2a3 3 0 0 1 3 3"/><path d="M8.5 11h7a3.5 3.5 0 0 0-7 0Z"/><path d="M10 14.2v.01M12 15.2v.01M14 14.2v.01M11 17.8v.01M13 17.8v.01" stroke-width="2.4"/></svg></span>Після тренування</h3>
+          <p>Душ і місце, щоб спокійно переодягнутися.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap fin-wrap">
+      <div class="ceil" aria-hidden="true"></div>
+      <div class="rods" aria-hidden="true"></div>
+      <div class="sign big">
+        <span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 14.5V9.2A5.2 5.2 0 0 1 12.7 4h.6A5.7 5.7 0 0 1 19 9.7v1.8a4.5 4.5 0 0 1-4.5 4.5H9"/><path d="M7.5 11.2H6.4a1.9 1.9 0 0 0-1.9 1.9v.2A2.7 2.7 0 0 0 7.2 16H9"/><path d="M8 16v4.2h8.5V16"/><path d="M11 10.2h5"/></svg></span>
+        <p class="txt"><span class="l1">До зустрічі в залі</span><span class="l2">перше тренування безкоштовно</span></p>
+        <a class="edge stretch" href="#chat" aria-label="Записатися на пробне тренування в чаті"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h16M13 5.5l6.5 6.5-6.5 6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg></a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <div class="ft">
+      <span>Strike · бійцівський клуб · Київ</span>
+      <span>Демо-сайт · зроблено ПродавAI</span>
+    </div>
+  </footer>
+
+  <a class="launch" href="#chat" aria-label="Відкрити чат з асистентом">
+    <span class="lt">Чат 24/7</span>
+    <span class="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 11.5a7.8 7.8 0 0 1-11.3 7L4 20l1.5-4.8a7.8 7.8 0 1 1 15-3.7Z"/><path d="M8.6 11.6h.01M12.4 11.6h.01M16.2 11.6h.01" stroke-width="2.6"/></svg></span>
+  </a>
+</div>
+</body>
+</html>

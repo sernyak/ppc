@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Velvet · Шкала відтінків - концепт</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tenor+Sans&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body { margin: 0; background: #f4f2f5; }
+.vb {
+  --lac: #8e1838;
+  --lac-deep: #6c0f2a;
+  --plum: #3b0f2a;
+  --ink: #1f1320;
+  --muted: #5d5262;
+  --porcelain: #f4f2f5;
+  --line: #e2dbe3;
+  --blush: #f7e6ec;
+  font-family: 'Manrope', system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--porcelain);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+.vb ::selection { background: var(--lac); color: #fff; }
+.vb a { color: inherit; }
+.vb a:focus-visible, .vb button:focus-visible { outline: 3px solid #ffd2de; outline-offset: 3px; border-radius: 8px; }
+.vb .wrap { max-width: 1240px; margin: 0 auto; padding: 0 40px; }
+.vb .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 0 26px; border-radius: 999px; font-weight: 700; font-size: 16px; text-decoration: none; transition: transform .2s ease, background-color .2s ease, box-shadow .2s ease; }
+.vb .btn svg { width: 20px; height: 20px; flex: none; }
+.vb .btn-white { background: #fff; color: var(--lac); box-shadow: 0 16px 30px -16px rgba(30, 0, 12, 0.7); }
+.vb .btn-white:hover { transform: translateY(-1px); background: #fff4f7; }
+.vb .btn-ghost { color: #fff; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.55); }
+.vb .btn-ghost:hover { background: rgba(255, 255, 255, 0.1); }
+.vb .btn-lac { background: var(--lac); color: #fff; box-shadow: 0 16px 30px -16px rgba(110, 15, 42, 0.8); }
+.vb .btn-lac:hover { background: #a01d42; transform: translateY(-1px); }
+
+/* the flooded first screen */
+.vb .hero { position: relative; background: radial-gradient(130% 90% at 50% 100%, #a01f44 0%, var(--lac) 45%, var(--lac-deep) 100%); color: #fff; overflow: hidden; }
+.vb .top { display: flex; align-items: center; gap: 36px; padding: 26px 0; position: relative; z-index: 3; }
+.vb .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.vb .brand b { font-family: 'Tenor Sans', serif; font-weight: 400; font-size: 30px; letter-spacing: 0.14em; text-transform: uppercase; }
+.vb .brand span { font-size: 13px; color: #f4c9d6; letter-spacing: 0.02em; }
+.vb .top nav { display: flex; gap: 28px; margin-left: auto; }
+.vb .top nav a { text-decoration: none; font-size: 15px; font-weight: 600; color: #fbe3ea; padding: 6px 0; border-bottom: 1px solid transparent; transition: border-color .2s ease; }
+.vb .top nav a:hover { border-color: #fff; }
+.vb .top .btn { min-height: 44px; padding: 0 20px; font-size: 15px; }
+
+.vb .stage { position: relative; height: 396px; margin-top: 0; }
+.vb .fan { position: absolute; left: 50%; bottom: 0; width: 0; height: 0; }
+.vb .tip { position: absolute; left: -46px; bottom: 38px; width: 92px; height: 300px; transform-origin: 46px 300px; transform: rotate(var(--a)); }
+.vb .tip .nail { position: absolute; left: 0; top: 0; width: 92px; height: 176px; border-radius: 46px 46px 20px 20px / 58px 58px 18px 18px; background: var(--c); box-shadow: inset -10px -6px 18px rgba(0, 0, 0, 0.22), inset 8px 0 14px rgba(255, 255, 255, 0.16), 0 14px 22px -10px rgba(20, 0, 8, 0.55); }
+.vb .tip .nail::after { content: ''; position: absolute; left: 18px; top: 16px; width: 16px; height: 104px; border-radius: 10px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0)); filter: blur(0.5px); }
+.vb .tip .stem { position: absolute; left: 32px; top: 168px; width: 28px; height: 132px; border-radius: 0 0 10px 10px; background: linear-gradient(90deg, #f6f3f5, #fff 45%, #e3dde2); box-shadow: 0 10px 18px -12px rgba(0, 0, 0, 0.5); }
+.vb .tip .num { position: absolute; left: 0; right: 0; top: 196px; text-align: center; font-size: 11px; font-weight: 800; color: #6b5c66; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
+.vb .tip.on .nail { box-shadow: 0 0 0 4px #fff, 0 0 0 7px rgba(255, 255, 255, 0.28), inset -10px -6px 18px rgba(0, 0, 0, 0.25), 0 18px 30px -12px rgba(20, 0, 8, 0.7); }
+.vb .ring { position: absolute; left: -38px; bottom: 0; width: 76px; height: 76px; border-radius: 50%; border: 9px solid #e9e3e8; box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.25), 0 10px 20px -8px rgba(0, 0, 0, 0.5); background: transparent; }
+.vb .picked { position: absolute; right: 0; top: 18px; width: 280px; padding: 22px 24px 20px; border-radius: 6px 22px 22px 22px; background: #fff; color: var(--ink); box-shadow: 0 24px 40px -22px rgba(20, 0, 8, 0.8); z-index: 2; }
+.vb .picked .k { font-size: 13px; color: var(--muted); font-weight: 600; }
+.vb .picked .n { font-family: 'Tenor Sans', serif; font-size: 32px; margin: 4px 0 10px; color: var(--lac); }
+.vb .picked .chip { display: inline-flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; }
+.vb .picked .chip i { width: 14px; height: 20px; border-radius: 7px 7px 4px 4px; background: var(--lac); }
+.vb .picked p { margin: 12px 0 0; font-size: 14px; line-height: 1.5; color: var(--muted); }
+.vb .copy { position: relative; z-index: 2; text-align: center; padding: 12px 0 84px; }
+.vb h1 { font-family: 'Tenor Sans', serif; font-weight: 400; font-size: 66px; line-height: 1.02; letter-spacing: -0.015em; margin: 0 auto 22px; max-width: 13em; text-wrap: balance; }
+.vb .lead { margin: 0 auto 30px; max-width: 36em; font-size: 19px; line-height: 1.55; color: #fbe3ea; }
+.vb .actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+.vb .slots { margin-top: 30px; display: flex; justify-content: center; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 14px; color: #f8cfdb; }
+.vb .slots a { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); color: #fff; font-weight: 700; text-decoration: none; font-variant-numeric: tabular-nums; transition: background-color .2s ease; }
+.vb .slots a:hover { background: rgba(255, 255, 255, 0.24); }
+.vb .launcher { position: absolute; right: 26px; bottom: 26px; display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: #fff; color: var(--lac); text-decoration: none; box-shadow: 0 18px 34px -12px rgba(20, 0, 8, 0.75); z-index: 4; }
+.vb .launcher svg { width: 28px; height: 28px; }
+.vb .launcher .dot { position: absolute; top: 4px; right: 4px; width: 14px; height: 14px; border-radius: 50%; background: #26a35a; box-shadow: 0 0 0 3px #fff; }
+
+/* bottles band */
+.vb .band { position: relative; height: 420px; overflow: hidden; }
+.vb .band img { width: 100%; height: 100%; object-fit: cover; object-position: center 55%; display: block; }
+
+/* prices */
+.vb .sec { padding: 110px 0; }
+.vb h2 { font-family: 'Tenor Sans', serif; font-weight: 400; font-size: 54px; line-height: 1.05; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
+.vb .prices { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 80px; align-items: start; }
+.vb .prices .intro p { margin: 20px 0 30px; font-size: 18px; line-height: 1.6; color: var(--muted); max-width: 26em; }
+.vb .masters { display: grid; gap: 14px; margin-top: 8px; }
+.vb .master { display: flex; align-items: center; gap: 16px; }
+.vb .master .av { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: var(--blush); color: var(--lac); font-family: 'Tenor Sans', serif; font-size: 22px; flex: none; }
+.vb .master b { display: block; font-size: 17px; }
+.vb .master span { font-size: 14px; color: var(--muted); }
+.vb .list { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
+.vb .list li { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 18px; padding: 26px 0; border-bottom: 1px solid var(--line); }
+.vb .list .sw { width: 22px; height: 30px; border-radius: 11px 11px 6px 6px / 14px 14px 5px 5px; background: var(--c); box-shadow: inset -3px -2px 5px rgba(0, 0, 0, 0.2); }
+.vb .list .nm { font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
+.vb .list .nm small { display: block; margin-top: 4px; font-size: 14px; font-weight: 500; color: var(--muted); }
+.vb .list .pr { font-family: 'Tenor Sans', serif; font-size: 30px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.vb .list .pr a { display: inline-flex; margin-left: 16px; font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 700; color: var(--lac); text-decoration: none; border-bottom: 1.5px solid currentColor; padding-bottom: 1px; vertical-align: middle; }
+.vb .terms { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 24px; font-size: 15px; color: var(--muted); }
+.vb .terms span { display: inline-flex; align-items: center; gap: 8px; }
+.vb .terms svg { width: 18px; height: 18px; color: var(--lac); }
+
+/* the assistant */
+.vb .assist { background: #fff; }
+.vb .assist-grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 72px; align-items: center; }
+.vb .assist figure { margin: 0; border-radius: 28px; overflow: hidden; aspect-ratio: 4 / 5; box-shadow: 0 30px 60px -30px rgba(60, 10, 30, 0.45); }
+.vb .assist figure img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.vb .assist .lead2 { margin: 18px 0 30px; font-size: 18px; line-height: 1.6; color: var(--muted); max-width: 30em; }
+.vb .chat { display: grid; gap: 10px; padding: 26px; border-radius: 28px; background: var(--porcelain); box-shadow: inset 0 0 0 1px var(--line); }
+.vb .chat .head { display: flex; align-items: center; gap: 12px; padding-bottom: 14px; margin-bottom: 4px; border-bottom: 1px solid var(--line); }
+.vb .chat .head .av { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--lac); color: #fff; font-family: 'Tenor Sans', serif; }
+.vb .chat .head b { display: block; font-size: 15px; }
+.vb .chat .head span { font-size: 13px; color: #2a7a4c; font-weight: 600; }
+.vb .msg { max-width: 82%; padding: 13px 16px; border-radius: 20px; font-size: 16px; line-height: 1.5; }
+.vb .msg.in { justify-self: end; background: var(--lac); color: #fff; border-bottom-right-radius: 6px; }
+.vb .msg.out { justify-self: start; background: #fff; color: var(--ink); border-bottom-left-radius: 6px; box-shadow: 0 6px 16px -12px rgba(60, 10, 30, 0.5); }
+.vb .msg.out b { font-weight: 800; }
+.vb .msg .sw { display: inline-block; width: 12px; height: 16px; border-radius: 6px 6px 3px 3px; background: #8e1838; margin: 0 4px -2px 2px; }
+.vb .confirm { justify-self: start; display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 18px; background: #fff; box-shadow: inset 0 0 0 1.5px #b9dcc6; font-size: 15px; }
+.vb .confirm svg { width: 22px; height: 22px; color: #26864d; flex: none; }
+.vb .confirm b { display: block; }
+
+/* close */
+.vb .close { background: var(--plum); color: #fff; padding: 100px 0 40px; }
+.vb .close-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 60px; align-items: end; }
+.vb .close h2 { font-size: 80px; }
+.vb .close p { margin: 22px 0 32px; font-size: 18px; line-height: 1.6; color: #f1cfdc; max-width: 30em; }
+.vb .info { display: grid; gap: 18px; font-size: 17px; }
+.vb .info div { display: flex; gap: 14px; align-items: flex-start; padding-bottom: 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.16); }
+.vb .info svg { width: 22px; height: 22px; color: #ffb3c8; flex: none; margin-top: 2px; }
+.vb .info span { color: #f1cfdc; display: block; font-size: 14px; }
+.vb .info p { margin: 0; max-width: none; }
+.vb .close .foot-line { max-width: none; margin: 80px 0 0; }
+.vb .foot-line { margin-top: 80px; padding-top: 22px; border-top: 1px solid rgba(255, 255, 255, 0.14); display: flex; justify-content: space-between; gap: 20px; font-size: 14px; color: #d9a9bd; }
+
+@media (max-width: 760px) {
+  .vb .wrap { padding: 0 16px; }
+  .vb .top { padding: 18px 0; gap: 12px; }
+  .vb .top nav, .vb .brand span { display: none; }
+  .vb .brand b { font-size: 24px; }
+  .vb .top .btn { margin-left: auto; }
+  .vb .stage { height: 270px; }
+  .vb .tip { left: -26px; width: 52px; height: 172px; transform-origin: 26px 172px; bottom: 26px; }
+  .vb .tip .nail { width: 52px; height: 100px; border-radius: 26px 26px 12px 12px / 34px 34px 10px 10px; }
+  .vb .tip .nail::after { left: 10px; top: 10px; width: 9px; height: 58px; }
+  .vb .tip .stem { left: 18px; top: 96px; width: 16px; height: 76px; }
+  .vb .tip .num { top: 110px; font-size: 8px; }
+  .vb .ring { left: -24px; width: 48px; height: 48px; border-width: 6px; }
+  .vb .picked { display: none; }
+  .vb .copy { padding: 26px 0 104px; }
+  .vb h1 { font-size: 42px; }
+  .vb .lead { font-size: 17px; }
+  .vb .actions .btn { flex: 1 1 100%; }
+  .vb .slots { margin-top: 22px; }
+  .vb .launcher { right: 16px; bottom: 22px; width: 58px; height: 58px; }
+  .vb .band { height: 220px; }
+  .vb .sec { padding: 70px 0; }
+  .vb h2 { font-size: 36px; }
+  .vb .prices { grid-template-columns: 1fr; gap: 36px; }
+  .vb .list li { grid-template-columns: 22px 1fr; gap: 6px 14px; padding: 20px 0; }
+  .vb .list .pr { grid-column: 2; font-size: 24px; }
+  .vb .list .nm { font-size: 18px; }
+  .vb .assist-grid { grid-template-columns: 1fr; gap: 36px; }
+  .vb .assist figure { aspect-ratio: 4 / 3; border-radius: 20px; }
+  .vb .chat { padding: 16px; border-radius: 22px; }
+  .vb .msg { max-width: 90%; font-size: 15px; }
+  .vb .close { padding: 70px 0 34px; }
+  .vb .close-grid { grid-template-columns: 1fr; gap: 36px; }
+  .vb .close h2 { font-size: 46px; }
+  .vb .close .foot-line { flex-direction: column; margin-top: 50px; }
+}
+</style>
+</head>
+<body>
+<div class="vb">
+  <section class="hero" id="top">
+    <div class="wrap">
+      <header class="top">
+        <a class="brand" href="#top"><b>Velvet</b><span>студія краси на Зеленій</span></a>
+        <nav aria-label="Розділи">
+          <a href="#price">Ціни</a>
+          <a href="#price">Майстрині</a>
+          <a href="#chat">Запис</a>
+          <a href="#contacts">Контакти</a>
+        </nav>
+        <a class="btn btn-white" href="#chat">Записатися</a>
+      </header>
+
+      <div class="stage">
+        <div class="fan" aria-label="Шкала відтінків, обрано №07 Вишня" role="img">
+          <div class="tip" style="--a: -64deg; --c: #ead0c4"><span class="nail"></span><span class="stem"></span><span class="num">01</span></div>
+          <div class="tip" style="--a: -48deg; --c: #d9a796"><span class="nail"></span><span class="stem"></span><span class="num">02</span></div>
+          <div class="tip" style="--a: -32deg; --c: #d98b99"><span class="nail"></span><span class="stem"></span><span class="num">03</span></div>
+          <div class="tip" style="--a: -16deg; --c: #e86a57"><span class="nail"></span><span class="stem"></span><span class="num">04</span></div>
+          <div class="tip" style="--a: 0deg; --c: #cc2230"><span class="nail"></span><span class="stem"></span><span class="num">05</span></div>
+          <div class="tip" style="--a: 16deg; --c: #b41f56"><span class="nail"></span><span class="stem"></span><span class="num">06</span></div>
+          <div class="tip on" style="--a: 32deg; --c: #8e1838"><span class="nail"></span><span class="stem"></span><span class="num">07</span></div>
+          <div class="tip" style="--a: 48deg; --c: #5c0f28"><span class="nail"></span><span class="stem"></span><span class="num">08</span></div>
+          <div class="tip" style="--a: 64deg; --c: #3b0f2a"><span class="nail"></span><span class="stem"></span><span class="num">09</span></div>
+          <span class="ring" aria-hidden="true"></span>
+        </div>
+        <aside class="picked">
+          <div class="k">Ваш відтінок</div>
+          <div class="n">№07 Вишня</div>
+          <span class="chip"><i></i>манікюр з покриттям · 950 грн</span>
+          <p>Оберіть колір - асистент у чаті запише вас до Олени з цим відтінком.</p>
+        </aside>
+      </div>
+
+      <div class="copy">
+        <h1>Оберіть відтінок&nbsp;- решту запише асистент</h1>
+        <p class="lead">Манікюр, педикюр, брови й вії на Зеленій, 12. Асистент у чаті відповідає будь-коли, називає ціну й знаходить вільне вікно за хвилину.</p>
+        <div class="actions">
+          <a class="btn btn-white" href="#chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1 1 21 12Z"/></svg>Записатися з відтінком №07</a>
+          <a class="btn btn-ghost" href="#price">Усі ціни</a>
+        </div>
+        <div class="slots"><span>Найближче вільне:</span><a href="#chat">завтра 12:00</a><a href="#chat">сб 10:00</a><a href="#chat">сб 14:30</a></div>
+      </div>
+    </div>
+    <a class="launcher" href="#chat" aria-label="Відкрити чат з асистентом"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1 1 21 12Z"/></svg><span class="dot" aria-hidden="true"></span></a>
+  </section>
+
+  <div class="band"><img src="/sites/concepts/img/ead5ee7b237e6d708abc3c0ef5d35493.jpg" alt="Дев’ять флаконів лаку в ряд: від пудрового до сливового"></div>
+
+  <section class="sec" id="price">
+    <div class="wrap prices">
+      <div class="intro">
+        <h2>Чотири послуги й чесна ціна</h2>
+        <p>Без передоплати й прихованих доплат. Майстриня й тривалість - одразу поруч із ціною.</p>
+        <div class="masters">
+          <div class="master"><span class="av" aria-hidden="true">О</span><div><b>Олена</b><span>манікюр і педикюр</span></div></div>
+          <div class="master"><span class="av" aria-hidden="true">К</span><div><b>Катерина</b><span>брови й вії</span></div></div>
+        </div>
+      </div>
+      <div>
+        <ul class="list">
+          <li><span class="sw" style="--c: #8e1838" aria-hidden="true"></span><span class="nm">Манікюр з покриттям<small>1,5 год · Олена</small></span><span class="pr">950 грн<a href="#chat">Записатися</a></span></li>
+          <li><span class="sw" style="--c: #d98b99" aria-hidden="true"></span><span class="nm">Педикюр з покриттям<small>1,5 год · Олена</small></span><span class="pr">1 150 грн<a href="#chat">Записатися</a></span></li>
+          <li><span class="sw" style="--c: #d9a796" aria-hidden="true"></span><span class="nm">Брови: корекція + фарбування<small>40 хв · Катерина</small></span><span class="pr">650 грн<a href="#chat">Записатися</a></span></li>
+          <li><span class="sw" style="--c: #5c0f28" aria-hidden="true"></span><span class="nm">Нарощування вій 2D<small>2 год · Катерина</small></span><span class="pr">900 грн<a href="#chat">Записатися</a></span></li>
+        </ul>
+        <div class="terms">
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Без передоплати</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Скасування - за 3 години</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Пн–Сб 9:00–20:00</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec assist" id="chat">
+    <div class="wrap assist-grid">
+      <figure><img src="/sites/concepts/img/651b4bce7ecd84f54e8d00487be60a66.jpg" alt="Віяло зразків лаку на кільці: пудрові, рожеві, червоні й вишневі відтінки"></figure>
+      <div>
+        <h2>О 23:40 майстрині сплять, а запис іде</h2>
+        <p class="lead2">Асистент у чаті знає ціни, тривалість і вільні вікна Олени й Катерини. Він відповідає за кілька секунд і записує сам.</p>
+        <div class="chat" aria-label="Приклад розмови з асистентом">
+          <div class="head"><span class="av" aria-hidden="true">V</span><div><b>Асистент Velvet</b><span>онлайн · відповідає одразу</span></div></div>
+          <p class="msg in">Добрий вечір! Скільки коштує манікюр з покриттям? Хочу вишневий</p>
+          <p class="msg out">Вітаю! Манікюр з покриттям - <b>950 грн</b>, близько 1,5 години, робить Олена. Вишневий <span class="sw" aria-hidden="true"></span>№07 є. Вільно завтра о 12:00 або в суботу о 10:00 і 14:30. Коли зручно?</p>
+          <p class="msg in">Субота, 14:30</p>
+          <div class="confirm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><div><b>Ви записані: сб, 31 жовтня, 14:30</b>Манікюр з покриттям · Олена · №07 Вишня</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="close" id="contacts">
+    <div class="wrap">
+      <div class="close-grid">
+        <div>
+          <h2>Ваш відтінок чекає</h2>
+          <p>Напишіть у чат зараз - навіть якщо вже пізно. Асистент назве ціну, покаже вільний час і запише вас.</p>
+          <a class="btn btn-white" href="#chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1 1 21 12Z"/></svg>Записатися в чаті</a>
+        </div>
+        <div class="info">
+          <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg><p>вул. Зелена, 12, Київ<span>студія Velvet</span></p></div>
+          <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><p>Пн–Сб 9:00–20:00<span>неділя - вихідний, чат працює цілодобово</span></p></div>
+          <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><p>Без передоплати<span>перенести чи скасувати - за 3 години в чаті</span></p></div>
+        </div>
+      </div>
+      <p class="foot-line"><span>Velvet · студія краси · вул. Зелена, 12, Київ</span><span>Демо-сайт · зроблено ПродавAI</span></p>
+    </div>
+  </section>
+</div>
+</body>
+</html>
