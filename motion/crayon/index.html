@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Освітнє анімоване відео - демо | Олександр Серняк</title>
-<meta name="description" content="Демо освітнього анімованого відео в мальованому стилі: 20 секунд, 16:9, один герой у всіх сценах.">
+<meta name="description" content="Два демо освітнього анімованого відео: вертикальне 9:16 українською і 16:9 у мальованому стилі, один герой у всіх сценах.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
@@ -21,7 +21,11 @@
   h1 { font-size: clamp(30px, 5vw, 50px); font-weight: 800; letter-spacing: -.03em; line-height: 1.08; }
   .facts { list-style: none; margin-top: 18px; color: var(--muted); font-size: 17px; }
   .facts li + li { margin-top: 4px; }
-  video { display: block; width: 100%; aspect-ratio: 16 / 9; margin-top: 36px; border-radius: 14px; background: #000; border: 1px solid var(--line); box-shadow: 0 30px 80px rgba(0,0,0,.45); }
+  video { display: block; width: 100%; aspect-ratio: 16 / 9; margin-top: 20px; border-radius: 14px; background: #000; border: 1px solid var(--line); box-shadow: 0 30px 80px rgba(0,0,0,.45); }
+  video.v { width: min(100%, 400px); aspect-ratio: 9 / 16; }
+  .demo { margin-top: 48px; }
+  .demo h2 { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+  .demo p { color: var(--muted); font-size: 16px; margin-top: 4px; }
   .block { margin-top: 52px; max-width: 760px; }
   .block h2 { font-size: 14px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
   .block ul { list-style: none; }
@@ -33,17 +37,26 @@
 </head>
 <body>
 <main>
-  <h1>Освітнє анімоване відео в мальованому стилі</h1>
+  <h1>Освітнє анімоване відео: два демо</h1>
   <ul class="facts">
-    <li>Демо: 20 секунд, 16:9, 1920×1080</li>
-    <li>Тема-приклад - «як працює складний відсоток», 4 сцени, один герой</li>
-    <li>Голос у демо синтезований; у роботі - ваша озвучка</li>
+    <li>Один герой у всіх сценах кожного ролика</li>
+    <li>Теми - приклади; голос у демо синтезований, у роботі - ваша озвучка</li>
   </ul>
 
-  <video src="compound-interest-demo.mp4" poster="compound-interest-demo.jpg" controls playsinline preload="metadata"></video>
+  <section class="demo">
+    <h2>Вертикальне 9:16 · українською</h2>
+    <p>«Чому перше враження важко змінити»: 3 сцени, 10 секунд, 1080×1920, титри. Кадри намальовано під стиль вашого ролика, рух - AI-анімація кожного кадру.</p>
+    <video class="v" src="first-impression-demo.mp4" poster="first-impression-demo.jpg" controls playsinline preload="metadata"></video>
+  </section>
+
+  <section class="demo">
+    <h2>16:9 · у мальованому стилі</h2>
+    <p>«Як працює складний відсоток»: 4 сцени, 20 секунд, 1920×1080, англійською.</p>
+    <video src="compound-interest-demo.mp4" poster="compound-interest-demo.jpg" controls playsinline preload="metadata"></video>
+  </section>
 
   <section class="block">
-    <h2>Як зроблено</h2>
+    <h2>Як зроблено 16:9</h2>
     <ul>
       <li><b>Перекладна анімація, як у референсі:</b> герой і предмети - окремими шарами, руки й ноги - живі лінії тієї ж товщини, що й контур.</li>
       <li><b>Один герой у всіх сценах:</b> пози, кліпання, здивування і «40 років потому» - з одного аркуша персонажа.</li>
@@ -51,6 +64,15 @@
       <li><b>Підписи пишуться «від руки»,</b> графік і лічильник рахуються точно: 100 × 1,1<sup>40</sup> = 4 526.</li>
       <li><b>Події стоять на словах диктора:</b> таймінг будується під озвучку.</li>
       <li><b>Переходи між сценами</b> - наїзд камери і завіса з хмар.</li>
+    </ul>
+  </section>
+
+  <section class="block">
+    <h2>Як зроблено 9:16</h2>
+    <ul>
+      <li><b>Свій герой у стилі вашого ролика:</b> біла кругла голова, точки-очі, чорний контур, приглушені офісні сцени.</li>
+      <li><b>Кожна сцена - намальований кадр,</b> далі плавний рух: погляд, кліпання, жест, наїзд камери.</li>
+      <li><b>Склейки - на межах речень,</b> титри з виділеним ключовим словом.</li>
     </ul>
   </section>
 
