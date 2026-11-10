@@ -1,5 +1,5 @@
 // Turns the design concepts of the canvas «Зразки сайтів ПродавAI · концепти» (claude.ai/artifact/54ho5k3nEkUQRAfhymeFbr)
-// into plain pages of ppcmarketing.pro: sites/concepts/<id>/index.html, shown on /sites/.
+// into plain pages of ppcmarketing.web.app: sites/concepts/<id>/index.html, shown on /sites/.
 // Each artboard is a static, responsive page (the phone artboards hold the same markup), so a page is its <helmet>
 // (fonts and styles) as the head and the rest of <x-dc> as the body; the canvas's /_blob/<asset> photos point to
 // sites/concepts/img/<asset>.jpg.

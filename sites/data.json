@@ -35,19 +35,19 @@
     },
     {
       "id": "ppc",
-      "title": "ppcmarketing.pro",
+      "title": "ppcmarketing.web.app",
       "chip": "live",
       "desc": "Мій сайт як PPC-маркетолога: анімована воронка, де рекламний бюджет стає доходом, кейси й відгуки. Англійською",
-      "href": "https://ppcmarketing.pro/",
-      "alt": "Перший екран ppcmarketing.pro з анімованою воронкою"
+      "href": "https://ppcmarketing.web.app/",
+      "alt": "Перший екран ppcmarketing.web.app з анімованою воронкою"
     },
     {
       "id": "ppcai",
-      "title": "ppcmarketing.pro/ai",
+      "title": "ppcmarketing.web.app/ai",
       "chip": "live",
       "desc": "Портфоліо моїх AI-систем. Перший екран - 3D-сцена: металевий каркас розкривається, поки гортаєте сторінку. Українська й англійська",
-      "href": "https://ppcmarketing.pro/ai/",
-      "alt": "Перший екран ppcmarketing.pro/ai з 3D-каркасом"
+      "href": "https://ppcmarketing.web.app/ai/",
+      "alt": "Перший екран ppcmarketing.web.app/ai з 3D-каркасом"
     }
   ],
   "designs": [

@@ -60,7 +60,7 @@ const html = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${title}</title>
 <meta name="description" content="${description}">
-<link rel="canonical" href="https://ppcmarketing.pro/sites/">
+<link rel="canonical" href="https://ppcmarketing.web.app/sites/">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -69,12 +69,12 @@ const html = `<!DOCTYPE html>
 <meta property="og:locale" content="uk_UA">
 <meta property="og:title" content="Приклади сайтів - Олександр Серняк">
 <meta property="og:description" content="${description}">
-<meta property="og:url" content="https://ppcmarketing.pro/sites/">
-<meta property="og:image" content="https://ppcmarketing.pro/sites/og.png">
+<meta property="og:url" content="https://ppcmarketing.web.app/sites/">
+<meta property="og:image" content="https://ppcmarketing.web.app/sites/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://ppcmarketing.pro/sites/og.png">
+<meta name="twitter:image" content="https://ppcmarketing.web.app/sites/og.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Unbounded:wght@500;600&display=swap" rel="stylesheet">
@@ -117,7 +117,7 @@ const html = `<!DOCTYPE html>
       </div>
     </section>
 
-    <footer>Олександр Серняк · <a href="/">ppcmarketing.pro</a></footer>
+    <footer>Олександр Серняк · <a href="/">ppcmarketing.web.app</a></footer>
   </div>
 
   <dialog id="pf-viewer" aria-labelledby="pf-viewer-title">
